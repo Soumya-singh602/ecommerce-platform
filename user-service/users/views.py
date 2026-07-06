@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from .models import CustomUser
 from .serializers import UserListSerializer
+from django.shortcuts import get_object_or_404
 
 
 @api_view(['POST'])
@@ -53,6 +54,16 @@ def user_list(request):
     users = CustomUser.objects.all()
 
     serializer = UserListSerializer(users, many=True)
+
+    return Response(serializer.data)
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def user_detail(request, id):
+
+    user = get_object_or_404(CustomUser, id=id)
+
+    serializer = UserListSerializer(user)
 
     return Response(serializer.data)
 
