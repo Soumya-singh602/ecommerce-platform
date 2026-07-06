@@ -67,3 +67,18 @@ def user_detail(request, id):
 
     return Response(serializer.data)
 
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_user(request, id):
+
+    user = get_object_or_404(CustomUser, id=id)
+
+    user.delete()
+
+    return Response(
+        {
+            "message": "User deleted successfully"
+        },
+        status=status.HTTP_200_OK
+    )
+
