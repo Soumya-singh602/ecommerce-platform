@@ -76,3 +76,17 @@ def update_product(request, id):
         serializer.errors,
         status=status.HTTP_400_BAD_REQUEST
     )
+
+@api_view(["DELETE"])
+def delete_product(request, id):
+
+    product = get_object_or_404(Product, id=id)
+
+    product.delete()
+
+    return Response(
+        {
+            "message": "Product Deleted Successfully"
+        },
+        status=status.HTTP_200_OK
+    )
