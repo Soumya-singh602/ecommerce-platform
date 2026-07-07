@@ -1,9 +1,11 @@
 from django.shortcuts import render
 
 # Create your views here.
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view 
 from rest_framework.response import Response
 from rest_framework import status
+from .authentication import UserServiceAuthentication
+from rest_framework.decorators import authentication_classes
 
 from .models import Product
 from .serializers import ProductSerializer
@@ -12,8 +14,8 @@ from django.shortcuts import get_object_or_404
 
 
 
-
 @api_view(["POST"])
+@authentication_classes([UserServiceAuthentication])
 def create_product(request):
 
     serializer = ProductSerializer(data=request.data)
@@ -50,7 +52,9 @@ def product_detail(request, id):
 
     return Response(serializer.data)
 
+
 @api_view(["PUT"])
+@authentication_classes([UserServiceAuthentication])
 def update_product(request, id):
 
     product = get_object_or_404(Product, id=id)
@@ -78,6 +82,7 @@ def update_product(request, id):
     )
 
 @api_view(["DELETE"])
+@authentication_classes([UserServiceAuthentication])
 def delete_product(request, id):
 
     product = get_object_or_404(Product, id=id)

@@ -1,0 +1,28 @@
+import requests
+
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+
+
+class UserServiceAuthentication(BaseAuthentication):
+
+    def authenticate(self, request):
+
+        auth_header = request.headers.get("Authorization")
+
+        if not auth_header:
+            raise AuthenticationFailed("Authorization header missing")
+
+        response = requests.get(
+            "http://127.0.0.1:8001/users/verify/",
+            headers={
+                "Authorization": auth_header
+            }
+        )
+
+        if response.status_code != 200:
+            raise AuthenticationFailed("Invalid Token")
+
+        user_data = response.json()
+
+        return (user_data, None)
