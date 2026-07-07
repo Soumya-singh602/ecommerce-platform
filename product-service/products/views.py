@@ -9,6 +9,8 @@ from .models import Product
 from .serializers import ProductSerializer
 
 
+
+
 @api_view(["POST"])
 def create_product(request):
 
@@ -27,3 +29,12 @@ def create_product(request):
         )
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+def product_list(request):
+
+    products = Product.objects.all()
+
+    serializer = ProductSerializer(products, many=True)
+
+    return Response(serializer.data)
