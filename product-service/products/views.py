@@ -49,3 +49,30 @@ def product_detail(request, id):
     serializer = ProductSerializer(product)
 
     return Response(serializer.data)
+
+@api_view(["PUT"])
+def update_product(request, id):
+
+    product = get_object_or_404(Product, id=id)
+
+    serializer = ProductSerializer(
+        product,
+        data=request.data
+    )
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return Response(
+            {
+                "message": "Product Updated Successfully",
+                "data": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    return Response(
+        serializer.errors,
+        status=status.HTTP_400_BAD_REQUEST
+    )
