@@ -94,3 +94,42 @@ def order_detail(request, id):
     serializer = OrderSerializer(order)
 
     return Response(serializer.data)
+
+@api_view(["PUT"])
+@authentication_classes([UserServiceAuthentication])
+def cancel_order(request, id):
+
+    user_id = request.user["id"]
+
+    order = get_object_or_404(
+        Order,
+        id=id,
+        user_id=user_id
+    )
+
+
+    if order.status == "Cancelled":
+
+        return Response(
+            {
+                "message": "Order already cancelled"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+    order.status = "Cancelled"
+
+    order.save()
+
+
+    serializer = OrderSerializer(order)
+
+
+    return Response(
+        {
+            "message": "Order cancelled successfully",
+            "data": serializer.data
+        },
+        status=status.HTTP_200_OK
+    )
