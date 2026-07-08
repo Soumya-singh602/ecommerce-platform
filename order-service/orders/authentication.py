@@ -23,6 +23,8 @@ class UserServiceAuthentication(BaseAuthentication):
         if response.status_code != 200:
             raise AuthenticationFailed("Invalid Token")
 
-        user = response.json()
+        response_data = response.json()
+
+        user = response_data["data"]
 
         return (user, None)
