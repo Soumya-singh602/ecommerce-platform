@@ -1,9 +1,19 @@
 from django.db import models
 
 # Create your models here.
-from django.db import models
+STATUS_CHOICES = (
 
+    ("Pending", "Pending"),
 
+    ("Confirmed", "Confirmed"),
+
+    ("Shipped", "Shipped"),
+
+    ("Delivered", "Delivered"),
+
+    ("Cancelled", "Cancelled"),
+
+)
 class Order(models.Model):
 
     user_id = models.IntegerField()
@@ -13,7 +23,7 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField(default=1)
 
     status = models.CharField(
-        max_length=20,
+        max_length=20, choices=STATUS_CHOICES,
         default="Pending"
     )
 

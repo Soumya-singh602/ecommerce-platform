@@ -133,3 +133,48 @@ def cancel_order(request, id):
         },
         status=status.HTTP_200_OK
     )
+
+@api_view(["PUT"])
+@authentication_classes([UserServiceAuthentication])
+def update_order_status(request, id):
+
+    order = get_object_or_404(
+        Order,
+        id=id
+    )
+
+
+    new_status = request.data.get("status")
+
+
+    if new_status not in [
+        "Pending",
+        "Confirmed",
+        "Shipped",
+        "Delivered",
+        "Cancelled"
+    ]:
+
+        return Response(
+            {
+                "message": "Invalid status"
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+    order.status = new_status
+
+    order.save()
+
+
+    serializer = OrderSerializer(order)
+
+
+    return Response(
+        {
+            "message": "Order status updated",
+            "data": serializer.data
+        },
+        status=status.HTTP_200_OK
+    )
