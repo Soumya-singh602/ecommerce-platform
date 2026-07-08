@@ -8,6 +8,7 @@ from rest_framework import status
 
 from .serializers import OrderSerializer
 from .authentication import UserServiceAuthentication
+from .models import Order
 
 
 @api_view(["POST"])
@@ -17,27 +18,35 @@ def place_order(request):
     # Request data copy
     data = request.data.copy()
 
-    # Logged-in user ki ID JWT se lo
+    
     data["user_id"] = request.user["id"]
 
-    # Product ID nikalo
+    
     product_id = request.data.get("product_id")
 
-    # Product Service ko call karo
-    response = requests.get(
-        f"http://127.0.0.1:8002/products/{product_id}/"
-    )
+    
+    auth_header = request.headers.get("Authorization")
 
-    # Product exist nahi karta
+    response = requests.get(
+    f"http://127.0.0.1:8002/products/{product_id}/",
+    headers={
+        "Authorization": auth_header
+    }
+)
+
+    print("Status Code:", response.status_code)
+    print("Response:", response.text)
+
     if response.status_code != 200:
         return Response(
-            {
-                "message": "Product not found"
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+        {
+            "status_code": response.status_code,
+            "response": response.text
+        },
+        status=response.status_code
+    )
 
-    # Order save karo
+    
     serializer = OrderSerializer(data=data)
 
     if serializer.is_valid():
@@ -56,3 +65,15 @@ def place_order(request):
         status=status.HTTP_400_BAD_REQUEST
     )
 
+
+@api_view(["GET"])
+@authentication_classes([UserServiceAuthentication])
+def order_list(request):
+
+    user_id = request.user["id"]
+
+    orders = Order.objects.filter(user_id=user_id)
+
+    serializer = OrderSerializer(orders, many=True)
+
+    return Response(serializer.data)

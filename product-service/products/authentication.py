@@ -10,6 +10,8 @@ class UserServiceAuthentication(BaseAuthentication):
 
         auth_header = request.headers.get("Authorization")
 
+        print("AUTH HEADER =", auth_header)
+
         if not auth_header:
             raise AuthenticationFailed("Authorization header missing")
 
@@ -20,8 +22,11 @@ class UserServiceAuthentication(BaseAuthentication):
             }
         )
 
+        print("STATUS =", response.status_code)
+        print("BODY =", response.text)
+
         if response.status_code != 200:
-            raise AuthenticationFailed("Invalid Token")
+            raise AuthenticationFailed(response.text)
 
         user_data = response.json()
 

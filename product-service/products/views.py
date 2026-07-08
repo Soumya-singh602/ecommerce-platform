@@ -35,6 +35,7 @@ def create_product(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
+@authentication_classes([UserServiceAuthentication])
 def product_list(request):
 
     products = Product.objects.all()
@@ -44,6 +45,7 @@ def product_list(request):
     return Response(serializer.data)
 
 @api_view(["GET"])
+@authentication_classes([UserServiceAuthentication])
 def product_detail(request, id):
 
     product = get_object_or_404(Product, id=id)
