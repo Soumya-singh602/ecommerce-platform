@@ -9,6 +9,7 @@ from rest_framework import status
 from .serializers import OrderSerializer
 from .authentication import UserServiceAuthentication
 from .models import Order
+from django.shortcuts import get_object_or_404
 
 
 @api_view(["POST"])
@@ -75,5 +76,21 @@ def order_list(request):
     orders = Order.objects.filter(user_id=user_id)
 
     serializer = OrderSerializer(orders, many=True)
+
+    return Response(serializer.data)
+
+@api_view(["GET"])
+@authentication_classes([UserServiceAuthentication])
+def order_detail(request, id):
+
+    user_id = request.user["id"]
+
+    order = get_object_or_404(
+        Order,
+        id=id,
+        user_id=user_id
+    )
+
+    serializer = OrderSerializer(order)
 
     return Response(serializer.data)
