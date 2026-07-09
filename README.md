@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a Django-based Ecommerce Platform developed using a Microservices Architecture. Each service is independently developed and has its own database. Authentication is handled using JWT, and Nginx is used as an API Gateway to provide a single entry point for all services.
+This project is a Django-based Ecommerce Platform built using a Microservices Architecture. Each service is independently developed with its own database, enabling scalability and maintainability. Authentication is implemented using JWT, while Nginx acts as an API Gateway to provide a single entry point for all microservices.
 
 ---
 
@@ -24,6 +24,7 @@ This project is a Django-based Ecommerce Platform developed using a Microservice
 * MySQL
 * PostgreSQL
 * Nginx
+* Git & GitHub
 
 ---
 
@@ -32,8 +33,8 @@ This project is a Django-based Ecommerce Platform developed using a Microservice
 | Service         | Database   |
 | --------------- | ---------- |
 | User Service    | MySQL      |
-| Product Service | PostgreSQL |
-| Order Service   | MySQL      |
+| Product Service | MySQL      |
+| Order Service   | PostgreSQL |
 
 ---
 
@@ -44,9 +45,13 @@ This project is a Django-based Ecommerce Platform developed using a Microservice
 * User Registration
 * User Login
 * JWT Authentication
+* Refresh Token
 * Token Verification API
 * User List
 * User Detail
+* User Profile
+* Update Profile
+* Change Password
 * Delete User
 
 ### Product Service
@@ -57,6 +62,9 @@ This project is a Django-based Ecommerce Platform developed using a Microservice
 * Update Product
 * Delete Product
 * Product Search (`?search=keyword`)
+* Price Filtering (`?min_price=&max_price=`)
+* Product Sorting (`?sort=price` / `?sort=-price`)
+* Product Pagination (`?page=1`)
 * JWT Protected APIs
 
 ### Order Service
@@ -66,6 +74,10 @@ This project is a Django-based Ecommerce Platform developed using a Microservice
 * Order Detail
 * Cancel Order
 * Update Order Status
+* Order Status Filtering (`?status=Pending`)
+* Order Sorting
+* Order Pagination
+* Order Statistics
 * JWT Protected APIs
 
 ---
@@ -124,25 +136,22 @@ Authorization: Bearer <access_token>
 2. Configure MySQL and PostgreSQL databases.
 3. Install project dependencies.
 4. Run migrations for all three services.
-5. Start:
-
-   * User Service
-   * Product Service
-   * Order Service
-6. Start Nginx.
-7. Test APIs using Postman.
+5. Start the User Service.
+6. Start the Product Service.
+7. Start the Order Service.
+8. Start Nginx.
+9. Test the APIs using Postman.
 
 ---
 
 ## Future Improvements
 
-* Product Price Filtering
-* Product Sorting
-* Pagination
-* Docker Deployment
-* RabbitMQ/Kafka Integration
+* Docker & Docker Compose
+* Redis Caching
+* RabbitMQ / Kafka Integration
 * Payment Service
 * Inventory Service
+* CI/CD Pipeline
 
 ---
 
