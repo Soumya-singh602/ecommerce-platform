@@ -55,6 +55,8 @@ def product_list(request):
     min_price = request.GET.get("min_price")
     max_price = request.GET.get("max_price")
 
+    sort = request.GET.get("sort")
+
     if search:
 
         products = products.filter(
@@ -69,6 +71,23 @@ def product_list(request):
     if max_price:
 
         products = products.filter(price__lte=max_price)
+
+    if sort:
+
+      if sort in ["price", "-price"]:
+
+        products = products.order_by(sort)
+
+      else:
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "Invalid sorting field",
+                "data": None
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     serializer = ProductSerializer(products, many=True)
 
