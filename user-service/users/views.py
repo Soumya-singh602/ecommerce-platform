@@ -4,13 +4,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import ChangePasswordSerializer
 
 from .models import CustomUser
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
     UserListSerializer,
+    UpdateProfileSerializer,
+    ChangePasswordSerializer
 )
+from django.contrib.auth.hashers import check_password
 
 
 # REGISTER USER
@@ -178,4 +182,114 @@ def verify_token(request):
             },
         },
         status=status.HTTP_200_OK,
+    )
+
+# USER PROFILE
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+
+    try:
+
+        user = CustomUser.objects.get(id=request.user.id)
+
+    except CustomUser.DoesNotExist:
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "User not found",
+                "data": None
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = UserListSerializer(user)
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Profile fetched successfully",
+            "data": serializer.data
+        },
+        status=status.HTTP_200_OK
+    )
+
+# UPDATE PROFILE
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+
+    serializer = UpdateProfileSerializer(
+        request.user,
+        data=request.data,
+        partial=True
+    )
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return Response(
+            {
+                "status": "success",
+                "message": "Profile updated successfully",
+                "data": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+    return Response(
+        {
+            "status": "failed",
+            "message": "Validation failed",
+            "data": serializer.errors
+        },
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+# CHANGE PASSWORD
+@api_view(["PUT"])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+
+    serializer = ChangePasswordSerializer(data=request.data)
+
+    if not serializer.is_valid():
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "Validation failed",
+                "data": serializer.errors
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user = request.user
+
+    old_password = serializer.validated_data["old_password"]
+    new_password = serializer.validated_data["new_password"]
+
+    if not check_password(old_password, user.password):
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "Old password is incorrect",
+                "data": None
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    user.set_password(new_password)
+    user.save()
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Password changed successfully",
+            "data": None
+        },
+        status=status.HTTP_200_OK
     )
