@@ -10,6 +10,7 @@ from .serializers import OrderSerializer
 from .authentication import UserServiceAuthentication
 from .models import Order
 from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Count
 
 
 #PLACE ORDER
@@ -290,6 +291,45 @@ def update_order_status(request, id):
             "status": "success",
             "message": "Order status updated successfully",
             "data": serializer.data
+        },
+        status=status.HTTP_200_OK
+    )
+
+
+# ORDER STATISTICS
+@api_view(["GET"])
+@authentication_classes([UserServiceAuthentication])
+def order_statistics(request):
+
+    user_id = request.user["id"]
+
+    orders = Order.objects.filter(user_id=user_id)
+
+    if not orders.exists():
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "No orders found",
+                "data": None
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    data = {
+        "total_orders": orders.count(),
+        "pending_orders": orders.filter(status="Pending").count(),
+        "confirmed_orders": orders.filter(status="Confirmed").count(),
+        "shipped_orders": orders.filter(status="Shipped").count(),
+        "delivered_orders": orders.filter(status="Delivered").count(),
+        "cancelled_orders": orders.filter(status="Cancelled").count()
+    }
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Order statistics fetched successfully",
+            "data": data
         },
         status=status.HTTP_200_OK
     )
