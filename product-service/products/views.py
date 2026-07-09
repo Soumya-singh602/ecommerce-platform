@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .authentication import UserServiceAuthentication
 from rest_framework.decorators import authentication_classes
+from django.core.paginator import Paginator , EmptyPage
 
 from .models import Product
 from .serializers import ProductSerializer
@@ -56,14 +57,14 @@ def product_list(request):
     max_price = request.GET.get("max_price")
 
     sort = request.GET.get("sort")
-
+    # SEARCH
     if search:
 
         products = products.filter(
             Q(name__icontains=search) |
             Q(description__icontains=search)
         )
-
+    # PRICE FILTER
     if min_price:
 
         products = products.filter(price__gte=min_price)
@@ -72,6 +73,7 @@ def product_list(request):
 
         products = products.filter(price__lte=max_price)
 
+    # SORTING
     if sort:
 
       if sort in ["price", "-price"]:
@@ -88,9 +90,8 @@ def product_list(request):
             },
             status=status.HTTP_400_BAD_REQUEST
         )
-
-    serializer = ProductSerializer(products, many=True)
-
+    
+    # CHECK DATA
     if not products.exists():
 
      return Response(
@@ -101,12 +102,40 @@ def product_list(request):
         },
         status=status.HTTP_404_NOT_FOUND
     )
+    # PAGINATION
+    page = request.GET.get("page", 1)
+
+    paginator = Paginator(products, 5)
+
+
+    try:
+
+       page_obj = paginator.page(page)
+
+    except EmptyPage:
+
+        return Response(
+        {
+            "status": "failed",
+            "message": "Page does not exist",
+            "data": None
+        },
+        status=status.HTTP_404_NOT_FOUND
+    )
+
+
+    serializer = ProductSerializer(page_obj, many=True)
 
     return Response(
         {
             "status": "success",
             "message": "Products fetched successfully",
-            "data": serializer.data
+            "data": {
+                      "current_page": page_obj.number,
+                      "total_pages": paginator.num_pages,
+                      "total_products": paginator.count,
+                      "products": serializer.data
+                    }
         },
         status=status.HTTP_200_OK
     )   
@@ -183,26 +212,26 @@ def update_product(request, id):
             "message": "Validation failed",
             "data": serializer.errors
         },
-        status=status.HTTP_400_BAD_REQUEST
     )
-#DELETE PRODUCT
+
+# DELETE PRODUCT
 @api_view(["DELETE"])
 @authentication_classes([UserServiceAuthentication])
 def delete_product(request, id):
 
     try:
-     product = Product.objects.get(id=id)
+        product = Product.objects.get(id=id)
 
     except Product.DoesNotExist:
 
-     return Response(
-        {
-            "status": "failed",
-            "message": "Product not found",
-            "data": None
-        },
-        status=status.HTTP_404_NOT_FOUND
-    )
+        return Response(
+            {
+                "status": "failed",
+                "message": "Product not found",
+                "data": None
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
 
     product.delete()
 
@@ -210,7 +239,9 @@ def delete_product(request, id):
         {
             "status": "success",
             "message": "Product deleted successfully",
-            "data": None
+            "data": {
+                "product_id": id
+            }
         },
         status=status.HTTP_200_OK
     )
