@@ -42,7 +42,8 @@ def create_product(request):
         },
         status=status.HTTP_400_BAD_REQUEST
     )
-#PRODUCT LIST
+
+# PRODUCT LIST
 @api_view(["GET"])
 @authentication_classes([UserServiceAuthentication])
 def product_list(request):
@@ -51,6 +52,9 @@ def product_list(request):
 
     search = request.GET.get("search")
 
+    min_price = request.GET.get("min_price")
+    max_price = request.GET.get("max_price")
+
     if search:
 
         products = products.filter(
@@ -58,7 +62,26 @@ def product_list(request):
             Q(description__icontains=search)
         )
 
+    if min_price:
+
+        products = products.filter(price__gte=min_price)
+
+    if max_price:
+
+        products = products.filter(price__lte=max_price)
+
     serializer = ProductSerializer(products, many=True)
+
+    if not products.exists():
+
+     return Response(
+        {
+            "status": "failed",
+            "message": "No products found",
+            "data": []
+        },
+        status=status.HTTP_404_NOT_FOUND
+    )
 
     return Response(
         {
@@ -67,7 +90,7 @@ def product_list(request):
             "data": serializer.data
         },
         status=status.HTTP_200_OK
-    )
+    )   
     
 #PRODUCT DETAILS
 @api_view(["GET"])
