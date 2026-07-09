@@ -33,8 +33,8 @@ This project is a Django-based Ecommerce Platform built using a Microservices Ar
 | Service         | Database   |
 | --------------- | ---------- |
 | User Service    | MySQL      |
-| Product Service | MySQL      |
-| Order Service   | PostgreSQL |
+| Product Service | PostgreSQL |
+| Order Service   | MySQL      |
 
 ---
 
