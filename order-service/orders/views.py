@@ -9,6 +9,7 @@ from rest_framework import status
 from .serializers import OrderSerializer
 from .authentication import UserServiceAuthentication
 from .models import Order
+from django.core.paginator import Paginator, EmptyPage
 
 
 #PLACE ORDER
@@ -66,7 +67,8 @@ def place_order(request):
         status=status.HTTP_400_BAD_REQUEST
     )
 
-#ORDER LIST
+
+# ORDER LIST
 @api_view(["GET"])
 @authentication_classes([UserServiceAuthentication])
 def order_list(request):
@@ -75,13 +77,77 @@ def order_list(request):
 
     orders = Order.objects.filter(user_id=user_id)
 
-    serializer = OrderSerializer(orders, many=True)
+    # STATUS FILTER
+    status_filter = request.GET.get("status")
+
+    if status_filter:
+
+        orders = orders.filter(status__iexact=status_filter)
+
+    # SORTING
+    sort = request.GET.get("sort")
+
+    if sort:
+
+        if sort in ["created_at", "-created_at"]:
+
+            orders = orders.order_by(sort)
+
+        else:
+
+            return Response(
+                {
+                    "status": "failed",
+                    "message": "Invalid sorting field",
+                    "data": None
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    # NO DATA
+    if not orders.exists():
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "No orders found",
+                "data": []
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    # PAGINATION
+    page = request.GET.get("page", 1)
+
+    paginator = Paginator(orders, 5)
+
+    try:
+
+        page_obj = paginator.page(page)
+
+    except EmptyPage:
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "Page does not exist",
+                "data": None
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = OrderSerializer(page_obj, many=True)
 
     return Response(
         {
             "status": "success",
             "message": "Orders fetched successfully",
-            "data": serializer.data
+            "data": {
+                "current_page": page_obj.number,
+                "total_pages": paginator.num_pages,
+                "total_orders": paginator.count,
+                "orders": serializer.data
+            }
         },
         status=status.HTTP_200_OK
     )
