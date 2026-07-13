@@ -4,8 +4,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view 
 from rest_framework.response import Response
 from rest_framework import status
-from .authentication import UserServiceAuthentication
-from rest_framework.decorators import authentication_classes
+from rest_framework.decorators import api_view
 from django.core.paginator import Paginator , EmptyPage
 
 from .models import Product
@@ -17,8 +16,13 @@ from django.db.models import Q
 
 # CREATE PRODUCT
 @api_view(["POST"])
-@authentication_classes([UserServiceAuthentication])
 def create_product(request):
+
+    user_id = request.headers.get("X-User-Id")
+    user_email = request.headers.get("X-User-Email")
+
+    print("User ID :", user_id)
+    print("User Email :", user_email)
 
     serializer = ProductSerializer(data=request.data)
 
@@ -30,24 +34,29 @@ def create_product(request):
             {
                 "status": "success",
                 "message": "Product created successfully",
-                "data": serializer.data
+                "created_by": user_id,
+                "data": serializer.data,
             },
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )
 
     return Response(
         {
             "status": "failed",
             "message": "Validation failed",
-            "data": serializer.errors
+            "data": serializer.errors,
         },
-        status=status.HTTP_400_BAD_REQUEST
+        status=status.HTTP_400_BAD_REQUEST,
     )
 
 # PRODUCT LIST
 @api_view(["GET"])
-@authentication_classes([UserServiceAuthentication])
 def product_list(request):
+    user_id = request.headers.get("X-User-Id")
+    user_email = request.headers.get("X-User-Email")
+
+    print(user_id)
+    print(user_email)
 
     products = Product.objects.all()
 
@@ -142,8 +151,10 @@ def product_list(request):
     
 #PRODUCT DETAILS
 @api_view(["GET"])
-@authentication_classes([UserServiceAuthentication])
 def product_detail(request, id):
+    user_id = request.headers.get("X-User-Id")
+
+    print(user_id)
 
     try:
       product = Product.objects.get(id=id)
@@ -172,8 +183,10 @@ def product_detail(request, id):
 
 #UPDATE PRODUCT
 @api_view(["PUT"])
-@authentication_classes([UserServiceAuthentication])
 def update_product(request, id):
+    user_id = request.headers.get("X-User-Id")
+
+    print(user_id)
 
     try:
       product = Product.objects.get(id=id)
@@ -216,8 +229,10 @@ def update_product(request, id):
 
 # DELETE PRODUCT
 @api_view(["DELETE"])
-@authentication_classes([UserServiceAuthentication])
 def delete_product(request, id):
+    user_id = request.headers.get("X-User-Id")
+
+    print(user_id)
 
     try:
         product = Product.objects.get(id=id)

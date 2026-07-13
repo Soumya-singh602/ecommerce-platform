@@ -2,12 +2,11 @@ from django.shortcuts import render
 
 # Create your views here.
 import requests
-from rest_framework.decorators import api_view , authentication_classes
+from rest_framework.decorators import api_view 
 from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import OrderSerializer
-from .authentication import UserServiceAuthentication
 from .models import Order
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count
@@ -15,22 +14,25 @@ from django.db.models import Count
 
 #PLACE ORDER
 @api_view(["POST"])
-@authentication_classes([UserServiceAuthentication])
 def place_order(request):
 
     data = request.data.copy()
 
-    data["user_id"] = request.user["id"]
+    user_id = request.headers.get("X-User-Id")
+    user_email = request.headers.get("X-User-Email")
+
+    print("User ID :", user_id)
+    print("User Email :", user_email)
+
+    data["user_id"] = user_id
 
     product_id = request.data.get("product_id")
-
-    auth_header = request.headers.get("Authorization")
 
     response = requests.get(
         f"http://127.0.0.1:8002/products/{product_id}/",
         headers={
-            "Authorization": auth_header
-        }
+           "Authorization": request.headers.get("Authorization")
+     }
     )
 
     if response.status_code != 200:
@@ -39,9 +41,9 @@ def place_order(request):
             {
                 "status": "failed",
                 "message": "Product not found",
-                "data": None
+                "data": None,
             },
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_404_NOT_FOUND,
         )
 
     serializer = OrderSerializer(data=data)
@@ -54,27 +56,26 @@ def place_order(request):
             {
                 "status": "success",
                 "message": "Order placed successfully",
-                "data": serializer.data
+                "data": serializer.data,
             },
-            status=status.HTTP_201_CREATED
+            status=status.HTTP_201_CREATED,
         )
 
     return Response(
         {
             "status": "failed",
             "message": "Validation failed",
-            "data": serializer.errors
+            "data": serializer.errors,
         },
-        status=status.HTTP_400_BAD_REQUEST
+        status=status.HTTP_400_BAD_REQUEST,
     )
 
 
 # ORDER LIST
 @api_view(["GET"])
-@authentication_classes([UserServiceAuthentication])
 def order_list(request):
 
-    user_id = request.user["id"]
+    user_id = request.headers.get("X-User-Id")
 
     orders = Order.objects.filter(user_id=user_id)
 
@@ -155,10 +156,9 @@ def order_list(request):
 
 #ORDER DETAIL
 @api_view(["GET"])
-@authentication_classes([UserServiceAuthentication])
 def order_detail(request, id):
 
-    user_id = request.user["id"]
+    user_id = request.headers.get("X-User-Id")
 
     try:
 
@@ -190,10 +190,9 @@ def order_detail(request, id):
 
 #CANCLE ORDER
 @api_view(["PUT"])
-@authentication_classes([UserServiceAuthentication])
 def cancel_order(request, id):
 
-    user_id = request.user["id"]
+    user_id = request.headers.get("X-User-Id")
 
     try:
 
@@ -241,7 +240,6 @@ def cancel_order(request, id):
 
 #UPDATE ORDER STATUS
 @api_view(["PUT"])
-@authentication_classes([UserServiceAuthentication])
 def update_order_status(request, id):
 
     try:
@@ -298,10 +296,9 @@ def update_order_status(request, id):
 
 # ORDER STATISTICS
 @api_view(["GET"])
-@authentication_classes([UserServiceAuthentication])
 def order_statistics(request):
 
-    user_id = request.user["id"]
+    user_id = request.headers.get("X-User-Id")
 
     orders = Order.objects.filter(user_id=user_id)
 

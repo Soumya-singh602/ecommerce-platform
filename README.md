@@ -88,10 +88,9 @@ Nginx is configured as an API Gateway to route all requests through a single bas
 
 ### Routes
 
-*/api/users/
-*/api/products/
-*/api/orders/
-
+1. `/api/users/`
+2. `/api/products/`
+3. `/api/orders/`
 
 
 ---

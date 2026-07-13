@@ -170,19 +170,18 @@ def verify_token(request):
 
     user = request.user
 
-    return Response(
+    response = Response(
         {
             "status": "success",
             "message": "Token verified successfully",
-            "data": {
-                "id": user.id,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-            },
         },
         status=status.HTTP_200_OK,
     )
+
+    response["X-User-Id"] = str(user.id)
+    response["X-User-Email"] = user.email
+
+    return response
 
 # USER PROFILE
 @api_view(["GET"])
