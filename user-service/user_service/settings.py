@@ -81,7 +81,7 @@ DATABASES = {
         "NAME": "user_db",
         "USER": "ecommerce",
         "PASSWORD": "password123",
-        "HOST": "127.0.0.1",
+        "HOST": "user-db",
         "PORT": "3306",
     }
 }
@@ -127,7 +127,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "EXCEPTION_HANDLER": "ecommerce_common.handlers.ecommerce_exception_handler",
 }
+
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
@@ -138,3 +140,9 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "nginx",
+    "user-service",
+]

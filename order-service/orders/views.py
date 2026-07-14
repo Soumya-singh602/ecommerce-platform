@@ -10,41 +10,36 @@ from .serializers import OrderSerializer
 from .models import Order
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Count
+from ecommerce_common.response import success_response
+from ecommerce_common.exceptions import NotFoundException
+from ecommerce_common.utils import get_user_info
 
 
 #PLACE ORDER
+# PLACE ORDER
 @api_view(["POST"])
 def place_order(request):
 
     data = request.data.copy()
 
-    user_id = request.headers.get("X-User-Id")
-    user_email = request.headers.get("X-User-Email")
+    user = get_user_info(request)
 
-    print("User ID :", user_id)
-    print("User Email :", user_email)
+    print("User ID :", user["user_id"])
+    print("User Email :", user["user_email"])
 
-    data["user_id"] = user_id
+    data["user_id"] = user["user_id"]
 
     product_id = request.data.get("product_id")
 
     response = requests.get(
-        f"http://127.0.0.1:8002/products/{product_id}/",
-        headers={
-           "Authorization": request.headers.get("Authorization")
-     }
-    )
+    f"http://product-service:8002/products/{product_id}/",
+    headers={
+        "Authorization": request.headers.get("Authorization")
+    }
+)
 
     if response.status_code != 200:
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "Product not found",
-                "data": None,
-            },
-            status=status.HTTP_404_NOT_FOUND,
-        )
+        raise NotFoundException("Product not found")
 
     serializer = OrderSerializer(data=data)
 
@@ -52,13 +47,10 @@ def place_order(request):
 
         serializer.save()
 
-        return Response(
-            {
-                "status": "success",
-                "message": "Order placed successfully",
-                "data": serializer.data,
-            },
-            status=status.HTTP_201_CREATED,
+        return success_response(
+            message="Order placed successfully",
+            data=serializer.data,
+            status_code=201
         )
 
     return Response(
@@ -70,12 +62,13 @@ def place_order(request):
         status=status.HTTP_400_BAD_REQUEST,
     )
 
-
+# ORDER LIST
 # ORDER LIST
 @api_view(["GET"])
 def order_list(request):
 
-    user_id = request.headers.get("X-User-Id")
+    user = get_user_info(request)
+    user_id = user["user_id"]
 
     orders = Order.objects.filter(user_id=user_id)
 
@@ -83,7 +76,6 @@ def order_list(request):
     status_filter = request.GET.get("status")
 
     if status_filter:
-
         orders = orders.filter(status__iexact=status_filter)
 
     # SORTING
@@ -92,11 +84,9 @@ def order_list(request):
     if sort:
 
         if sort in ["created_at", "-created_at"]:
-
             orders = orders.order_by(sort)
 
         else:
-
             return Response(
                 {
                     "status": "failed",
@@ -108,15 +98,7 @@ def order_list(request):
 
     # NO DATA
     if not orders.exists():
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "No orders found",
-                "data": []
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+        raise NotFoundException("No orders found")
 
     # PAGINATION
     page = request.GET.get("page", 1)
@@ -124,93 +106,64 @@ def order_list(request):
     paginator = Paginator(orders, 5)
 
     try:
-
         page_obj = paginator.page(page)
 
     except EmptyPage:
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "Page does not exist",
-                "data": None
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+        raise NotFoundException("Page does not exist")
 
     serializer = OrderSerializer(page_obj, many=True)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Orders fetched successfully",
-            "data": {
-                "current_page": page_obj.number,
-                "total_pages": paginator.num_pages,
-                "total_orders": paginator.count,
-                "orders": serializer.data
-            }
-        },
-        status=status.HTTP_200_OK
-    )
-
-#ORDER DETAIL
-@api_view(["GET"])
-def order_detail(request, id):
-
-    user_id = request.headers.get("X-User-Id")
-
-    try:
-
-        order = Order.objects.get(
-            id=id,
-            user_id=user_id
-        )
-
-    except Order.DoesNotExist:
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "Order not found",
-                "data": None
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
-
-    serializer = OrderSerializer(order)
-
-    return Response(
-        {
-            "status": "success",
-            "message": "Order fetched successfully",
-            "data": serializer.data
+    return success_response(
+        message="Orders fetched successfully",
+        data={
+            "current_page": page_obj.number,
+            "total_pages": paginator.num_pages,
+            "total_orders": paginator.count,
+            "orders": serializer.data
         }
     )
 
-#CANCLE ORDER
-@api_view(["PUT"])
-def cancel_order(request, id):
 
-    user_id = request.headers.get("X-User-Id")
+# ORDER DETAIL
+@api_view(["GET"])
+def order_detail(request, id):
+
+    user = get_user_info(request)
+    user_id = user["user_id"]
 
     try:
-
         order = Order.objects.get(
             id=id,
             user_id=user_id
         )
 
     except Order.DoesNotExist:
+        raise NotFoundException("Order not found")
 
-        return Response(
-            {
-                "status": "failed",
-                "message": "Order not found",
-                "data": None
-            },
-            status=status.HTTP_404_NOT_FOUND
+    serializer = OrderSerializer(order)
+
+    return success_response(
+        message="Order fetched successfully",
+        data=serializer.data
+    )
+
+
+
+# CANCEL ORDER
+@api_view(["PUT"])
+def cancel_order(request, id):
+
+    user = get_user_info(request)
+    user_id = user["user_id"]
+
+    try:
+        order = Order.objects.get(
+            id=id,
+            user_id=user_id
         )
+
+    except Order.DoesNotExist:
+        raise NotFoundException("Order not found")
 
     if order.status == "Cancelled":
 
@@ -224,38 +177,25 @@ def cancel_order(request, id):
         )
 
     order.status = "Cancelled"
-
     order.save()
 
     serializer = OrderSerializer(order)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Order cancelled successfully",
-            "data": serializer.data
-        },
-        status=status.HTTP_200_OK
+    return success_response(
+        message="Order cancelled successfully",
+        data=serializer.data
     )
 
-#UPDATE ORDER STATUS
+
+# UPDATE ORDER STATUS
 @api_view(["PUT"])
 def update_order_status(request, id):
 
     try:
-
         order = Order.objects.get(id=id)
 
     except Order.DoesNotExist:
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "Order not found",
-                "data": None
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+        raise NotFoundException("Order not found")
 
     new_status = request.data.get("status")
 
@@ -279,39 +219,28 @@ def update_order_status(request, id):
         )
 
     order.status = new_status
-
     order.save()
 
     serializer = OrderSerializer(order)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Order status updated successfully",
-            "data": serializer.data
-        },
-        status=status.HTTP_200_OK
+    return success_response(
+        message="Order status updated successfully",
+        data=serializer.data
     )
+
 
 
 # ORDER STATISTICS
 @api_view(["GET"])
 def order_statistics(request):
 
-    user_id = request.headers.get("X-User-Id")
+    user = get_user_info(request)
+    user_id = user["user_id"]
 
     orders = Order.objects.filter(user_id=user_id)
 
     if not orders.exists():
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "No orders found",
-                "data": None
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+        raise NotFoundException("No orders found")
 
     data = {
         "total_orders": orders.count(),
@@ -319,14 +248,10 @@ def order_statistics(request):
         "confirmed_orders": orders.filter(status="Confirmed").count(),
         "shipped_orders": orders.filter(status="Shipped").count(),
         "delivered_orders": orders.filter(status="Delivered").count(),
-        "cancelled_orders": orders.filter(status="Cancelled").count()
+        "cancelled_orders": orders.filter(status="Cancelled").count(),
     }
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Order statistics fetched successfully",
-            "data": data
-        },
-        status=status.HTTP_200_OK
+    return success_response(
+        message="Order statistics fetched successfully",
+        data=data
     )

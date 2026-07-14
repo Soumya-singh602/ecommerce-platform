@@ -79,9 +79,9 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "order_db",
-        "USER": "order_user",
-        "PASSWORD": "order123",
-        "HOST": "127.0.0.1",
+        "USER": "ecommerce",
+        "PASSWORD": "password123",
+        "HOST": "order-db",
         "PORT": "3306",
     }
 }
@@ -123,4 +123,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-REST_FRAMEWORK = {}
+REST_FRAMEWORK = {"EXCEPTION_HANDLER": "ecommerce_common.handlers.ecommerce_exception_handler",}
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "nginx",
+    "order-service",
+]

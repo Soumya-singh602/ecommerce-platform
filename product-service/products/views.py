@@ -10,6 +10,10 @@ from django.core.paginator import Paginator , EmptyPage
 from .models import Product
 from .serializers import ProductSerializer
 from django.db.models import Q
+from ecommerce_common.response import success_response
+from ecommerce_common.exceptions import NotFoundException
+from ecommerce_common.utils import get_user_info
+
 
 
 
@@ -18,11 +22,10 @@ from django.db.models import Q
 @api_view(["POST"])
 def create_product(request):
 
-    user_id = request.headers.get("X-User-Id")
-    user_email = request.headers.get("X-User-Email")
+    user = get_user_info(request)
 
-    print("User ID :", user_id)
-    print("User Email :", user_email)
+    print("User ID :", user["user_id"])
+    print("User Email :", user["user_email"])
 
     serializer = ProductSerializer(data=request.data)
 
@@ -30,15 +33,11 @@ def create_product(request):
 
         serializer.save()
 
-        return Response(
-            {
-                "status": "success",
-                "message": "Product created successfully",
-                "created_by": user_id,
-                "data": serializer.data,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        return success_response(
+               message="Product Created Successfully",
+               data=serializer.data,
+               status_code=201
+               )
 
     return Response(
         {
@@ -52,11 +51,10 @@ def create_product(request):
 # PRODUCT LIST
 @api_view(["GET"])
 def product_list(request):
-    user_id = request.headers.get("X-User-Id")
-    user_email = request.headers.get("X-User-Email")
+    user = get_user_info(request)
 
-    print(user_id)
-    print(user_email)
+    print(user["user_id"])
+    print(user["user_email"])
 
     products = Product.objects.all()
 
@@ -103,14 +101,7 @@ def product_list(request):
     # CHECK DATA
     if not products.exists():
 
-     return Response(
-        {
-            "status": "failed",
-            "message": "No products found",
-            "data": []
-        },
-        status=status.HTTP_404_NOT_FOUND
-    )
+     raise NotFoundException("No products found")
     # PAGINATION
     page = request.GET.get("page", 1)
 
@@ -123,84 +114,53 @@ def product_list(request):
 
     except EmptyPage:
 
-        return Response(
-        {
-            "status": "failed",
-            "message": "Page does not exist",
-            "data": None
-        },
-        status=status.HTTP_404_NOT_FOUND
-    )
-
+        raise NotFoundException("Page does not exist")
 
     serializer = ProductSerializer(page_obj, many=True)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Products fetched successfully",
-            "data": {
-                      "current_page": page_obj.number,
-                      "total_pages": paginator.num_pages,
-                      "total_products": paginator.count,
-                      "products": serializer.data
-                    }
-        },
-        status=status.HTTP_200_OK
-    )   
+    return success_response(
+    message="Products fetched successfully",
+    data={
+        "current_page": page_obj.number,
+        "total_pages": paginator.num_pages,
+        "total_products": paginator.count,
+        "products": serializer.data,
+    }
+)
     
 #PRODUCT DETAILS
 @api_view(["GET"])
 def product_detail(request, id):
-    user_id = request.headers.get("X-User-Id")
+    user = get_user_info(request)
 
-    print(user_id)
+    print(user["user_id"])
 
     try:
       product = Product.objects.get(id=id)
 
     except Product.DoesNotExist:
-
-        return Response(
-        {
-            "status": "failed",
-            "message": "Product not found",
-            "data": None
-        },
-        status=status.HTTP_404_NOT_FOUND
-    )
+      raise NotFoundException("Product not found")
 
     serializer = ProductSerializer(product)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Product fetched successfully",
-            "data": serializer.data
-        },
-        status=status.HTTP_200_OK
-    )
+    return success_response(
+      message="Product fetched successfully",
+      data=serializer.data
+)
 
 #UPDATE PRODUCT
 @api_view(["PUT"])
 def update_product(request, id):
-    user_id = request.headers.get("X-User-Id")
+    user = get_user_info(request)
 
-    print(user_id)
+    print(user["user_id"])
 
     try:
       product = Product.objects.get(id=id)
 
     except Product.DoesNotExist:
-
-        return Response(
-        {
-            "status": "failed",
-            "message": "Product not found",
-            "data": None
-        },
-        status=status.HTTP_404_NOT_FOUND
-    )
+     raise NotFoundException("Product not found")
+    
     serializer = ProductSerializer(
         product,
         data=request.data
@@ -210,14 +170,10 @@ def update_product(request, id):
 
         serializer.save()
 
-        return Response(
-            {
-                "status": "success",
-                "message": "Product updated successfully",
-                "data": serializer.data
-            },
-            status=status.HTTP_200_OK
-        )
+        return success_response(
+         message="Product updated successfully",
+         data=serializer.data
+)
 
     return Response(
         {
@@ -230,33 +186,24 @@ def update_product(request, id):
 # DELETE PRODUCT
 @api_view(["DELETE"])
 def delete_product(request, id):
-    user_id = request.headers.get("X-User-Id")
+    user = get_user_info(request)
 
-    print(user_id)
+    print(user["user_id"])
 
     try:
         product = Product.objects.get(id=id)
 
     except Product.DoesNotExist:
 
-        return Response(
-            {
-                "status": "failed",
-                "message": "Product not found",
-                "data": None
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+        raise NotFoundException(
+        "Product not found"
+    )
 
     product.delete()
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Product deleted successfully",
-            "data": {
-                "product_id": id
-            }
-        },
-        status=status.HTTP_200_OK
+    return success_response(
+        message="Product deleted successfully",
+        data={
+            "product_id": id
+        }
     )

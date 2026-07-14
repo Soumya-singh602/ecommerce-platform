@@ -78,13 +78,13 @@ WSGI_APPLICATION = 'product_service.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'product_db',
-        'USER': 'product_user',
-        'PASSWORD': 'product123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "product_db",
+        "USER": "postgres",
+        "PASSWORD": "postgres123",
+        "HOST": "product-db",
+        "PORT": "5432",
     }
 }
 
@@ -124,7 +124,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-REST_FRAMEWORK = {}
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "ecommerce_common.handlers.ecommerce_exception_handler",
+}
 
 from datetime import timedelta
 
@@ -132,3 +134,9 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "nginx",
+    "product-service",
+]

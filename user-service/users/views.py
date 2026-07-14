@@ -5,6 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import ChangePasswordSerializer
+from ecommerce_common.response import success_response
+from ecommerce_common.exceptions import NotFoundException
 
 from .models import CustomUser
 from .serializers import (
@@ -58,19 +60,16 @@ def login_user(request):
 
         refresh = RefreshToken.for_user(user)
 
-        return Response(
-            {
-                "status": "success",
-                "message": "Login successful",
-                "data": {
-                    "user_id": user.id,
-                    "email": user.email,
-                    "access": str(refresh.access_token),
-                    "refresh": str(refresh),
-                },
-            },
-            status=status.HTTP_200_OK,
-        )
+        return success_response(
+          message="Login successful",
+          data={
+             "user_id": user.id,
+             "email": user.email,
+             "access": str(refresh.access_token),
+             "refresh": str(refresh),
+      },
+    status_code=status.HTTP_200_OK
+ )
 
     return Response(
         {
@@ -91,14 +90,11 @@ def user_list(request):
 
     serializer = UserListSerializer(users, many=True)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Users fetched successfully",
-            "data": serializer.data,
-        },
-        status=status.HTTP_200_OK,
-    )
+    return success_response(
+    message="Users fetched successfully",
+    data=serializer.data,
+    status_code=status.HTTP_200_OK
+)
 
 
 # USER DETAIL
@@ -110,26 +106,14 @@ def user_detail(request, id):
         user = CustomUser.objects.get(id=id)
 
     except CustomUser.DoesNotExist:
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "User not found",
-                "data": None,
-            },
-            status=status.HTTP_404_NOT_FOUND,
-        )
+      raise NotFoundException("User not found")
 
     serializer = UserListSerializer(user)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "User fetched successfully",
-            "data": serializer.data,
-        },
-        status=status.HTTP_200_OK,
-    )
+    return success_response(
+         message="User fetched successfully",
+         data=serializer.data
+)
 
 
 # DELETE USER
@@ -193,26 +177,14 @@ def user_profile(request):
         user = CustomUser.objects.get(id=request.user.id)
 
     except CustomUser.DoesNotExist:
-
-        return Response(
-            {
-                "status": "failed",
-                "message": "User not found",
-                "data": None
-            },
-            status=status.HTTP_404_NOT_FOUND
-        )
+      raise NotFoundException("User not found")
 
     serializer = UserListSerializer(user)
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Profile fetched successfully",
-            "data": serializer.data
-        },
-        status=status.HTTP_200_OK
-    )
+    return success_response(
+        message="Profile fetched successfully",
+        data=serializer.data
+)
 
 # UPDATE PROFILE
 @api_view(["PUT"])
@@ -229,15 +201,10 @@ def update_profile(request):
 
         serializer.save()
 
-        return Response(
-            {
-                "status": "success",
-                "message": "Profile updated successfully",
-                "data": serializer.data
-            },
-            status=status.HTTP_200_OK
-        )
-
+        return success_response(
+         message="Profile updated successfully",
+         data=serializer.data
+)
     return Response(
         {
             "status": "failed",
@@ -284,11 +251,7 @@ def change_password(request):
     user.set_password(new_password)
     user.save()
 
-    return Response(
-        {
-            "status": "success",
-            "message": "Password changed successfully",
-            "data": None
-        },
-        status=status.HTTP_200_OK
-    )
+    return success_response(
+       message="Password changed successfully",
+       data=None
+)
