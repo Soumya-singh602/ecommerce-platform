@@ -15,16 +15,20 @@ This project is a Django-based Ecommerce Platform built using a Microservices Ar
 
 ---
 
+
 ## Tech Stack
 
-* Python 3
-* Django
-* Django REST Framework
-* JWT Authentication
-* MySQL
-* PostgreSQL
-* Nginx
-* Git & GitHub
+- Python 3.12
+- Django
+- Django REST Framework
+- MySQL
+- PostgreSQL
+- JWT Authentication
+- Docker
+- Docker Compose
+- Nginx (API Gateway)
+- Git
+- GitHub
 
 ---
 
