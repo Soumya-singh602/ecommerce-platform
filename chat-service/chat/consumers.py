@@ -21,7 +21,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         token = ""
 
-        if query.startswith("token="):
+        if query.startswith("token"):
             token = query.replace("token=", "")
 
         if not token:
@@ -74,6 +74,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             receiver_id=receiver_id,
             message=message,
         )
+    
+    @database_sync_to_async
+    def mark_delivered(self, message_id):
+
+        Message.objects.filter(
+        id=message_id
+        ).update(
+        is_delivered=True
+    )
 
     async def receive(self, text_data=None, bytes_data=None):
 
@@ -92,28 +101,69 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
             receiver_id = self.admin_id
 
-        await self.save_message(
-            sender_id=self.user["id"],
-            receiver_id=receiver_id,
-            message=message,
+        saved_message = await self.save_message(
+        sender_id=self.user["id"],
+        receiver_id=receiver_id,
+        message=message,
+        )
+        await self.mark_delivered(
+        saved_message.id
         )
 
         await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "chat_message",
-                "sender": self.user["email"],
-                "message": message,
-            },
+        self.room_group_name,
+        {
+        "type": "chat_message",
+
+        "id": saved_message.id,
+
+        "sender_id": self.user["id"],
+
+        "receiver_id": receiver_id,
+
+        "sender": self.user["email"],
+
+        "message": message,
+
+        "is_delivered": True,
+
+        "is_read": False,
+
+        "created_at": saved_message.created_at.isoformat(),
+        },
         )
 
     async def chat_message(self, event):
 
-        await self.send(
-            text_data=json.dumps(
-                {
-                    "sender": event["sender"],
-                    "message": event["message"],
-                }
-            )
+      await self.send(
+        text_data=json.dumps(
+            {
+                "id": event["id"],
+
+                "sender_id": event["sender_id"],
+
+                "receiver_id": event["receiver_id"],
+
+                "sender": event["sender"],
+
+                "message": event["message"],
+
+                "is_delivered": event["is_delivered"],
+
+                "is_read": event["is_read"],
+
+                "created_at": event["created_at"],
+            }
         )
+    )
+    async def messages_read(self, event):
+
+     await self.send(
+        text_data=json.dumps(
+            {
+                "type": "messages_read",
+                "sender_id": event["sender_id"],
+                "receiver_id": event["receiver_id"],
+            }
+        )
+    )  

@@ -255,3 +255,31 @@ def change_password(request):
        message="Password changed successfully",
        data=None
 )
+
+@api_view(["GET"])
+def internal_user_detail(request, id):
+
+    try:
+
+        user = CustomUser.objects.get(id=id)
+
+    except CustomUser.DoesNotExist:
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "User not found"
+            },
+            status=404
+        )
+
+
+    serializer = UserListSerializer(user)
+
+
+    return Response(
+        {
+            "status":"success",
+            "data":serializer.data
+        }
+    )
