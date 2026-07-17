@@ -164,6 +164,7 @@ def verify_token(request):
 
     response["X-User-Id"] = str(user.id)
     response["X-User-Email"] = user.email
+    response["X-User-Role"] = user.role
 
     return response
 
