@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register_user , login_user , user_list , user_detail , delete_user , verify_token , user_profile , update_profile , change_password , internal_user_detail
+from .views import register_user , login_user , user_list , user_detail , delete_user , verify_token , user_profile , update_profile , change_password , internal_user_detail , internal_user_list
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
       path("verify/", verify_token),
       path("change-password/", change_password, name="change-password"),
       path("internal/<int:id>/",internal_user_detail),
+      path("internal/",internal_user_list,),
 ]
 
    

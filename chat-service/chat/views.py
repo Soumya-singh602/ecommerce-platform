@@ -11,6 +11,12 @@ from .serializers import MessageSerializer
 from .services import get_user_details
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+import httpx
+
+
+
+from .models import Conversation
+from .redis_client import redis_client
 
 
 @api_view(["GET"])
@@ -130,3 +136,48 @@ def mark_messages_read(request, sender_id, receiver_id):
         "success": True,
         "messages_read": updated
     })
+
+
+
+
+@api_view(["GET"])
+def dashboard(request):
+
+    online_users = list(
+        redis_client.smembers("online_users")
+    )
+
+
+    conversations = Conversation.objects.all().order_by(
+        "-created_at"
+    )
+
+
+    data = []
+
+    for conversation in conversations:
+
+        data.append(
+            {
+                "admin_id": conversation.admin_id,
+
+                "customer_id": conversation.customer_id,
+
+                "last_message": conversation.last_message,
+
+                "unread_count": conversation.unread_count,
+
+                "is_online": str(
+                    conversation.customer_id
+                ) in online_users,
+            }
+        )
+
+
+    return Response(
+        {
+            "status": "success",
+            "online_users": online_users,
+            "conversations": data,
+        }
+    )

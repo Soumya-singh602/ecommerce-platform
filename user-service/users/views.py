@@ -284,3 +284,18 @@ def internal_user_detail(request, id):
             "data":serializer.data
         }
     )
+
+@api_view(["GET"])
+def internal_user_list(request):
+
+    users = CustomUser.objects.all()
+
+    serializer = UserListSerializer(users, many=True)
+
+    return Response(
+        {
+            "status": "success",
+            "data": serializer.data,
+        },
+        status=status.HTTP_200_OK,
+    )
