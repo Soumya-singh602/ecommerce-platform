@@ -47,6 +47,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+        # Notify admin when customer comes online
+        if self.user["role"] == "customer":
+
+         await self.channel_layer.group_send(
+          "admin_dashboard",
+        {
+            "type": "dashboard_update",
+            "event": "online",
+            "customer_id": self.user["id"],
+        }
+    )
 
         redis_client.sadd(
             "online_users",
@@ -63,6 +74,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "online_users",
                 self.user["id"],
             )
+        # Notify admin when customer goes offline
+        if self.user["role"] == "customer":
+
+         await self.channel_layer.group_send(
+        "admin_dashboard",
+        {
+            "type": "dashboard_update",
+            "event": "offline",
+            "customer_id": self.user["id"],
+        }
+    )    
 
         await self.channel_layer.group_discard(
             self.room_group_name,
@@ -162,6 +184,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message=message,
         )
 
+        # Notify admin dashboard about new message
+        await self.channel_layer.group_send(
+         "admin_dashboard",
+    {
+        "type": "dashboard_update",
+        "event": "new_message",
+        "customer_id": self.customer_id,
+        "last_message": message,
+    }
+)
+
         await self.mark_delivered(
             saved_message.id
         )
@@ -216,6 +249,56 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "messages_read",
                     "sender_id": event["sender_id"],
                     "receiver_id": event["receiver_id"],
+                }
+            )
+        )
+
+class DashboardConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+
+        headers = dict(self.scope["headers"])
+
+        user_role = headers.get(b"x-user-role")
+
+        if not user_role:
+            await self.close()
+            return
+
+        if user_role.decode() != "admin":
+            await self.close()
+            return
+
+        await self.channel_layer.group_add(
+            "admin_dashboard",
+            self.channel_name,
+        )
+
+        await self.accept()
+
+        print("ADMIN DASHBOARD CONNECTED")
+
+    async def disconnect(self, close_code):
+
+        await self.channel_layer.group_discard(
+            "admin_dashboard",
+            self.channel_name,
+        )
+
+        print("ADMIN DASHBOARD DISCONNECTED")
+
+    async def dashboard_update(self, event):
+
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "dashboard_update",
+                    "event": event["event"],
+                    "customer_id": event["customer_id"],
+                    "last_message": event.get(
+                        "last_message",
+                        "",
+                    ),
                 }
             )
         )

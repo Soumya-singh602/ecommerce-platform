@@ -138,19 +138,20 @@ def mark_messages_read(request, sender_id, receiver_id):
     })
 
 
-
-
 @api_view(["GET"])
 def dashboard(request):
 
-    online_users = list(
-        redis_client.smembers("online_users")
-    )
+    online_users = []
+
+    for user in redis_client.smembers("online_users"):
+
+        if isinstance(user, bytes):
+            online_users.append(user.decode())
+        else:
+            online_users.append(user)
 
 
-    conversations = Conversation.objects.all().order_by(
-        "-created_at"
-    )
+    conversations = Conversation.objects.all()
 
 
     data = []
@@ -160,16 +161,14 @@ def dashboard(request):
         data.append(
             {
                 "admin_id": conversation.admin_id,
-
                 "customer_id": conversation.customer_id,
-
                 "last_message": conversation.last_message,
-
                 "unread_count": conversation.unread_count,
-
-                "is_online": str(
+                "is_online": (
                     conversation.customer_id
-                ) in online_users,
+                    in online_users
+                ),
+                "updated_at": conversation.updated_at,
             }
         )
 
