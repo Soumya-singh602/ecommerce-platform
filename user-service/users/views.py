@@ -65,6 +65,7 @@ def login_user(request):
           data={
              "user_id": user.id,
              "email": user.email,
+              "role": user.role,
              "access": str(refresh.access_token),
              "refresh": str(refresh),
       },
