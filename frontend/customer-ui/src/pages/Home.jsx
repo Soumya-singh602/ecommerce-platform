@@ -4,7 +4,6 @@ import Categories from "../components/Categories";
 import FeaturedProducts from "../components/FeaturedProducts";
 import TrendingProducts from "../components/TrendingProducts";
 import Newsletter from "../components/Newsletter";
-import Footer from "../components/Footer";
 
 export default function Home() {
   return (
@@ -19,8 +18,6 @@ export default function Home() {
       <TrendingProducts />
 
       <Newsletter />
-
-      <Footer />
 
     </MainLayout>
   );

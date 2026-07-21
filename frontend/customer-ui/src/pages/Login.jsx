@@ -1,14 +1,16 @@
-import MainLayout from "../layouts/MainLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import LoginForm from "../components/auth/LoginForm";
 
 export default function Login() {
   return (
-    <MainLayout>
-      <div className="max-w-md mx-auto py-16 px-4">
+    <AuthLayout>
+
+      <div className="w-full max-w-md">
 
         <LoginForm />
 
       </div>
-    </MainLayout>
+
+    </AuthLayout>
   );
 }
