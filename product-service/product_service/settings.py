@@ -140,3 +140,6 @@ ALLOWED_HOSTS = [
     "nginx",
     "product-service",
 ]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

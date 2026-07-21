@@ -5,7 +5,6 @@ import { loginUser } from "../../services/authService";
 
 export default function LoginForm() {
 
-
   const navigate = useNavigate();
 
 
@@ -39,36 +38,69 @@ export default function LoginForm() {
 
     e.preventDefault();
 
+    setError("");
+
 
     try {
 
-      const data = await loginUser(formData);
+
+      const response = await loginUser(formData);
 
 
-      console.log(data);
+      console.log("LOGIN RESPONSE:", response);
 
 
-      // token save
+
+      // Save JWT Token
+
       localStorage.setItem(
         "access",
-        data.access
+        response.data.access
       );
 
 
       localStorage.setItem(
         "refresh",
-        data.refresh
+        response.data.refresh
       );
 
+
+
+      // Save User Information
+
+      localStorage.setItem(
+
+        "user",
+
+        JSON.stringify(response.data)
+
+      );
+
+
+
+      // Redirect Home
 
       navigate("/");
 
 
+
     } catch (error) {
 
-      setError(
-        error.message || "Login failed"
+
+      console.log(
+        "LOGIN ERROR:",
+        error.response?.data
       );
+
+
+      setError(
+
+        error.response?.data?.message ||
+
+        "Login failed"
+
+      );
+
 
     }
 
@@ -89,7 +121,7 @@ export default function LoginForm() {
 
       {error && (
 
-        <p className="text-red-500 mb-4 text-center">
+        <p className="text-red-500 text-center mb-4">
           {error}
         </p>
 
@@ -117,6 +149,8 @@ export default function LoginForm() {
 
           className="w-full border rounded-lg px-4 py-3"
 
+          required
+
         />
 
 
@@ -135,6 +169,8 @@ export default function LoginForm() {
 
           className="w-full border rounded-lg px-4 py-3"
 
+          required
+
         />
 
 
@@ -142,10 +178,15 @@ export default function LoginForm() {
         <div className="text-right">
 
           <Link
+
             to="/forgot-password"
-            className="text-blue-600 text-sm"
+
+            className="text-blue-600 text-sm hover:underline"
+
           >
+
             Forgot Password?
+
           </Link>
 
         </div>
@@ -156,7 +197,7 @@ export default function LoginForm() {
 
           type="submit"
 
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
 
         >
 
@@ -174,11 +215,17 @@ export default function LoginForm() {
         Don't have an account?{" "}
 
         <Link
+
           to="/register"
-          className="text-blue-600"
+
+          className="text-blue-600 hover:underline"
+
         >
+
           Register
+
         </Link>
+
 
       </p>
 
@@ -186,4 +233,5 @@ export default function LoginForm() {
     </div>
 
   );
+
 }

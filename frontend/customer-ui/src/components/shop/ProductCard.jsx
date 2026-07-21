@@ -1,39 +1,53 @@
 import { ShoppingCart } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function ProductCard({ product }) {
   return (
-    <div className="border rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition duration-300">
 
-      <img
-        src={product.image}
-        alt={product.name}
-        className="w-full h-60 object-cover"
-      />
+    <Link to={`/product/${product.id}`}>
 
-      <div className="p-4">
+      <div className="border rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition duration-300">
 
-        <h3 className="text-lg font-semibold">
-          {product.name}
-        </h3>
+        <img
+          src={
+            product.image
+              ? `http://127.0.0.1:8002${product.image}`
+              : "https://picsum.photos/400/300"
+          }
+          alt={product.name}
+          className="w-full h-60 object-cover"
+        />
 
-        <p className="text-gray-500 text-sm mt-2">
-          {product.description}
-        </p>
+        <div className="p-4">
 
-        <div className="flex items-center justify-between mt-4">
+          <h3 className="text-lg font-semibold">
+            {product.name}
+          </h3>
 
-          <span className="text-xl font-bold text-blue-600">
-            ₹{product.price}
-          </span>
+          <p className="text-gray-500 text-sm mt-2">
+            {product.description}
+          </p>
 
-          <button className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
-            <ShoppingCart size={20} />
-          </button>
+          <div className="flex items-center justify-between mt-4">
+
+            <span className="text-xl font-bold text-blue-600">
+              ₹{product.price}
+            </span>
+
+            <button
+              onClick={(e) => e.preventDefault()}
+              className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700"
+            >
+              <ShoppingCart size={20} />
+            </button>
+
+          </div>
 
         </div>
 
       </div>
 
-    </div>
+    </Link>
+
   );
 }

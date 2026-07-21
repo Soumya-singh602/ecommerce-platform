@@ -1,15 +1,19 @@
 import { Star } from "lucide-react";
 import QuantitySelector from "./QuantitySelector";
 
-export default function ProductInfo() {
+export default function ProductInfo({ product }) {
+
   return (
+
     <div>
+
       <h1 className="text-4xl font-bold">
-        Wireless Headphones
+        {product?.name}
       </h1>
 
       {/* Rating */}
       <div className="flex items-center gap-1 mt-4">
+
         <Star size={18} fill="gold" color="gold" />
         <Star size={18} fill="gold" color="gold" />
         <Star size={18} fill="gold" color="gold" />
@@ -17,26 +21,38 @@ export default function ProductInfo() {
         <Star size={18} color="#d1d5db" />
 
         <span className="ml-2 text-gray-500">
-          (124 Reviews)
+          (0 Reviews)
         </span>
+
       </div>
 
       {/* Price */}
       <h2 className="text-3xl font-bold text-blue-600 mt-6">
-        ₹2,999
+        ₹{product?.price}
       </h2>
 
       {/* Description */}
       <p className="text-gray-600 mt-6 leading-7">
-        Premium wireless headphones with active noise cancellation,
-        long battery life and crystal clear sound quality.
+        {product?.description}
       </p>
 
       {/* Stock */}
       <div className="mt-6">
-        <span className="text-green-600 font-semibold">
-          ✓ In Stock
-        </span>
+
+        {product?.stock > 0 ? (
+
+          <span className="text-green-600 font-semibold">
+            ✓ In Stock ({product.stock} available)
+          </span>
+
+        ) : (
+
+          <span className="text-red-600 font-semibold">
+            Out of Stock
+          </span>
+
+        )}
+
       </div>
 
       {/* Quantity */}
@@ -54,6 +70,9 @@ export default function ProductInfo() {
         </button>
 
       </div>
+
     </div>
+
   );
+
 }
