@@ -15,7 +15,7 @@ from ecommerce_common.exceptions import NotFoundException
 from ecommerce_common.utils import get_user_info
 
 
-#PLACE ORDER
+
 # PLACE ORDER
 @api_view(["POST"])
 def place_order(request):
@@ -62,31 +62,51 @@ def place_order(request):
         status=status.HTTP_400_BAD_REQUEST,
     )
 
+
 # ORDER LIST
 # ORDER LIST
 @api_view(["GET"])
 def order_list(request):
 
     user = get_user_info(request)
+
     user_id = user["user_id"]
 
-    orders = Order.objects.filter(user_id=user_id)
+
+    orders = Order.objects.filter(
+        user_id=user_id
+    ).order_by("-created_at")
+
+
 
     # STATUS FILTER
+
     status_filter = request.GET.get("status")
 
+
     if status_filter:
-        orders = orders.filter(status__iexact=status_filter)
+
+        orders = orders.filter(
+            status__iexact=status_filter
+        )
+
+
 
     # SORTING
+
     sort = request.GET.get("sort")
+
 
     if sort:
 
+
         if sort in ["created_at", "-created_at"]:
+
             orders = orders.order_by(sort)
 
+
         else:
+
             return Response(
                 {
                     "status": "failed",
@@ -96,33 +116,122 @@ def order_list(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+
+
     # NO DATA
+
     if not orders.exists():
-        raise NotFoundException("No orders found")
+
+        raise NotFoundException(
+            "No orders found"
+        )
+
+
 
     # PAGINATION
-    page = request.GET.get("page", 1)
 
-    paginator = Paginator(orders, 5)
-
-    try:
-        page_obj = paginator.page(page)
-
-    except EmptyPage:
-        raise NotFoundException("Page does not exist")
-
-    serializer = OrderSerializer(page_obj, many=True)
-
-    return success_response(
-        message="Orders fetched successfully",
-        data={
-            "current_page": page_obj.number,
-            "total_pages": paginator.num_pages,
-            "total_orders": paginator.count,
-            "orders": serializer.data
-        }
+    page = request.GET.get(
+        "page",
+        1
     )
 
+
+    paginator = Paginator(
+        orders,
+        5
+    )
+
+
+    try:
+
+        page_obj = paginator.page(page)
+
+
+    except EmptyPage:
+
+        raise NotFoundException(
+            "Page does not exist"
+        )
+
+
+
+    serializer = OrderSerializer(
+        page_obj,
+        many=True
+    )
+
+
+
+    orders_data = []
+
+
+
+    for order in serializer.data:
+
+
+        product_response = requests.get(
+
+
+            f"http://product-service:8002/products/{order['product_id']}/",
+
+
+            headers={
+
+                "Authorization": request.headers.get(
+                    "Authorization"
+                )
+
+            }
+
+        )
+
+
+
+        product_data = None
+
+
+
+        if product_response.status_code == 200:
+
+
+            product_data = product_response.json().get(
+                "data"
+            )
+
+
+
+        order["product"] = product_data
+
+
+
+        orders_data.append(
+            order
+        )
+
+
+
+
+    return success_response(
+
+        message="Orders fetched successfully",
+
+
+        data={
+
+            "current_page": page_obj.number,
+
+
+            "total_pages": paginator.num_pages,
+
+
+            "total_orders": paginator.count,
+
+
+            "orders": orders_data
+
+        }
+
+    )
 
 # ORDER DETAIL
 @api_view(["GET"])
@@ -131,23 +240,65 @@ def order_detail(request, id):
     user = get_user_info(request)
     user_id = user["user_id"]
 
+
     try:
+
         order = Order.objects.get(
             id=id,
             user_id=user_id
         )
 
+
     except Order.DoesNotExist:
+
         raise NotFoundException("Order not found")
 
-    serializer = OrderSerializer(order)
 
-    return success_response(
-        message="Order fetched successfully",
-        data=serializer.data
+
+    product_response = requests.get(
+
+        f"http://product-service:8002/products/{order.product_id}/",
+
+        headers={
+
+            "Authorization": request.headers.get("Authorization")
+
+        }
+
     )
 
 
+
+    product_data = None
+
+
+    if product_response.status_code == 200:
+
+        product_data = product_response.json()["data"]
+
+
+
+    serializer = OrderSerializer(order)
+
+
+
+    data = {
+
+        **serializer.data,
+
+        "product": product_data
+
+    }
+
+
+
+    return success_response(
+
+        message="Order fetched successfully",
+
+        data=data
+
+    )
 
 # CANCEL ORDER
 @api_view(["PUT"])
@@ -254,4 +405,24 @@ def order_statistics(request):
     return success_response(
         message="Order statistics fetched successfully",
         data=data
+    )
+
+@api_view(["GET"])
+def admin_order_list(request):
+
+    orders = Order.objects.all().order_by("-created_at")
+
+
+    serializer = OrderSerializer(
+        orders,
+        many=True
+    )
+
+
+    return success_response(
+
+        message="All orders fetched successfully",
+
+        data=serializer.data
+
     )

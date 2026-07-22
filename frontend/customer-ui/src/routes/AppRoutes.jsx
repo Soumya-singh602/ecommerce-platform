@@ -9,6 +9,8 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Product from "../pages/Product";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
+import MyOrders from "../pages/MyOrders";
+import OrderDetails from "../pages/OrderDetails";
 
 export default function AppRoutes() {
   return (
@@ -20,6 +22,15 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+      <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+      <Route
+         path="/orders/:id"
+         element={
+         <ProtectedRoute>
+          <OrderDetails />
+          </ProtectedRoute>
+          }
+         />
 
       <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
     </Routes>
