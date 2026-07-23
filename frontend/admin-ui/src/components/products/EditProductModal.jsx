@@ -1,41 +1,56 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import { createProduct } from "../../services/productService";
+import { updateProduct } from "../../services/productService";
 
 
-export default function AddProductModal({
-    open,
+export default function EditProductModal({
+    product,
     onClose,
-    onAdded
+    onUpdated
 }) {
 
 
-    const [formData,setFormData] = useState({
+    const [formData, setFormData] = useState({
 
-        name:"",
-        description:"",
-        price:"",
-        stock:"",
+        name: "",
+        description: "",
+        price: "",
+        stock: "",
 
     });
 
 
 
-    if(!open){
+    useEffect(() => {
 
-        return null;
+        if(product){
 
-    }
+            setFormData({
+
+                name: product.name || "",
+
+                description: product.description || "",
+
+                price: product.price || "",
+
+                stock: product.stock || "",
+
+            });
+
+        }
+
+    }, [product]);
 
 
 
-    const handleChange = (e)=>{
+
+    const handleChange = (e) => {
 
         setFormData({
 
             ...formData,
 
-            [e.target.name]:e.target.value
+            [e.target.name]: e.target.value
 
         });
 
@@ -43,61 +58,59 @@ export default function AddProductModal({
 
 
 
-    const handleSubmit = async(e)=>{
+
+    const handleSubmit = async (e) => {
 
         e.preventDefault();
 
 
-        try{
+        try {
 
 
-            await createProduct(formData);
-
-
-
-            alert(
-                "Product added successfully"
+            await updateProduct(
+                product.id,
+                formData
             );
 
 
-            setFormData({
-
-                name:"",
-                description:"",
-                price:"",
-                stock:"",
-
-            });
+            alert(
+                "Product updated successfully"
+            );
 
 
-
-            onAdded();
+            onUpdated();
 
 
             onClose();
-
 
 
         }
 
         catch(error){
 
-
             console.log(
-                "CREATE PRODUCT ERROR:",
+                "UPDATE ERROR:",
                 error
             );
 
 
             alert(
-                "Unable to create product"
+                "Unable to update product"
             );
-
 
         }
 
 
     };
+
+
+
+
+    if(!product){
+
+        return null;
+
+    }
 
 
 
@@ -111,7 +124,7 @@ export default function AddProductModal({
 
                 <h2 className="text-2xl font-bold mb-5">
 
-                    Add Product
+                    Edit Product
 
                 </h2>
 
@@ -124,11 +137,11 @@ export default function AddProductModal({
 
                         name="name"
 
-                        placeholder="Product Name"
-
                         value={formData.name}
 
                         onChange={handleChange}
+
+                        placeholder="Product Name"
 
                         className="w-full border p-2 rounded mb-3"
 
@@ -140,11 +153,11 @@ export default function AddProductModal({
 
                         name="description"
 
-                        placeholder="Description"
-
                         value={formData.description}
 
                         onChange={handleChange}
+
+                        placeholder="Description"
 
                         className="w-full border p-2 rounded mb-3"
 
@@ -156,13 +169,13 @@ export default function AddProductModal({
 
                         name="price"
 
-                        type="number"
-
-                        placeholder="Price"
-
                         value={formData.price}
 
                         onChange={handleChange}
+
+                        placeholder="Price"
+
+                        type="number"
 
                         className="w-full border p-2 rounded mb-3"
 
@@ -174,13 +187,13 @@ export default function AddProductModal({
 
                         name="stock"
 
-                        type="number"
-
-                        placeholder="Stock"
-
                         value={formData.stock}
 
                         onChange={handleChange}
+
+                        placeholder="Stock"
+
+                        type="number"
 
                         className="w-full border p-2 rounded mb-3"
 
@@ -197,7 +210,7 @@ export default function AddProductModal({
 
                             onClick={onClose}
 
-                            className="bg-gray-300 px-4 py-2 rounded"
+                            className="px-4 py-2 bg-gray-300 rounded"
 
                         >
 
@@ -212,17 +225,16 @@ export default function AddProductModal({
 
                             type="submit"
 
-                            className="bg-green-600 text-white px-4 py-2 rounded"
+                            className="px-4 py-2 bg-blue-600 text-white rounded"
 
                         >
 
-                            Save
+                            Update
 
                         </button>
 
 
                     </div>
-
 
 
                 </form>

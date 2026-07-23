@@ -1,39 +1,7 @@
-const orders = [
-
-    {
-        id:"#1001",
-        customer:"Rahul Sharma",
-        product:"iPhone 15",
-        amount:"₹70,000",
-        status:"Completed"
-    },
+export default function RecentOrders({ orders = [] }) {
 
 
-    {
-        id:"#1002",
-        customer:"Amit Kumar",
-        product:"Laptop",
-        amount:"₹55,000",
-        status:"Pending"
-    },
-
-
-    {
-        id:"#1003",
-        customer:"Priya Singh",
-        product:"Headphones",
-        amount:"₹3,000",
-        status:"Cancelled"
-    },
-
-
-];
-
-
-export default function RecentOrders(){
-
-
-    return(
+    return (
 
         <div className="bg-white rounded-2xl shadow p-6 mt-8">
 
@@ -43,7 +11,6 @@ export default function RecentOrders(){
                 Recent Orders
 
             </h2>
-
 
 
             <div className="overflow-x-auto">
@@ -93,76 +60,128 @@ export default function RecentOrders(){
 
 
                         {
-                            orders.map((order)=>(
+
+                        orders.length === 0 ?
 
 
-                                <tr 
-                                key={order.id}
-                                className="border-b hover:bg-slate-50"
+                        (
+
+                            <tr>
+
+                                <td
+                                colSpan="5"
+                                className="text-center p-5 text-gray-500"
                                 >
 
+                                    No orders found
 
-                                    <td className="p-3 font-semibold">
-                                        {order.id}
-                                    </td>
+                                </td>
 
-
-                                    <td className="p-3">
-                                        {order.customer}
-                                    </td>
+                            </tr>
 
 
-                                    <td className="p-3">
-                                        {order.product}
-                                    </td>
+                        )
 
 
-                                    <td className="p-3">
-                                        {order.amount}
-                                    </td>
+                        :
 
 
-                                    <td className="p-3">
+                        orders.map((order)=>(
 
 
-                                        <span
+                            <tr
 
-                                        className={
+                            key={order.id}
 
-                                            order.status==="Completed"
+                            className="border-b hover:bg-slate-50"
 
-                                            ?
-
-                                            "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
-
-                                            :
-
-                                            order.status==="Pending"
-
-                                            ?
-
-                                            "bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm"
-
-                                            :
-
-                                            "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
-
-                                        }
-
-                                        >
-
-                                            {order.status}
-
-                                        </span>
+                            >
 
 
-                                    </td>
+
+                                <td className="p-3 font-semibold">
+
+                                    #{order.id}
+
+                                </td>
 
 
-                                </tr>
+
+                                <td className="p-3">
+
+                                    User #{order.user_id}
+
+                                </td>
 
 
-                            ))
+
+                                <td className="p-3">
+
+                                    {order.product?.name}
+
+                                </td>
+
+
+
+                                <td className="p-3">
+
+                                    ₹
+                                    {
+                                    Number(order.product?.price)
+                                    *
+                                    order.quantity
+                                    }
+
+                                </td>
+
+
+
+                                <td className="p-3">
+
+
+                                    <span
+
+                                    className={
+
+                                        order.status === "Completed"
+
+                                        ?
+
+                                        "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+
+                                        :
+
+                                        order.status === "Pending"
+
+                                        ?
+
+                                        "bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm"
+
+                                        :
+
+                                        "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
+
+                                    }
+
+
+                                    >
+
+                                        {order.status}
+
+
+                                    </span>
+
+
+                                </td>
+
+
+
+                            </tr>
+
+
+                        ))
+
+
                         }
 
 
@@ -177,6 +196,7 @@ export default function RecentOrders(){
 
         </div>
 
-    )
+
+    );
 
 }

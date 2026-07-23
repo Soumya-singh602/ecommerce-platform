@@ -8,9 +8,23 @@ import {
     LogOut
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
+
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("email");
+        localStorage.removeItem("role");
+
+        navigate("/login");
+
+    };
 
     return (
 
@@ -34,7 +48,6 @@ export default function Sidebar() {
                     <span>Dashboard</span>
                 </Link>
 
-
                 <Link
                     to="/products"
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition"
@@ -42,7 +55,6 @@ export default function Sidebar() {
                     <Package size={22} />
                     <span>Products</span>
                 </Link>
-
 
                 <Link
                     to="/orders"
@@ -52,7 +64,6 @@ export default function Sidebar() {
                     <span>Orders</span>
                 </Link>
 
-
                 <Link
                     to="/customers"
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition"
@@ -61,7 +72,6 @@ export default function Sidebar() {
                     <span>Customers</span>
                 </Link>
 
-
                 <Link
                     to="/chat"
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition"
@@ -69,7 +79,6 @@ export default function Sidebar() {
                     <MessageCircle size={22} />
                     <span>Chat</span>
                 </Link>
-
 
                 <Link
                     to="/settings"
@@ -81,13 +90,13 @@ export default function Sidebar() {
 
             </nav>
 
-
             {/* Logout */}
 
             <div className="border-t border-slate-700 pt-5">
 
                 <button
-                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition"
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-600 transition"
                 >
                     <LogOut size={22} />
                     <span>Logout</span>

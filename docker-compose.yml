@@ -101,17 +101,23 @@ services:
   # NGINX API GATEWAY
   # ==========================
   nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: nginx
-    ports:
-      - "8080:80"
-    depends_on:
-      - user-service
-      - product-service
-      - order-service
-      - chat-service
+   build:
+    context: ./nginx
+    dockerfile: Dockerfile
+
+   container_name: nginx
+
+   ports:
+    - "8080:80"
+
+   volumes:
+    - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+
+   depends_on:
+    - user-service
+    - product-service
+    - order-service
+    - chat-service
 
 
 

@@ -412,17 +412,63 @@ def admin_order_list(request):
 
     orders = Order.objects.all().order_by("-created_at")
 
+    page = request.GET.get("page", 1)
 
-    serializer = OrderSerializer(
-        orders,
-        many=True
-    )
+    paginator = Paginator(orders, 5)
+
+    try:
+
+        page_obj = paginator.page(page)
+
+    except EmptyPage:
+
+        raise NotFoundException("Page does not exist")
+
+
+    serializer = OrderSerializer(page_obj, many=True)
+
+    orders_data = []
+
+
+    for order in serializer.data:
+
+        product_response = requests.get(
+
+            f"http://product-service:8002/products/{order['product_id']}/",
+
+            headers={
+
+                "Authorization": request.headers.get("Authorization")
+
+            }
+
+        )
+
+        product_data = None
+
+        if product_response.status_code == 200:
+
+            product_data = product_response.json().get("data")
+
+        order["product"] = product_data
+
+        orders_data.append(order)
 
 
     return success_response(
 
         message="All orders fetched successfully",
 
-        data=serializer.data
+        data={
+
+            "current_page": page_obj.number,
+
+            "total_pages": paginator.num_pages,
+
+            "total_orders": paginator.count,
+
+            "orders": orders_data
+
+        }
 
     )

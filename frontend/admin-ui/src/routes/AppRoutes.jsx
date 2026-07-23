@@ -7,56 +7,87 @@ import Orders from "../pages/Orders";
 import Customers from "../pages/Customers";
 import Chat from "../pages/Chat";
 import Settings from "../pages/Settings";
-export default function AppRoutes(){
 
-    return(
+import ProtectedRoute from "./ProtectedRoute";
+import ProductDetail from "../pages/ProductDetail";
+
+export default function AppRoutes() {
+
+    return (
 
         <Routes>
 
-
             <Route
-
                 path="/login"
-
                 element={<Login />}
-
             />
 
-
             <Route
-
                 path="/dashboard"
-
-                element={<Dashboard />}
-
+                element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                }
             />
 
-
             <Route
-
-                path="*"
-
-                element={<Navigate to="/login" />}
-
-            />
-            <Route
-
                 path="/products"
+                element={
+                    <ProtectedRoute>
+                        <Products />
+                    </ProtectedRoute>
+                }
+            />
 
-                  element={<Products />}
-
-                       />
-
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/customers" element={<Customers />} />
             <Route
-                   path="/chat"
-                  element={<Chat />}
-           />
-           <Route
-               path="/settings"
-                element={<Settings />}
-             />
+                path="/orders"
+                element={
+                    <ProtectedRoute>
+                        <Orders />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/customers"
+                element={
+                    <ProtectedRoute>
+                        <Customers />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/chat"
+                element={
+                    <ProtectedRoute>
+                        <Chat />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/settings"
+                element={
+                    <ProtectedRoute>
+                        <Settings />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/"
+                element={<Navigate to="/dashboard" replace />}
+            />
+
+            <Route
+                path="*"
+                element={<Navigate to="/dashboard" replace />}
+            />
+
+            <Route
+               path="/products/:id"element={<ProtectedRoute><ProductDetail /></ProtectedRoute>}/>
         </Routes>
 
     );

@@ -1,43 +1,117 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import SortDropdown from "../components/SortDropdown";
+
 
 import DashboardLayout from "../layouts/DashboardLayout";
 import ProductHeader from "../components/products/ProductHeader";
 import ProductToolbar from "../components/products/ProductToolbar";
 import AddProductModal from "../components/products/AddProductModal";
+import EditProductModal from "../components/products/EditProductModal";
+import ProductViewModal from "../components/products/ProductViewModal";
 
-const products = [
-    {
-        id: 1,
-        image: "https://via.placeholder.com/60",
-        name: "iPhone 15",
-        category: "Mobile",
-        price: "₹70,000",
-        stock: 20,
-        status: "In Stock",
-    },
-    {
-        id: 2,
-        image: "https://via.placeholder.com/60",
-        name: "MacBook Air M3",
-        category: "Laptop",
-        price: "₹1,15,000",
-        stock: 12,
-        status: "In Stock",
-    },
-    {
-        id: 3,
-        image: "https://via.placeholder.com/60",
-        name: "Samsung S25 Ultra",
-        category: "Mobile",
-        price: "₹1,10,000",
-        stock: 0,
-        status: "Out of Stock",
-    },
-];
+
+
+import {
+    getProducts,
+    deleteProduct,
+    updateProduct,
+    getProductDetail,
+} from "../services/productService";
 
 export default function Products() {
 
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [openModal, setOpenModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedViewProduct, setSelectedViewProduct] = useState(null);
+    const navigate = useNavigate();
+    const [search, setSearch] = useState("");
+    const [sort, setSort] = useState("");
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
+
+    // ==========================
+    // FETCH PRODUCTS
+    // ==========================
+    const fetchProducts = async () => {
+
+        try {
+
+            setLoading(true);
+
+            const data = await getProducts(search,sort , minPrice , maxPrice , page);
+
+            setProducts(data.products);
+            setTotalPages(data.total_pages);
+
+        } catch (error) {
+
+            console.log("PRODUCT ERROR:", error);
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    // ==========================
+    // DELETE PRODUCT
+    // ==========================
+    const handleDelete = async (id) => {
+
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this product?"
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+
+            await deleteProduct(id);
+
+            alert("Product deleted successfully");
+
+            fetchProducts();
+
+        } catch (error) {
+
+            console.log(error);
+
+            alert("Unable to delete product");
+
+        }
+
+    };
+
+    useEffect(() => {
+
+        fetchProducts();
+
+    }, [search , sort , minPrice , maxPrice , page]);
+
+    if (loading) {
+
+        return (
+
+            <DashboardLayout>
+
+                <div className="text-xl font-semibold">
+
+                    Loading Products...
+
+                </div>
+
+            </DashboardLayout>
+
+        );
+
+    }
 
     return (
 
@@ -45,9 +119,24 @@ export default function Products() {
 
             <ProductHeader
                 onAddProduct={() => setOpenModal(true)}
+
             />
 
-            <ProductToolbar />
+            <ProductToolbar 
+                 search={search}
+
+                 setSearch={setSearch}
+
+                 minPrice={minPrice}
+                 setMinPrice={setMinPrice}
+
+                 maxPrice={maxPrice}
+                 setMaxPrice={setMaxPrice}
+
+
+
+            />
+            <SortDropdown setSort={setSort}/>
 
             <div className="bg-white rounded-2xl shadow overflow-hidden">
 
@@ -66,7 +155,7 @@ export default function Products() {
                             </th>
 
                             <th className="p-4 text-left">
-                                Category
+                                Description
                             </th>
 
                             <th className="p-4 text-left">
@@ -91,78 +180,123 @@ export default function Products() {
 
                     <tbody>
 
-                        {products.map((product) => (
+                        {products.length === 0 ? (
 
-                            <tr
-                                key={product.id}
-                                className="border-t hover:bg-slate-50"
-                            >
+                            <tr>
 
-                                <td className="p-4">
+                                <td
+                                    colSpan="7"
+                                    className="text-center p-6 text-gray-500"
+                                >
 
-                                    <img
-                                        src={product.image}
-                                        alt={product.name}
-                                        className="w-14 h-14 rounded-lg object-cover"
-                                    />
-
-                                </td>
-
-                                <td className="p-4 font-semibold">
-                                    {product.name}
-                                </td>
-
-                                <td className="p-4">
-                                    {product.category}
-                                </td>
-
-                                <td className="p-4">
-                                    {product.price}
-                                </td>
-
-                                <td className="p-4">
-                                    {product.stock}
-                                </td>
-
-                                <td className="p-4">
-
-                                    <span
-                                        className={
-                                            product.status === "In Stock"
-                                                ? "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
-                                                : "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
-                                        }
-                                    >
-                                        {product.status}
-                                    </span>
-
-                                </td>
-
-                                <td className="p-4 space-x-2">
-
-                                    <button className="bg-slate-700 text-white px-3 py-2 rounded-lg hover:bg-slate-800">
-
-                                        View
-
-                                    </button>
-
-                                    <button className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700">
-
-                                        Edit
-
-                                    </button>
-
-                                    <button className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700">
-
-                                        Delete
-
-                                    </button>
+                                    No Products Found
 
                                 </td>
 
                             </tr>
 
-                        ))}
+                        ) : (
+
+                            products.map((product) => (
+
+                                <tr
+                                    key={product.id}
+                                    className="border-t hover:bg-slate-50"
+                                >
+
+                                    <td className="p-4">
+
+                                        <img
+                                            src={
+                                                product.image ||
+                                                "https://via.placeholder.com/60"
+                                            }
+                                            alt={product.name}
+                                            className="w-14 h-14 rounded-lg object-cover"
+                                        />
+                                
+                                    </td>
+
+                                    <td className="p-4 font-semibold">
+
+                                        {product.name}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        {product.description || "-"}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        ₹{product.price}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        {product.stock}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        <span
+                                            className={
+                                                product.stock > 0
+                                                    ? "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                                                    : "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
+                                            }
+                                        >
+
+                                            {product.stock > 0
+                                                ? "In Stock"
+                                                : "Out of Stock"}
+
+                                        </span>
+
+                                    </td>
+
+                                    <td className="p-4 space-x-2">
+
+                                        <button
+
+                                            onClick={() => navigate(`/products/${product.id}`)}
+
+                                              className="bg-slate-700 text-white px-3 py-2 rounded-lg hover:bg-slate-800"
+
+                                                    >
+
+                                                       View
+
+                                        </button>
+
+                                        <button 
+                                            onClick={() => setSelectedProduct(product)}
+                                            className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700">
+
+                                            Edit
+
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDelete(product.id)}
+                                            className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700"
+                                        >
+
+                                            Delete
+
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+
+                            ))
+
+                        )}
 
                     </tbody>
 
@@ -170,10 +304,61 @@ export default function Products() {
 
             </div>
 
+            {/* Pagination */}
+
+            <div className="flex justify-center gap-3 mt-6">
+
+                {
+                 Array.from(
+                 { length: totalPages },
+                 (_, index) => (
+
+                  <button
+
+                    key={index}
+
+                    onClick={() => setPage(index + 1)}
+
+                    className={
+                        page === index + 1
+                        ? "bg-indigo-600 text-white px-4 py-2 rounded-lg"
+                        : "bg-slate-200 px-4 py-2 rounded-lg"
+                    }
+
+                        >
+
+                          {index + 1}
+
+                </button>
+
+                        )
+                    )
+                }
+
+           </div>
+
             <AddProductModal
                 open={openModal}
                 onClose={() => setOpenModal(false)}
+                onAdded={fetchProducts}
             />
+            <EditProductModal
+
+                 product={selectedProduct}
+
+                 onClose={() => setSelectedProduct(null)}
+
+                 onUpdated={fetchProducts}
+
+            />
+
+            <ProductViewModal
+
+                product={selectedViewProduct}
+
+                onClose={() => setSelectedViewProduct(null)}
+
+                />
 
         </DashboardLayout>
 

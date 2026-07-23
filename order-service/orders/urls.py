@@ -9,10 +9,7 @@ urlpatterns = [
       path("<int:id>/cancel/",cancel_order,name="cancel-order"),
       path("<int:id>/status/",update_order_status,name="update-order-status"),
       path("stats/",order_statistics),
-      path(
-    "admin/orders/",
-    admin_order_list
-),
+     path( "admin/",admin_order_list,name="admin-order-list",),
 
 
 
