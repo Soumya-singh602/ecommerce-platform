@@ -59,3 +59,12 @@ export const getOrderStats = async () => {
     return response.data.data;
 
 };
+
+export const cancelOrder = async (id) => {
+
+    const response = await api.put(
+        `/orders/admin/${id}/cancel/`
+    );
+
+    return response.data;
+};

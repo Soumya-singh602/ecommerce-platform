@@ -7,12 +7,15 @@ import OrderTable from "../components/orders/OrderTable";
 import OrderViewModal from "../components/orders/OrderViewModal";
 import OrderUpdateModal from "../components/orders/OrderUpdateModal";
 import OrderStats from "../components/orders/OrderStats";
+import OrderCancelModal from "../components/orders/OrderCancelModal";
+
 
 import {
     getOrders,
     getOrderDetail,
     updateOrderStatus,
     getOrderStats,
+    cancelOrder,
 } from "../services/orderService";
 
 export default function Orders() {
@@ -28,6 +31,7 @@ export default function Orders() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [selectedUpdateOrder, setSelectedUpdateOrder] = useState(null);
+    const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
     const [stats, setStats] = useState({
     total_orders: 0,
     pending_orders: 0,
@@ -111,6 +115,33 @@ export default function Orders() {
 
         };
 
+    const handleCancelClick = (order) => {
+
+           setSelectedCancelOrder(order);
+
+        };
+    const handleCancelOrder = async (id) => {
+
+        try {
+
+            await cancelOrder(id);
+
+            alert("Order cancelled successfully");
+
+            setSelectedCancelOrder(null);
+
+            fetchOrders();
+
+        } catch (error) {
+
+            console.log(error);
+
+            alert("Unable to cancel order");
+
+        }
+
+    };
+
     // ==========================
     // UPDATE STATUS
     // ==========================
@@ -179,6 +210,7 @@ export default function Orders() {
                 onView={handleView}
                 onUpdateStatus={handleStatusUpdate}
                 onUpdate={handleUpdateClick}
+                onCancel={handleCancelOrder}
             />
 
             {/* Pagination */}
@@ -238,7 +270,11 @@ export default function Orders() {
                 onClose={() => setSelectedUpdateOrder(null)}
                 onUpdate={handleStatusUpdate}
                 />
-
+            <OrderCancelModal
+                order={selectedCancelOrder}
+                onClose={() => setSelectedCancelOrder(null)}
+                onConfirm={handleCancelOrder}
+               />
         </DashboardLayout>
 
     );

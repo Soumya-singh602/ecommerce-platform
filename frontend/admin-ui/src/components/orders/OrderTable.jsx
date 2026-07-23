@@ -1,4 +1,4 @@
-export default function OrderTable({ orders, onView  , onUpdate}) {
+export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
 
     return (
 
@@ -140,6 +140,13 @@ export default function OrderTable({ orders, onView  , onUpdate}) {
 
                                             Update
 
+                                        </button>
+
+                                        <button
+                                             onClick={() => onCancel(order.id)}
+                                             className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700"
+                                        >
+                                              Cancel
                                         </button>
 
                                     </td>

@@ -570,3 +570,32 @@ def admin_order_statistics(request):
         data=data
 
     )
+
+@api_view(["PUT"])
+def admin_cancel_order(request, id):
+
+    try:
+        order = Order.objects.get(id=id)
+
+    except Order.DoesNotExist:
+        raise NotFoundException("Order not found")
+
+    if order.status == "Cancelled":
+        return Response(
+            {
+                "status": "failed",
+                "message": "Order already cancelled",
+                "data": None
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    order.status = "Cancelled"
+    order.save()
+
+    serializer = OrderSerializer(order)
+
+    return success_response(
+        message="Order cancelled successfully",
+        data=serializer.data
+    )
