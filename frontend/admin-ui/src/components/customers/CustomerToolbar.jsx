@@ -1,4 +1,10 @@
-export default function CustomerToolbar() {
+export default function CustomerToolbar({
+
+    search,
+
+    setSearch
+
+}) {
 
     return (
 
@@ -9,6 +15,10 @@ export default function CustomerToolbar() {
                 type="text"
 
                 placeholder="Search Customer..."
+
+                value={search}
+
+                onChange={(e) => setSearch(e.target.value)}
 
                 className="w-full border rounded-xl px-4 py-3"
 

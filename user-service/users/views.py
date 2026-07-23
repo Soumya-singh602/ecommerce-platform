@@ -7,6 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import ChangePasswordSerializer
 from ecommerce_common.response import success_response
 from ecommerce_common.exceptions import NotFoundException
+from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage
 
 from .models import CustomUser
 from .serializers import (
@@ -289,14 +291,57 @@ def internal_user_detail(request, id):
 @api_view(["GET"])
 def internal_user_list(request):
 
-    users = CustomUser.objects.all()
+    users = CustomUser.objects.all().order_by("-created_at")
 
-    serializer = UserListSerializer(users, many=True)
+    search = request.GET.get("search")
+
+    if search:
+
+        users = users.filter(
+
+            Q(first_name__icontains=search) |
+
+            Q(last_name__icontains=search) |
+
+            Q(email__icontains=search)
+
+        )
+
+    page = request.GET.get("page", 1)
+
+    paginator = Paginator(users, 5)
+
+    try:
+
+        page_obj = paginator.page(page)
+
+    except EmptyPage:
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "Page does not exist",
+                "data": None,
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    serializer = UserListSerializer(page_obj, many=True)
 
     return Response(
         {
             "status": "success",
-            "data": serializer.data,
+            "data": {
+
+                "customers": serializer.data,
+
+                "current_page": page_obj.number,
+
+                "total_pages": paginator.num_pages,
+
+                "total_customers": paginator.count,
+
+            },
         },
         status=status.HTTP_200_OK,
     )

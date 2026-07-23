@@ -1,34 +1,14 @@
-const customers = [
+export default function CustomerTable({
 
-    {
-        id:1,
-        name:"Rahul Sharma",
-        email:"rahul@gmail.com",
-        phone:"+91 9876543210",
-        status:"Active"
-    },
+    customers,
 
-    {
-        id:2,
-        name:"Priya Singh",
-        email:"priya@gmail.com",
-        phone:"+91 9876501234",
-        status:"Active"
-    },
+    onView,
 
-    {
-        id:3,
-        name:"Amit Kumar",
-        email:"amit@gmail.com",
-        phone:"+91 9876511111",
-        status:"Blocked"
-    }
+    onDelete
 
-];
+}) {
 
-export default function CustomerTable(){
-
-    return(
+    return (
 
         <div className="bg-white rounded-2xl shadow overflow-hidden">
 
@@ -38,17 +18,29 @@ export default function CustomerTable(){
 
                     <tr>
 
-                        <th className="p-4 text-left">ID</th>
+                        <th className="p-4 text-left">
+                            ID
+                        </th>
 
-                        <th className="p-4 text-left">Name</th>
+                        <th className="p-4 text-left">
+                            Name
+                        </th>
 
-                        <th className="p-4 text-left">Email</th>
+                        <th className="p-4 text-left">
+                            Email
+                        </th>
 
-                        <th className="p-4 text-left">Phone</th>
+                        <th className="p-4 text-left">
+                            Role
+                        </th>
 
-                        <th className="p-4 text-left">Status</th>
+                        <th className="p-4 text-left">
+                            Joined
+                        </th>
 
-                        <th className="p-4 text-left">Action</th>
+                        <th className="p-4 text-left">
+                            Action
+                        </th>
 
                     </tr>
 
@@ -58,66 +50,102 @@ export default function CustomerTable(){
 
                     {
 
-                        customers.map((customer)=>(
+                        customers.length === 0 ? (
 
-                            <tr
-                            key={customer.id}
-                            className="border-t hover:bg-slate-50"
-                            >
+                            <tr>
 
-                                <td className="p-4">
-                                    {customer.id}
-                                </td>
+                                <td
+                                    colSpan="6"
+                                    className="text-center p-6 text-gray-500"
+                                >
 
-                                <td className="p-4 font-semibold">
-                                    {customer.name}
-                                </td>
-
-                                <td className="p-4">
-                                    {customer.email}
-                                </td>
-
-                                <td className="p-4">
-                                    {customer.phone}
-                                </td>
-
-                                <td className="p-4">
-
-                                    <span
-                                    className={
-                                        customer.status==="Active"
-                                        ?
-                                        "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
-                                        :
-                                        "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
-                                    }
-                                    >
-
-                                        {customer.status}
-
-                                    </span>
-
-                                </td>
-
-                                <td className="p-4 space-x-2">
-
-                                    <button className="bg-blue-600 text-white px-3 py-2 rounded-lg">
-
-                                        View
-
-                                    </button>
-
-                                    <button className="bg-red-600 text-white px-3 py-2 rounded-lg">
-
-                                        Delete
-
-                                    </button>
+                                    No Customers Found
 
                                 </td>
 
                             </tr>
 
-                        ))
+                        ) : (
+
+                            customers.map((customer) => (
+
+                                <tr
+                                    key={customer.id}
+                                    className="border-t hover:bg-slate-50"
+                                >
+
+                                    <td className="p-4">
+
+                                        #{customer.id}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        {customer.first_name} {customer.last_name}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        {customer.email}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        <span
+                                            className={
+                                                customer.role === "admin"
+                                                    ? "bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm"
+                                                    : "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                                            }
+                                        >
+
+                                            {customer.role}
+
+                                        </span>
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        {new Date(
+                                            customer.created_at
+                                        ).toLocaleDateString()}
+
+                                    </td>
+
+                                    <td className="p-4 space-x-2">
+
+                                        <button
+
+                                            onClick={() => onView(customer.id)}
+
+                                            className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700"
+
+                                        >
+
+                                            View
+
+                                        </button>
+
+                                        <button
+                                            onClick={() => onDelete(customer.id)}
+                                            className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700"
+                                        >
+
+                                            Delete
+
+                                        </button>
+
+                                    </td>
+
+                                </tr>
+
+                            ))
+
+                        )
 
                     }
 
@@ -127,6 +155,6 @@ export default function CustomerTable(){
 
         </div>
 
-    )
+    );
 
 }
