@@ -1,154 +1,91 @@
 let socket = null;
 
 
-// ==============================
-// CONNECT SOCKET
-// ==============================
-
 export const connectChatSocket = (
-
     adminId,
-
     customerId,
-
     onMessage
-
 ) => {
+
+    if (socket) {
+        socket.close();
+    }
+
+
+    const token = localStorage.getItem("access");
 
 
     socket = new WebSocket(
-
-        `ws://localhost:8004/ws/chat/${adminId}/${customerId}/`
-
+        `ws://localhost:8080/ws/chat/${adminId}/${customerId}/?token=${token}`
     );
 
 
     socket.onopen = () => {
-
-        console.log(
-            "CHAT SOCKET CONNECTED"
-        );
-
+        console.log("CHAT SOCKET CONNECTED");
     };
 
 
     socket.onmessage = (event) => {
 
+        const data = JSON.parse(event.data);
 
-        const data = JSON.parse(
-
-            event.data
-
-        );
+        console.log("MESSAGE RECEIVED:", data);
 
 
-        console.log(
-            "MESSAGE RECEIVED:",
-            data
-        );
-
-
-        onMessage(data);
-
+        if(onMessage){
+            onMessage(data);
+        }
 
     };
 
 
-    socket.onerror = (error) => {
-
-
-        console.log(
-
-            "SOCKET ERROR:",
-
-            error
-
-        );
-
-
+    socket.onerror = (error)=>{
+        console.log("SOCKET ERROR:",error);
     };
 
 
-    socket.onclose = (event) => {
+    socket.onclose = (event)=>{
 
-       console.log(
-        "CHAT SOCKET CLOSED"
-       );
+        console.log(
+            "CHAT SOCKET CLOSED",
+            event.code
+        );
 
-       console.log(
-        "CLOSE CODE:",
-         event.code
-       );
-
-       console.log(
-        "CLOSE REASON:",
-         event.reason
-       );
-
+        socket=null;
     };
 
 };
 
 
 
-// ==============================
-// SEND MESSAGE
-// ==============================
-
-export const sendMessage = (message) => {
+export const sendMessage=(message)=>{
 
 
-    if (
+    if(!socket || socket.readyState !== WebSocket.OPEN){
 
-        socket &&
+        console.log("Socket not connected");
 
-        socket.readyState === WebSocket.OPEN
-
-    ) {
-
-
-        socket.send(
-
-            JSON.stringify({
-
-                message: message
-
-            })
-
-        );
-
-
+        return;
     }
 
-    else {
 
-
-        console.log(
-
-            "Socket not connected"
-
-        );
-
-
-    }
-
+    socket.send(
+        JSON.stringify({
+            message:message
+        })
+    );
 
 };
 
 
 
-// ==============================
-// DISCONNECT
-// ==============================
-
-export const disconnectChatSocket = () => {
-
+export const disconnectChatSocket=()=>{
 
     if(socket){
 
         socket.close();
 
+        socket=null;
     }
-
 
 };

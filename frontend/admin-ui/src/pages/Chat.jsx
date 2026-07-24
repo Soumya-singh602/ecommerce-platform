@@ -1,8 +1,8 @@
 import {
     useState,
-    useEffect
+    useEffect,
+    useCallback
 } from "react";
-
 
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -10,24 +10,70 @@ import ChatSidebar from "../components/chat/ChatSidebar";
 import ChatWindow from "../components/chat/ChatWindow";
 import ChatInput from "../components/chat/ChatInput";
 
-
 import {
-
     connectChatSocket,
-
+    disconnectChatSocket,
     sendMessage
-
 } from "../services/chatSocket";
-
 
 
 export default function Chat() {
 
 
+    // Logged in Admin
     const currentUserId = 6;
 
 
     const [selectedUser, setSelectedUser] = useState(null);
+
+    const [messages, setMessages] = useState([]);
+
+
+
+    // ==========================
+    // HANDLE INCOMING MESSAGE
+    // ==========================
+
+    const handleMessage = useCallback((message) => {
+
+
+        console.log(
+            "SOCKET MESSAGE :",
+            message
+        );
+
+
+        setMessages((prev) => {
+
+
+            const exists = prev.some(
+
+                (item) => item.id === message.id
+
+            );
+
+
+            if (exists) {
+
+                return prev;
+
+            }
+
+
+            return [
+
+                ...prev,
+
+                message
+
+            ];
+
+
+        });
+
+
+    }, []);
+
 
 
 
@@ -38,40 +84,63 @@ export default function Chat() {
     useEffect(() => {
 
 
-        if(selectedUser){
+        if (!selectedUser?.user_id) {
 
-
-            connectChatSocket(
-
-
-                currentUserId,
-
-
-                selectedUser.user_id,
-
-
-                (message)=>{
-
-
-                    console.log(
-
-                        "NEW MESSAGE",
-
-                        message
-
-                    );
-
-
-                }
-
-
-            );
-
+            return;
 
         }
 
 
-    },[selectedUser]);
+        console.log(
+
+            "CONNECT CHAT:",
+
+            currentUserId,
+
+            selectedUser.user_id
+
+        );
+
+
+        // clear previous realtime messages
+        setMessages([]);
+
+
+
+        connectChatSocket(
+
+            currentUserId,
+
+            selectedUser.user_id,
+
+            handleMessage
+
+        );
+
+
+
+        return () => {
+
+
+            console.log(
+                "CLEANUP SOCKET"
+            );
+
+
+            disconnectChatSocket();
+
+
+        };
+
+
+    }, [
+
+        selectedUser?.user_id,
+
+        handleMessage
+
+    ]);
+
 
 
 
@@ -82,6 +151,7 @@ export default function Chat() {
 
 
             <div className="bg-white rounded-2xl shadow overflow-hidden h-[80vh] flex">
+
 
 
                 <ChatSidebar
@@ -100,6 +170,7 @@ export default function Chat() {
 
 
 
+
                 <div className="flex-1 flex flex-col">
 
 
@@ -113,7 +184,12 @@ export default function Chat() {
                         selectedUser={selectedUser}
 
 
+                        messages={messages}
+
+
                     />
+
+
 
 
 
@@ -124,6 +200,15 @@ export default function Chat() {
 
 
                         onSend={(message)=>{
+
+
+                            console.log(
+
+                                "SEND MESSAGE:",
+
+                                message
+
+                            );
 
 
                             sendMessage(message);
@@ -141,6 +226,7 @@ export default function Chat() {
 
 
             </div>
+
 
 
         </DashboardLayout>

@@ -11,88 +11,104 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
 
+        print("========== CONNECT START ==========")
+
         self.admin_id = str(
-            self.scope["url_route"]["kwargs"]["admin_id"]
+          self.scope["url_route"]["kwargs"]["admin_id"]
         )
 
         self.customer_id = str(
-            self.scope["url_route"]["kwargs"]["customer_id"]
+          self.scope["url_route"]["kwargs"]["customer_id"]
         )
 
-        ids = sorted(
-            [self.admin_id, self.customer_id]
-        )
+        ids = sorted([
+            self.admin_id, 
+            self.customer_id
+        ])
 
         self.room_group_name = f"chat_{ids[0]}_{ids[1]}"
 
         headers = dict(self.scope["headers"])
+
+        print("HEADERS :", headers)
+        print("USER ID :", headers.get(b"x-user-id"))
+        print("EMAIL :", headers.get(b"x-user-email"))
+        print("ROLE :", headers.get(b"x-user-role"))
 
         user_id = headers.get(b"x-user-id")
         user_email = headers.get(b"x-user-email")
         user_role = headers.get(b"x-user-role")
 
         if not user_id:
-            await self.close(code=4001)
-            return
+          print("USER ID NOT FOUND")
+          await self.close(code=4001)
+          return
 
         self.user = {
-            "id": user_id.decode(),
-            "email": user_email.decode() if user_email else "",
-            "role": user_role.decode() if user_role else "",
-        }
+          "id": user_id.decode(),
+          "email": user_email.decode() if user_email else "",
+          "role": user_role.decode() if user_role else "",
+    }
 
         await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name,
-        )
-
-        await self.accept()
-        # Notify admin when customer comes online
-        if self.user["role"] == "customer":
-
-         await self.channel_layer.group_send(
-          "admin_dashboard",
-        {
-            "type": "dashboard_update",
-            "event": "online",
-            "customer_id": self.user["id"],
-        }
+          self.room_group_name,
+          self.channel_name,
     )
 
-        redis_client.sadd(
-            "online_users",
-            self.user["id"],
+        await self.accept()
+
+        if self.user["role"] == "customer":
+
+            await self.channel_layer.group_send(
+              "admin_dashboard",
+            {
+                "type": "dashboard_update",
+                "event": "online",
+                "customer_id": self.user["id"],
+            }
         )
+
+        redis_client.sadd(
+         "online_users",
+          self.user["id"],
+    )
 
         print("CONNECTED :", self.room_group_name)
         print("USER :", self.user)
-
     async def disconnect(self, close_code):
 
-        if hasattr(self, "user"):
-            redis_client.srem(
-                "online_users",
-                self.user["id"],
-            )
-        # Notify admin when customer goes offline
+        if not hasattr(self, "user"):
+          print("USER NOT SET, DISCONNECT")
+          return
+
+
         if self.user["role"] == "customer":
 
-         await self.channel_layer.group_send(
-        "admin_dashboard",
-        {
-            "type": "dashboard_update",
-            "event": "offline",
-            "customer_id": self.user["id"],
-        }
-    )    
-
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name,
+          await self.channel_layer.group_send(
+            "admin_dashboard",
+            {
+                "type": "dashboard_update",
+                "event": "offline",
+                "customer_id": self.user["id"],
+            }
         )
 
-        print("DISCONNECTED :", self.room_group_name)
 
+        redis_client.srem(
+           "online_users",
+            self.user["id"],
+    )
+
+
+        if hasattr(self, "room_group_name"):
+
+            await self.channel_layer.group_discard(
+              self.room_group_name,
+              self.channel_name,
+        )
+
+
+        print("DISCONNECTED :", close_code)
     @database_sync_to_async
     def save_message(
         self,
@@ -153,7 +169,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     ):
         print("MESSAGE RECEIVED")
         print("TEXT DATA:", text_data)
-
+        print("BEFORE GROUP SEND")
         if not text_data:
             return
 
@@ -225,6 +241,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def chat_message(self, event):
+
+        print("SENDING TO CLIENT:", event)
 
         await self.send(
             text_data=json.dumps(

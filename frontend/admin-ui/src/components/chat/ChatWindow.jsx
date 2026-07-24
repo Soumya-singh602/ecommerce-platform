@@ -7,20 +7,25 @@ export default function ChatWindow({
 
     currentUserId,
 
-    selectedUser
+    selectedUser,
+
+    messages,
 
 }) {
 
-    const [messages, setMessages] = useState([]);
+
+    const [history, setHistory] = useState([]);
 
     const [loading, setLoading] = useState(false);
 
 
+
     const fetchMessages = async () => {
+
 
         if (!selectedUser) {
 
-            setMessages([]);
+            setHistory([]);
 
             return;
 
@@ -41,17 +46,21 @@ export default function ChatWindow({
             );
 
 
-            setMessages(data);
+            setHistory(data);
 
 
-        } catch (error) {
+        }
+
+        catch(error){
 
             console.log(
                 "CHAT HISTORY ERROR:",
                 error
             );
 
-        } finally {
+        }
+
+        finally{
 
             setLoading(false);
 
@@ -60,137 +69,187 @@ export default function ChatWindow({
     };
 
 
-    useEffect(() => {
+
+    useEffect(()=>{
 
         fetchMessages();
 
-    }, [selectedUser]);
+    },[selectedUser]);
+
+
+
+
+    const allMessages = [
+
+        ...history,
+
+        ...messages
+
+    ];
+
+
+
+    console.log("HISTORY :", history);
+
+    console.log("SOCKET MESSAGES :", messages);
+
+    console.log("ALL MESSAGES :", allMessages);
+
 
 
     return (
 
-        <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-4">
-
-            {/* Header */}
-
-            <div className="border-b p-5">
-
-                {
-
-                    selectedUser ? (
-
-                        <>
-
-                            <h2 className="text-xl font-bold">
-
-                                {selectedUser.name}
-
-                            </h2>
+        <>
 
 
-                            <p className="text-sm text-gray-500">
-
-                                {selectedUser.email}
-
-                            </p>
-
-                        </>
-
-                    ) : (
-
-                        <h2 className="text-xl font-bold">
-
-                            Select Conversation
-
-                        </h2>
-
-                    )
-
-                }
-
-            </div>
+        <div className="border-b bg-white p-5">
 
 
+        {
 
-            {/* Messages */}
+            selectedUser ?
 
-            <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-4">
+            (
 
+                <>
 
-                {
+                <h2 className="text-xl font-bold">
 
-                    loading ? (
+                    {selectedUser.name}
 
-                        <p>
-
-                            Loading messages...
-
-                        </p>
-
-                    ) : messages.length === 0 ? (
-
-                        <p className="text-gray-500">
-
-                            No messages found
-
-                        </p>
-
-                    ) : (
-
-                        messages.map((message) => (
-
-                            <div
-
-                                key={message.id}
-
-                                className={
-
-                                    `flex ${
-                                        message.sender_id === currentUserId
-                                        ? "justify-end"
-                                        : "justify-start"
-                                    }`
-
-                                }
-
-                            >
-
-                                <div
-
-                                    className={
-
-                                        `max-w-sm px-4 py-3 rounded-2xl ${
-                                            message.sender_id === currentUserId
-                                            ? "bg-indigo-600 text-white"
-                                            : "bg-white shadow"
-                                        }`
-
-                                    }
-
-                                >
-
-                                    <p>
-
-                                        {message.message}
-
-                                    </p>
-
-                                </div>
+                </h2>
 
 
-                            </div>
+                <p className="text-sm text-gray-500">
 
-                        ))
+                    {selectedUser.email}
 
-                    )
-
-                }
+                </p>
 
 
-            </div>
+                </>
+
+            )
+
+            :
+
+            (
+
+                <h2 className="text-xl font-bold">
+
+                    Select Conversation
+
+                </h2>
+
+            )
+
+
+        }
 
 
         </div>
+
+
+
+
+        <div className="flex-1 overflow-y-auto bg-slate-50 p-6 space-y-4">
+
+
+        {
+
+        loading ?
+
+        (
+
+            <p>
+                Loading messages...
+            </p>
+
+        )
+
+        :
+
+        allMessages.length === 0 ?
+
+        (
+
+            <p className="text-gray-500">
+
+                No messages found
+
+            </p>
+
+        )
+
+        :
+
+        allMessages.map((message,index)=>(
+
+
+            <div
+
+            key={`${message.id}-${index}`}
+
+            className={`flex ${
+                
+                Number(message.sender_id) === Number(currentUserId)
+
+                ?
+
+                "justify-end"
+
+                :
+
+                "justify-start"
+
+            }`}
+
+
+            >
+
+
+            <div
+
+            className={`max-w-sm rounded-2xl px-4 py-3 ${
+                
+                Number(message.sender_id) === Number(currentUserId)
+
+                ?
+
+                "bg-indigo-600 text-white"
+
+                :
+
+                "bg-white shadow"
+
+            }`}
+
+            >
+
+
+            <p>
+
+                {message.message}
+
+            </p>
+
+
+            </div>
+
+
+            </div>
+
+
+        ))
+
+
+        }
+
+
+        </div>
+
+
+        </>
 
     );
 

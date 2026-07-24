@@ -9,7 +9,8 @@ from ecommerce_common.response import success_response
 from ecommerce_common.exceptions import NotFoundException
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage
-
+from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.exceptions import InvalidToken
 from .models import CustomUser
 from .serializers import (
     RegisterSerializer,
@@ -149,7 +150,7 @@ def delete_user(request, id):
         status=status.HTTP_200_OK,
     )
 
-
+"""
 # VERIFY TOKEN
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -170,6 +171,7 @@ def verify_token(request):
     response["X-User-Role"] = user.role
 
     return response
+    """
 
 # USER PROFILE
 @api_view(["GET"])
@@ -345,3 +347,106 @@ def internal_user_list(request):
         },
         status=status.HTTP_200_OK,
     )
+
+@api_view(["GET"])
+def verify_token(request):
+
+    print("GET params:", request.GET)
+    print("Authorization:", request.headers.get("Authorization"))
+    print("Original URI:", request.headers.get("X-Original-URI"))
+
+
+    token = None
+
+
+    # =========================
+    # 1. Authorization Header
+    # =========================
+
+    auth_header = request.headers.get("Authorization")
+
+
+    if auth_header and auth_header.startswith("Bearer "):
+
+        token = auth_header.split(" ")[1]
+
+
+
+    # =========================
+    # 2. Query Parameter
+    # =========================
+
+    if not token:
+
+        token = request.GET.get("token")
+
+
+
+    # =========================
+    # 3. Nginx WebSocket URI
+    # =========================
+
+    if not token:
+
+        original_uri = request.headers.get(
+            "X-Original-URI",
+            ""
+        )
+
+
+        if "token=" in original_uri:
+
+            token = original_uri.split("token=")[1]
+
+
+
+    print("FINAL TOKEN:", token)
+
+
+
+    if not token:
+
+        return Response(
+            {
+                "error": "Token missing"
+            },
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+
+
+    try:
+
+        access = AccessToken(token)
+
+        user = CustomUser.objects.get(
+            id=access["user_id"]
+        )
+
+
+    except (InvalidToken, CustomUser.DoesNotExist):
+
+        return Response(
+            {
+                "error": "Invalid token"
+            },
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
+
+
+
+    response = Response(
+        {
+            "status": "success",
+            "message": "Token verified successfully",
+        },
+        status=status.HTTP_200_OK,
+    )
+
+
+    response["X-User-Id"] = str(user.id)
+    response["X-User-Email"] = user.email
+    response["X-User-Role"] = user.role
+
+
+    return response
