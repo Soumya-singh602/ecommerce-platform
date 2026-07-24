@@ -5,8 +5,12 @@ import FeaturedProducts from "../components/FeaturedProducts";
 import TrendingProducts from "../components/TrendingProducts";
 import Newsletter from "../components/Newsletter";
 
+
+
 export default function Home() {
+
   return (
+
     <MainLayout>
 
       <Hero />

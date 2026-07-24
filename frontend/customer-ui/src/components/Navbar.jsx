@@ -1,4 +1,4 @@
-import { ShoppingCart, Search, User, Menu } from "lucide-react";
+import { ShoppingCart, Search, User, Menu, MessageCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { getUser, isAuthenticated, logout } from "../utils/auth";
@@ -194,17 +194,48 @@ export default function Navbar() {
 
 
 
+
+            {/* Chat */}
+
+            {
+              loggedIn && (
+
+                <Link to="/chat">
+
+                  <MessageCircle
+
+                    className="
+                    cursor-pointer
+                    hover:text-blue-600
+                    transition-colors
+                    "
+
+                  />
+
+                </Link>
+
+              )
+            }
+
+
+
+
             {/* Cart */}
 
             <Link to="/cart">
 
               <ShoppingCart
 
-                className="cursor-pointer hover:text-blue-600 transition-colors"
+                className="
+                cursor-pointer
+                hover:text-blue-600
+                transition-colors
+                "
 
               />
 
             </Link>
+
 
 
 

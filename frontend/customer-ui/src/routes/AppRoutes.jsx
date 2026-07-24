@@ -11,6 +11,7 @@ import Product from "../pages/Product";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import MyOrders from "../pages/MyOrders";
 import OrderDetails from "../pages/OrderDetails";
+import Chat from "../pages/Chat";
 
 export default function AppRoutes() {
   return (
@@ -33,6 +34,7 @@ export default function AppRoutes() {
          />
 
       <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+      <Route path="/chat" element={<ProtectedRoute><Chat/></ProtectedRoute>}/>
     </Routes>
   );
 }
