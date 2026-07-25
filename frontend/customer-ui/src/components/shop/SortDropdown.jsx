@@ -1,17 +1,44 @@
-export default function SortDropdown() {
-  return (
-    <select
-      className="border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500"
-      defaultValue=""
-    >
-      <option value="" disabled>
-        Sort By
-      </option>
+export default function SortDropdown({
+    setOrdering
+}) {
 
-      <option value="latest">Latest</option>
-      <option value="price-low">Price: Low to High</option>
-      <option value="price-high">Price: High to Low</option>
-      <option value="name">Name (A-Z)</option>
-    </select>
-  );
+
+return (
+
+<select
+
+className="
+border rounded-lg px-4 py-2
+"
+
+defaultValue=""
+
+onChange={(e)=>{
+
+    setOrdering(e.target.value);
+
+}}
+
+>
+
+
+<option value="">
+Sort By
+</option>
+
+
+<option value="price">
+Price: Low to High
+</option>
+
+
+<option value="-price">
+Price: High to Low
+</option>
+
+
+</select>
+
+);
+
 }

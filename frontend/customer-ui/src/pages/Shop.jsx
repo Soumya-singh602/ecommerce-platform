@@ -19,74 +19,84 @@ export default function Shop() {
   const [loading, setLoading] = useState(true);
 
 
+  const [search, setSearch] = useState("");
 
-  useEffect(() => {
+  const [ordering, setOrdering] = useState("");
 
-    fetchProducts();
+  const [page, setPage] = useState(1);
 
-  }, []);
+
+  const [totalPages, setTotalPages] = useState(1);
+
 
 
 
 
   const fetchProducts = async () => {
 
+
     try {
 
 
-      const response = await getProducts();
-
-
-      console.log("PRODUCT RESPONSE:", response);
+      setLoading(true);
 
 
 
+      const response = await getProducts({
+
+        search: search,
+
+        sort: ordering,
+
+        page: page
+
+      });
+
+
+
+      console.log(
+        "PRODUCT RESPONSE:",
+        response
+      );
+
+
+
+
+      // Backend Response:
       /*
-        Backend response:
-
         {
           success:true,
-          message:"Products fetched successfully",
           data:{
-              products:[]
+             current_page:1,
+             total_pages:2,
+             total_products:6,
+             products:[]
           }
         }
-
       */
 
 
 
-      if (Array.isArray(response)) {
+      if(
+        response.success &&
+        response.data
+      ){
 
 
-        setProducts(response);
+        setProducts(
+          response.data.products
+        );
 
 
-      }
-
-
-      else if (Array.isArray(response.data)) {
-
-
-        setProducts(response.data);
-
-
-      }
-
-
-      else if (
-        response.data &&
-        Array.isArray(response.data.products)
-      ) {
-
-
-        setProducts(response.data.products);
+        setTotalPages(
+          response.data.total_pages
+        );
 
 
       }
 
 
-      else {
+      else{
 
 
         setProducts([]);
@@ -96,10 +106,11 @@ export default function Shop() {
 
 
 
+
     }
 
 
-    catch(error) {
+    catch(error){
 
 
       console.log(
@@ -114,7 +125,7 @@ export default function Shop() {
     }
 
 
-    finally {
+    finally{
 
 
       setLoading(false);
@@ -123,7 +134,26 @@ export default function Shop() {
     }
 
 
+
   };
+
+
+
+
+
+  useEffect(()=>{
+
+
+    fetchProducts();
+
+
+  },[
+    search,
+    ordering,
+    page
+  ]);
+
+
 
 
 
@@ -141,7 +171,9 @@ export default function Shop() {
 
 
         <h1 className="text-4xl font-bold">
+
           Shop
+
         </h1>
 
 
@@ -152,13 +184,39 @@ export default function Shop() {
 
           <div className="flex-1">
 
-            <SearchBar />
+
+            <SearchBar
+
+              value={search}
+
+              setSearch={(value)=>{
+
+                setSearch(value);
+
+                setPage(1);
+
+              }}
+
+            />
+
 
           </div>
 
 
 
-          <SortDropdown />
+
+          <SortDropdown
+
+            setOrdering={(value)=>{
+
+              setOrdering(value);
+
+              setPage(1);
+
+            }}
+
+          />
+
 
 
         </div>
@@ -173,7 +231,9 @@ export default function Shop() {
 
           <div>
 
+
             <FilterSidebar />
+
 
           </div>
 
@@ -197,23 +257,37 @@ export default function Shop() {
 
             {
 
-
-              loading ? (
-
-                <p>
-                  Loading products...
-                </p>
+            loading ? (
 
 
-              ) : (
+              <p>
+
+                Loading products...
+
+              </p>
 
 
-                <ProductGrid
-                  products={products}
-                />
+            ) : products.length > 0 ? (
 
 
-              )
+              <ProductGrid
+
+                products={products}
+
+              />
+
+
+            ) : (
+
+
+              <p>
+
+                No products found
+
+              </p>
+
+
+            )
 
 
             }
@@ -222,7 +296,15 @@ export default function Shop() {
 
 
 
-            <Pagination />
+            <Pagination
+
+              page={page}
+
+              setPage={setPage}
+
+              totalPages={totalPages}
+
+            />
 
 
 
