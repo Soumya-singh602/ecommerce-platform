@@ -16,7 +16,8 @@ export const connectChatSocket = (
 
 
     socket = new WebSocket(
-        `ws://localhost:8080/ws/chat/${adminId}/${customerId}/?token=${token}`
+        `${import.meta.env.VITE_WS_URL}/ws/chat/${adminId}/${customerId}/?token=${token}`
+
     );
 
 

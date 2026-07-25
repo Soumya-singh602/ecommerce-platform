@@ -3,40 +3,45 @@ import axios from "axios";
 
 const api = axios.create({
 
-   baseURL: "http://localhost:8080/api"
+    baseURL: import.meta.env.VITE_API_URL,
+
+    headers:{
+        "Content-Type":"application/json",
+    }
 
 });
 
 
-
 api.interceptors.request.use(
 
-    (config) => {
+(config)=>{
 
 
-        const token = localStorage.getItem("access");
+    const token = localStorage.getItem("access");
 
 
-        if (token) {
+    if(token){
 
-            config.headers.Authorization = `Bearer ${token}`;
-
-        }
-
-
-        return config;
-
-    },
-
-
-    (error) => {
-
-        return Promise.reject(error);
+        config.headers.Authorization =
+        `Bearer ${token}`;
 
     }
 
-);
 
+    return config;
+
+
+},
+
+
+(error)=>{
+
+    return Promise.reject(error);
+
+}
+
+
+);
 
 
 export default api;

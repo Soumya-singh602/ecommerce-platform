@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const API = "http://localhost:8080/api/chat";
+const API = `${import.meta.env.VITE_API_URL}/chat`;
 
 
 export const getChatHistory = async (

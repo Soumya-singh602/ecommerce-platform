@@ -147,8 +147,7 @@ export default function OrderDetails() {
 
                 <img
 
-                  src={`http://localhost:8002${order.product.image}`}
-
+                  src={`${import.meta.env.VITE_PRODUCT_SERVICE_URL}${order.product.image}`}
                   alt={order.product.name}
 
                   className="w-full h-full object-cover rounded-lg"

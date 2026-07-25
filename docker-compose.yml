@@ -156,7 +156,7 @@ services:
       - chat-db
     restart: always
 
-    # ==========================
+  # ==========================
   # CUSTOMER UI
   # ==========================
   customer-ui:
@@ -166,6 +166,9 @@ services:
     container_name: customer-ui
     ports:
       - "5173:80"
+    environment:
+      VITE_API_URL: http://127.0.0.1:8080/api
+      VITE_WS_URL: ws://127.0.0.1:8080
     depends_on:
       - nginx
 
@@ -180,6 +183,9 @@ services:
     container_name: admin-ui
     ports:
       - "5174:80"
+    environment:
+      VITE_API_URL: http://127.0.0.1:8080/api
+      VITE_WS_URL: ws://127.0.0.1:8080
     depends_on:
       - nginx
 

@@ -6,7 +6,7 @@ export const connectChatSocket = (
     const token = localStorage.getItem("access");
 
     const socket = new WebSocket(
-        `ws://localhost:8080/ws/chat/${adminId}/${customerId}/?token=${token}`
+        `${import.meta.env.VITE_WS_URL}/ws/chat/${adminId}/${customerId}/?token=${token}`
     );
 
     socket.onopen = () => {
