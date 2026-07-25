@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import MainLayout from "../layouts/MainLayout";
 
@@ -7,6 +7,8 @@ import {
     sendMessage,
     disconnectChatSocket
 } from "../services/chatSocket";
+
+import { getChatHistory } from "../api/chatApi";
 
 
 
@@ -18,10 +20,21 @@ export default function Chat(){
     const [text,setText] = useState("");
 
 
+    const socketRef = useRef(null);
+
+
 
     const adminId = "6";
 
-    const customerId = localStorage.getItem("user_id");
+
+    const user = JSON.parse(
+        localStorage.getItem("user")
+    );
+
+
+    const customerId = String(
+        user?.user_id
+    );
 
 
 
@@ -29,7 +42,61 @@ export default function Chat(){
     useEffect(()=>{
 
 
-        connectChatSocket(
+        if(!customerId){
+
+            console.log(
+                "CUSTOMER ID NOT FOUND"
+            );
+
+            return;
+
+        }
+
+
+
+        const loadHistory = async()=>{
+
+
+            try{
+
+
+                const data = await getChatHistory(
+                    adminId,
+                    customerId
+                );
+
+
+                console.log(
+                    "HISTORY:",
+                    data
+                );
+
+
+                setMessages(data);
+
+
+            }
+            catch(error){
+
+                console.log(
+                    "HISTORY ERROR:",
+                    error
+                );
+
+            }
+
+
+        };
+
+
+
+        loadHistory();
+
+
+
+
+
+        const socket = connectChatSocket(
 
             adminId,
 
@@ -60,9 +127,19 @@ export default function Chat(){
 
 
 
+        socketRef.current = socket;
+
+
+
+
+
         return ()=>{
 
-            disconnectChatSocket();
+
+            disconnectChatSocket(
+                socketRef.current
+            );
+
 
         };
 
@@ -73,21 +150,39 @@ export default function Chat(){
 
 
 
-    const handleSend=()=>{
 
 
-        if(!text.trim())
+    const handleSend = ()=>{
+
+
+        console.log(
+            "SEND BUTTON CLICK"
+        );
+
+
+        if(!text.trim()){
+
             return;
 
+        }
 
 
-        sendMessage(text);
+
+        sendMessage(
+
+            socketRef.current,
+
+            text
+
+        );
 
 
 
         setText("");
 
     };
+
+
 
 
 
@@ -109,31 +204,35 @@ Chat With Admin
 
 
 
-
-<div className="
+<div
+className="
 border
 rounded-xl
 h-[500px]
 flex
 flex-col
-">
+"
+>
 
 
-<div className="
+
+<div
+className="
 flex-1
 p-4
 overflow-y-auto
-">
+"
+>
 
 
 {
-
 messages.map((msg,index)=>(
 
 
 <div
 
-key={index}
+key={msg.id || index}
+
 
 className={
 
@@ -152,13 +251,17 @@ String(msg.sender_id) === String(customerId)
 >
 
 
-<span className="
+<span
+
+className="
 inline-block
 bg-gray-200
 rounded-lg
 px-3
 py-2
-">
+"
+
+>
 
 
 <b>
@@ -171,6 +274,7 @@ py-2
 :
 
 {msg.message}
+
 
 
 </span>
@@ -190,25 +294,25 @@ py-2
 
 
 
+<div
 
-<div className="
+className="
 border-t
 p-3
 flex
 gap-2
-">
+"
+
+>
 
 
 <input
 
-
 value={text}
-
 
 onChange={(e)=>
 setText(e.target.value)
 }
-
 
 className="
 flex-1
@@ -217,20 +321,15 @@ rounded
 px-3
 "
 
-
 placeholder="Type message..."
 
-
-
-/>
-
+ />
 
 
 
 <button
 
 onClick={handleSend}
-
 
 className="
 bg-blue-600
@@ -258,7 +357,6 @@ Send
 
 
 </MainLayout>
-
 
 );
 
