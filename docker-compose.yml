@@ -156,6 +156,33 @@ services:
       - chat-db
     restart: always
 
+    # ==========================
+  # CUSTOMER UI
+  # ==========================
+  customer-ui:
+    build:
+      context: ./frontend/customer-ui
+      dockerfile: Dockerfile
+    container_name: customer-ui
+    ports:
+      - "5173:80"
+    depends_on:
+      - nginx
+
+
+  # ==========================
+  # ADMIN UI
+  # ==========================
+  admin-ui:
+    build:
+      context: ./frontend/admin-ui
+      dockerfile: Dockerfile
+    container_name: admin-ui
+    ports:
+      - "5174:80"
+    depends_on:
+      - nginx
+
 volumes:
   user_db_data:
   product_db_data:
