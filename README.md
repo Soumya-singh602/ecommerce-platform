@@ -1,279 +1,490 @@
-# Ecommerce Platform – Django Microservices
+# 🛒 Ecommerce Platform  
+## Full-Stack Microservices E-Commerce Application
 
-## Overview
+A production-style **full-stack ecommerce platform** built using **Django Microservices Architecture, React.js, Docker, Nginx, JWT Authentication, PostgreSQL, MySQL, Redis, and WebSockets**.
 
-Ecommerce Platform is a backend application built using **Django Microservices Architecture**. Each service is independently developed, maintains its own database, and communicates with other services through REST APIs. Authentication is implemented using **JWT**, **Nginx** serves as the **API Gateway**, and **Django Channels** with **WebSockets** enables real-time one-to-one chat.
+The project follows a scalable distributed architecture where each business domain is developed as an independent service with its own database.
+
+The system includes:
+
+- Customer Web Application
+- Admin Dashboard
+- REST API Gateway
+- Independent Backend Microservices
+- Real-Time Communication System
+
 
 ---
 
-# Architecture
+# 🚀 Project Highlights
 
-```text
-                           Client
-                              │
-                 ┌────────────┴────────────┐
-                 │                         │
-           HTTP REST APIs            WebSocket
-                 │                         │
-                 └────────────┬────────────┘
-                              │
-                     Nginx API Gateway
-                              │
-      ┌──────────────┬──────────────┬──────────────┬──────────────┐
-      │              │              │              │
- User Service   Product Service  Order Service   Chat Service
+⭐ Microservices-based backend architecture  
+⭐ Independent databases per service  
+⭐ JWT based authentication system  
+⭐ API Gateway using Nginx  
+⭐ Dockerized complete application  
+⭐ Real-time chat using WebSockets  
+⭐ Service-to-service communication  
+⭐ Product search, filtering, sorting and pagination  
+⭐ Admin product and order management  
+⭐ Scalable architecture design  
+
+
+---
+
+# 🏗️ System Architecture
+
+
+```
+                         Client Users
+
+              ┌─────────────────────────┐
+              │                         │
+        Customer UI                 Admin UI
+        React.js                    React.js
+              │                         │
+              └───────────┬─────────────┘
+                          │
+
+                    Nginx API Gateway
+
+                          │
+
+ ┌──────────────┬──────────────┬──────────────┬──────────────┐
+ │              │              │              │
+User Service Product Service Order Service Chat Service
+ │              │              │              │
+MySQL       PostgreSQL       MySQL          MySQL
+
+                          │
+
+                       Redis
+                (WebSocket Channel Layer)
+
 ```
 
+
 ---
 
-# Microservices
+# 🎯 Features
+
+
+## 👤 Customer Application
+
+- User Registration
+- Secure Login
+- JWT Authentication
+- Browse Products
+- Product Search
+- Product Sorting
+- Price Filtering
+- Pagination
+- Product Details
+- Shopping Cart
+- Checkout
+- Order Placement
+- Order History
+- Real-Time Chat With Admin
+
+
+---
+
+## 🛠️ Admin Dashboard
+
+- Admin Authentication
+- Product Management
+    - Create Product
+    - Update Product
+    - Delete Product
+
+- Order Management
+    - View Orders
+    - Update Order Status
+
+- Customer Communication
+    - Real-Time Chat Support
+
+
+---
+
+# 🔥 Backend Microservices
+
 
 ## User Service
 
-Responsible for authentication and user management.
+Responsible for identity and authentication management.
 
-### Features
+### Responsibilities
 
-* User Registration
-* User Login
-* JWT Authentication
-* Refresh Token
-* Token Verification API
-* User Profile
-* Update Profile
-* Change Password
-* User Detail
-* User List
-* Delete User
+- User Registration
+- Login System
+- JWT Access Token
+- JWT Refresh Token
+- Token Verification
+- User Profile Management
+- Password Management
 
-**Database:** MySQL
+
+Database:
+
+```
+MySQL
+```
+
 
 ---
 
 ## Product Service
 
-Responsible for product management.
+Handles complete product lifecycle.
 
-### Features
 
-* Create Product
-* Update Product
-* Delete Product
-* Product List
-* Product Detail
-* Product Search
-* Price Filtering
-* Product Sorting
-* Pagination
-* JWT Protected APIs
+### Responsibilities
 
-**Database:** PostgreSQL
+- Product Creation
+- Product Update
+- Product Deletion
+- Product Listing
+- Product Search
+- Sorting
+- Filtering
+- Pagination
+
+
+Database:
+
+```
+PostgreSQL
+```
+
 
 ---
 
 ## Order Service
 
-Responsible for order management.
+Manages customer orders.
 
-### Features
 
-* Place Order
-* Order List
-* Order Detail
-* Cancel Order
-* Update Order Status
-* Order Filtering
-* Order Sorting
-* Pagination
-* Order Statistics
-* Service-to-Service Communication
-* JWT Protected APIs
+### Responsibilities
 
-**Database:** MySQL
+- Create Orders
+- Order Details
+- Order History
+- Cancel Orders
+- Update Order Status
+- Pagination
+- Filtering
+- Statistics
+
+
+Communication:
+
+```
+REST API Communication
+```
+
+
+Database:
+
+```
+MySQL
+```
+
 
 ---
 
 ## Chat Service
 
-Responsible for real-time messaging between users.
+Provides real-time communication.
 
-### Features
 
-* JWT Authenticated WebSocket Connection
-* One-to-One Chat
-* Private Chat Rooms
-* Real-Time Messaging
-* Chat History API
-* Conversation List API
-* Message Delivery Status
-* Message Read Status
-* Unread Message Count
-* Database Message Storage
+Implemented using:
 
-**Database:** MySQL
+- Django Channels
+- WebSockets
+- Redis
 
----
 
-# Technology Stack
+Features:
 
-* Python 3.12
-* Django
-* Django REST Framework
-* Django Channels
-* WebSockets
-* MySQL
-* PostgreSQL
-* JWT Authentication
-* HTTPX
-* Docker
-* Docker Compose
-* Nginx (API Gateway)
-* Git
-* GitHub
+- One-to-One Messaging
+- Private Chat Rooms
+- JWT Protected WebSocket
+- Message Storage
+- Chat History
+- Delivery Status
+- Read Status
+- Unread Count
 
----
 
-# API Gateway
+Database:
 
-Nginx acts as the single entry point for all services.
-
-## REST API Routes
-
-| Route            | Service         |
-| ---------------- | --------------- |
-| `/api/users/`    | User Service    |
-| `/api/products/` | Product Service |
-| `/api/orders/`   | Order Service   |
-| `/api/chat/`     | Chat Service    |
-
----
-
-## WebSocket Route
-
-All WebSocket connections are routed through the Nginx API Gateway.
-
-```text
-ws://localhost/ws/chat/<admin_id>/<customer_id>/?token=<access_token>
+```
+MySQL
 ```
 
-Example:
-
-```text
-ws://localhost/ws/chat/6/5/?token=<JWT_ACCESS_TOKEN>
-```
 
 ---
 
-# Authentication
+# 🔐 Authentication & Security
 
-All protected REST APIs require a valid JWT Access Token.
+
+Authentication flow:
+
+
+```
+User Login
+
+     ↓
+
+JWT Access Token Generated
+
+     ↓
+
+Frontend Stores Token
+
+     ↓
+
+Request Sent Through Nginx
+
+     ↓
+
+Token Verification
+
+     ↓
+
+Service Access Granted
+
+```
+
+
+Protected APIs require:
+
 
 ```http
-Authorization: Bearer <access_token>
+Authorization: Bearer <JWT_TOKEN>
 ```
 
-WebSocket connections are also authenticated using the same JWT Access Token before establishing the connection.
 
 ---
 
-# Database
+# 🌐 API Gateway Design
 
-| Service         | Database   |
-| --------------- | ---------- |
-| User Service    | MySQL      |
-| Product Service | PostgreSQL |
-| Order Service   | MySQL      |
-| Chat Service    | MySQL      |
 
----
+Nginx works as the single entry point.
 
-# Standard API Response
 
-## Success
+| Endpoint | Service |
+|-|-|
+| /api/users | User Service |
+| /api/products | Product Service |
+| /api/orders | Order Service |
+| /api/chat | Chat Service |
+| /ws/chat | WebSocket Service |
 
-```json
-{
-    "status": "success",
-    "message": "Request completed successfully",
-    "data": {}
-}
-```
-
-## Error
-
-```json
-{
-    "status": "failed",
-    "message": "Validation failed",
-    "data": {}
-}
-```
 
 ---
 
-# Project Structure
+# 🐳 Docker Architecture
 
-```text
+
+The complete application runs using Docker Compose.
+
+
+Containers:
+
+```
+Frontend Containers
+
+├── customer-ui
+└── admin-ui
+
+
+Gateway
+
+└── nginx
+
+
+Backend Services
+
+├── user-service
+├── product-service
+├── order-service
+└── chat-service
+
+
+Infrastructure
+
+├── mysql containers
+├── postgres container
+└── redis container
+
+```
+
+
+---
+
+# 🧰 Technology Stack
+
+
+## Backend
+
+- Python
+- Django
+- Django REST Framework
+- Django Channels
+- JWT Authentication
+- HTTPX
+
+
+## Frontend
+
+- React.js
+- Vite
+- Tailwind CSS
+- Axios
+
+
+## Database
+
+- MySQL
+- PostgreSQL
+
+
+## Infrastructure
+
+- Docker
+- Docker Compose
+- Nginx
+- Redis
+- Git
+- GitHub
+
+
+---
+
+# 📂 Project Structure
+
+
+```
 ecommerce-platform/
+
+│
+├── frontend/
+│   ├── customer-ui/
+│   └── admin-ui/
+│
+├── user-service/
+│
+├── product-service/
+│
+├── order-service/
+│
+├── chat-service/
 │
 ├── nginx/
-├── user-service/
-├── product-service/
-├── order-service/
-├── chat-service/
+│
 ├── docker-compose.yml
-├── README.md
-└── .gitignore
+│
+└── README.md
+
 ```
 
----
-
-# Running the Project
-
-1. Clone the repository.
-2. Configure MySQL and PostgreSQL databases.
-3. Build and start all services using Docker Compose.
-4. Run database migrations.
-5. Access all REST APIs through the Nginx API Gateway.
-6. Connect to the Chat Service using the WebSocket endpoint.
-7. Test REST APIs and WebSocket communication using Postman.
 
 ---
 
-# Current Features
+# ⚙️ Running Locally
 
-* Microservices Architecture
-* JWT Authentication
-* Nginx API Gateway
-* User Management
-* Product Management
-* Order Management
-* Real-Time One-to-One Chat
-* WebSocket Authentication
-* Chat History
-* Conversation List
-* Message Delivery Status
-* Message Read Status
-* Unread Message Count
+
+Clone repository:
+
+```bash
+git clone <repository-url>
+```
+
+
+Build containers:
+
+```bash
+docker compose build
+```
+
+
+Start application:
+
+```bash
+docker compose up -d
+```
+
+
+Run migrations:
+
+```bash
+docker exec -it user-service python manage.py migrate
+```
+
+
+Application:
+
+
+Customer:
+
+```
+http://localhost:5173
+```
+
+
+Admin:
+
+```
+http://localhost:5174
+```
+
+
+API Gateway:
+
+```
+http://localhost:8080
+```
+
 
 ---
 
-# Future Enhancements
+# 📈 Engineering Concepts Implemented
 
-* Online / Offline Status
-* Last Seen
-* Typing Indicator
-* File Sharing
-* Image Sharing
-* Group Chat
-* Payment Service
-* Inventory Service
-* Redis Caching
-* RabbitMQ / Kafka Integration
-* CI/CD Pipeline
+
+✔ Microservices Architecture  
+✔ Database Isolation  
+✔ API Gateway Pattern  
+✔ Authentication Service  
+✔ Service Communication  
+✔ Containerization  
+✔ Reverse Proxy  
+✔ WebSocket Communication  
+✔ Distributed System Design  
+✔ REST API Design  
+✔ Frontend-Backend Integration  
+
 
 ---
 
-# Author
+# 🔮 Future Improvements
 
-**Soumya Singh**
+
+- Payment Service
+- Inventory Service
+- Notification Service
+- Email Service
+- Redis Cache Layer
+- RabbitMQ / Kafka Event Processing
+- CI/CD Pipeline
+- Kubernetes Deployment
+- Monitoring & Logging
+
+
+---
+
+# 👩‍💻 Author
+
+## Soumya Singh
+
