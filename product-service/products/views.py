@@ -13,6 +13,8 @@ from django.db.models import Q
 from ecommerce_common.response import success_response
 from ecommerce_common.exceptions import NotFoundException
 from ecommerce_common.utils import get_user_info
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.decorators import parser_classes
 
 
 
@@ -20,6 +22,7 @@ from ecommerce_common.utils import get_user_info
 
 # CREATE PRODUCT
 @api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
 def create_product(request):
 
     user = get_user_info(request)
@@ -34,10 +37,10 @@ def create_product(request):
         serializer.save()
 
         return success_response(
-               message="Product Created Successfully",
-               data=serializer.data,
-               status_code=201
-               )
+            message="Product Created Successfully",
+            data=serializer.data,
+            status_code=201
+        )
 
     return Response(
         {
@@ -47,7 +50,6 @@ def create_product(request):
         },
         status=status.HTTP_400_BAD_REQUEST,
     )
-
 # PRODUCT LIST
 @api_view(["GET"])
 def product_list(request):
