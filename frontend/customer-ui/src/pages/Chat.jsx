@@ -1,26 +1,25 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import MainLayout from "../layouts/MainLayout";
 
-import {
-    connectChatSocket,
-    sendMessage,
-    disconnectChatSocket
-} from "../services/chatSocket";
+import { sendMessage } from "../services/chatSocket";
 
 import { getChatHistory } from "../api/chatApi";
+
+import { useChat } from "../context/ChatContext";
 
 
 
 export default function Chat(){
 
 
-    const [messages,setMessages] = useState([]);
+    
 
-    const [text,setText] = useState("");
+    const [text, setText] = useState("");
 
 
-    const socketRef = useRef(null);
+
+    const { socketRef, messages, setMessages } = useChat();
 
 
 
@@ -94,56 +93,6 @@ export default function Chat(){
 
 
 
-
-
-        const socket = connectChatSocket(
-
-            adminId,
-
-            customerId,
-
-
-            (message)=>{
-
-
-                console.log(
-                    "NEW MESSAGE:",
-                    message
-                );
-
-
-                setMessages((prev)=>[
-
-                    ...prev,
-
-                    message
-
-                ]);
-
-
-            }
-
-        );
-
-
-
-        socketRef.current = socket;
-
-
-
-
-
-        return ()=>{
-
-
-            disconnectChatSocket(
-                socketRef.current
-            );
-
-
-        };
-
-
     },[customerId]);
 
 
@@ -158,6 +107,7 @@ export default function Chat(){
         console.log(
             "SEND BUTTON CLICK"
         );
+
 
 
         if(!text.trim()){
@@ -188,177 +138,179 @@ export default function Chat(){
 
 
 
-return (
+    return (
 
-<MainLayout>
+        <MainLayout>
 
 
-<div className="max-w-5xl mx-auto py-10 px-4">
+            <div className="max-w-5xl mx-auto py-10 px-4">
 
 
-<h1 className="text-3xl font-bold mb-6">
+                <h1 className="text-3xl font-bold mb-6">
 
-Chat With Admin
+                    Chat With Admin
 
-</h1>
+                </h1>
 
 
 
-<div
-className="
-border
-rounded-xl
-h-[500px]
-flex
-flex-col
-"
->
 
+                <div
+                className="
+                border
+                rounded-xl
+                h-[500px]
+                flex
+                flex-col
+                "
+                >
 
 
-<div
-className="
-flex-1
-p-4
-overflow-y-auto
-"
->
 
 
-{
-messages.map((msg,index)=>(
+                    <div
+                    className="
+                    flex-1
+                    p-4
+                    overflow-y-auto
+                    "
+                    >
 
 
-<div
+                    {
+                        messages.map((msg,index)=>(
 
-key={msg.id || index}
 
+                            <div
 
-className={
+                            key={msg.id || index}
 
-String(msg.sender_id) === String(customerId)
+                            className={
 
-?
+                                String(msg.sender_id) === String(customerId)
 
-"text-right mb-3"
+                                ?
 
-:
+                                "text-right mb-3"
 
-"text-left mb-3"
+                                :
 
-}
+                                "text-left mb-3"
 
->
+                            }
 
+                            >
 
-<span
 
-className="
-inline-block
-bg-gray-200
-rounded-lg
-px-3
-py-2
-"
+                                <span
 
->
+                                className="
+                                inline-block
+                                bg-gray-200
+                                rounded-lg
+                                px-3
+                                py-2
+                                "
 
+                                >
 
-<b>
 
-{msg.sender}
+                                    <b>
+                                        {msg.sender}
+                                    </b>
 
-</b>
 
+                                    :
 
-:
+                                    {msg.message}
 
-{msg.message}
 
 
+                                </span>
 
-</span>
 
+                            </div>
 
-</div>
 
+                        ))
 
-))
+                    }
 
-}
 
 
+                    </div>
 
-</div>
 
 
 
 
-<div
+                    <div
 
-className="
-border-t
-p-3
-flex
-gap-2
-"
+                    className="
+                    border-t
+                    p-3
+                    flex
+                    gap-2
+                    "
 
->
+                    >
 
 
-<input
 
-value={text}
+                        <input
 
-onChange={(e)=>
-setText(e.target.value)
-}
+                        value={text}
 
-className="
-flex-1
-border
-rounded
-px-3
-"
+                        onChange={(e)=>
+                            setText(e.target.value)
+                        }
 
-placeholder="Type message..."
+                        className="
+                        flex-1
+                        border
+                        rounded
+                        px-3
+                        "
 
- />
+                        placeholder="Type message..."
 
+                        />
 
 
-<button
 
-onClick={handleSend}
 
-className="
-bg-blue-600
-text-white
-px-5
-rounded
-"
+                        <button
 
->
+                        onClick={handleSend}
 
-Send
+                        className="
+                        bg-blue-600
+                        text-white
+                        px-5
+                        rounded
+                        "
 
-</button>
+                        >
 
+                            Send
 
+                        </button>
 
-</div>
 
 
+                    </div>
 
-</div>
 
 
-</div>
+                </div>
 
 
-</MainLayout>
+            </div>
 
-);
+
+        </MainLayout>
+
+    );
 
 
 }

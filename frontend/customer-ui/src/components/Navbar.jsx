@@ -2,6 +2,7 @@ import { ShoppingCart, Search, User, Menu, MessageCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { getUser, isAuthenticated, logout } from "../utils/auth";
+import { useCart } from "../context/CartContext";
 
 
 export default function Navbar() {
@@ -16,6 +17,12 @@ export default function Navbar() {
 
 
   const user = getUser();
+
+
+  const { cartItems } = useCart();
+
+
+  console.log("NAVBAR CART ITEMS:", cartItems);
 
 
 
@@ -82,6 +89,8 @@ export default function Navbar() {
 
 
 
+
+
           {/* Search */}
 
           <div className="hidden md:flex w-2/5">
@@ -112,6 +121,8 @@ export default function Navbar() {
 
 
           </div>
+
+
 
 
 
@@ -195,6 +206,9 @@ export default function Navbar() {
 
 
 
+
+
+
             {/* Chat */}
 
             {
@@ -203,6 +217,8 @@ export default function Navbar() {
                 <Link to="/chat">
 
                   <MessageCircle
+
+                    size={26}
 
                     className="
                     cursor-pointer
@@ -220,11 +236,24 @@ export default function Navbar() {
 
 
 
+
+
+
+
             {/* Cart */}
 
-            <Link to="/cart">
+            <Link
+
+              to="/cart"
+
+              className="relative"
+
+            >
+
 
               <ShoppingCart
+
+                size={28}
 
                 className="
                 cursor-pointer
@@ -234,14 +263,57 @@ export default function Navbar() {
 
               />
 
+
+
+              {
+                cartItems.length > 0 && (
+
+                  <span
+
+                    className="
+                    absolute
+                    -top-3
+                    -right-3
+                    bg-red-600
+                    text-white
+                    text-sm
+                    font-bold
+                    rounded-full
+                    w-6
+                    h-6
+                    flex
+                    items-center
+                    justify-center
+                    "
+
+                  >
+
+                    {cartItems.length}
+
+                  </span>
+
+                )
+              }
+
+
             </Link>
+
+
+
+
 
 
 
 
             {/* Mobile Menu */}
 
-            <Menu className="md:hidden cursor-pointer" />
+            <Menu
+
+              size={26}
+
+              className="md:hidden cursor-pointer"
+
+            />
 
 
           </div>
@@ -256,4 +328,5 @@ export default function Navbar() {
     </header>
 
   );
+
 }

@@ -1,3 +1,4 @@
+
 export const connectChatSocket = (
     adminId,
     customerId,
@@ -16,7 +17,8 @@ export const connectChatSocket = (
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log("SOCKET MESSAGE RECEIVED:", data);
-
+        
+   
         if (onMessage) {
             onMessage(data);
         }

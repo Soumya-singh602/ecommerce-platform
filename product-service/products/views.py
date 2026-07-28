@@ -152,6 +152,7 @@ def product_detail(request, id):
 
 #UPDATE PRODUCT
 @api_view(["PUT"])
+@parser_classes([MultiPartParser, FormParser])
 def update_product(request, id):
     user = get_user_info(request)
 
@@ -165,7 +166,9 @@ def update_product(request, id):
     
     serializer = ProductSerializer(
         product,
-        data=request.data
+        data=request.data,
+        partial=True
+
     )
 
     if serializer.is_valid():
