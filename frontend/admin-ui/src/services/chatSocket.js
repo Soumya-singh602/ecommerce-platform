@@ -1,48 +1,67 @@
-let socket = null;
-
-
 export const connectChatSocket = (
     adminId,
     customerId,
     onMessage
 ) => {
 
-    if (socket) {
-        socket.close();
-    }
-
 
     const token = localStorage.getItem("access");
 
 
-    socket = new WebSocket(
+    const socket = new WebSocket(
         `${import.meta.env.VITE_WS_URL}/ws/chat/${adminId}/${customerId}/?token=${token}`
+    );
 
+
+    console.log(
+        "CONNECT CHAT:",
+        adminId,
+        customerId
     );
 
 
     socket.onopen = () => {
-        console.log("CHAT SOCKET CONNECTED");
+
+        console.log(
+            "CHAT SOCKET CONNECTED"
+        );
+
     };
+
 
 
     socket.onmessage = (event) => {
 
+
         const data = JSON.parse(event.data);
 
-        console.log("MESSAGE RECEIVED:", data);
+
+        console.log(
+            "MESSAGE RECEIVED:",
+            data
+        );
 
 
         if(onMessage){
+
             onMessage(data);
+
         }
 
+
     };
+
 
 
     socket.onerror = (error)=>{
-        console.log("SOCKET ERROR:",error);
+
+        console.log(
+            "SOCKET ERROR:",
+            error
+        );
+
     };
+
 
 
     socket.onclose = (event)=>{
@@ -52,41 +71,64 @@ export const connectChatSocket = (
             event.code
         );
 
-        socket=null;
     };
+
+
+    return socket;
 
 };
 
 
 
-export const sendMessage=(message)=>{
 
 
-    if(!socket || socket.readyState !== WebSocket.OPEN){
+export const sendMessage = (
+    socket,
+    message
+)=>{
 
-        console.log("Socket not connected");
+
+    if(
+        !socket ||
+        socket.readyState !== WebSocket.OPEN
+    ){
+
+        console.log(
+            "SOCKET NOT CONNECTED"
+        );
 
         return;
+
     }
 
 
+
     socket.send(
+
         JSON.stringify({
-            message:message
+
+            message: message
+
         })
+
     );
+
 
 };
 
 
 
-export const disconnectChatSocket=()=>{
+
+
+export const disconnectChatSocket = (
+    socket
+)=>{
+
 
     if(socket){
 
         socket.close();
 
-        socket=null;
     }
 
 };

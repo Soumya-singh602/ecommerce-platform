@@ -1,7 +1,8 @@
 import {
     useState,
     useEffect,
-    useCallback
+    useCallback,
+    useRef
 } from "react";
 
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -27,6 +28,9 @@ export default function Chat() {
     const [selectedUser, setSelectedUser] = useState(null);
 
     const [messages, setMessages] = useState([]);
+
+
+    const socketRef = useRef(null);
 
 
 
@@ -77,6 +81,7 @@ export default function Chat() {
 
 
 
+
     // ==========================
     // CONNECT SOCKET
     // ==========================
@@ -91,6 +96,7 @@ export default function Chat() {
         }
 
 
+
         console.log(
 
             "CONNECT CHAT:",
@@ -102,12 +108,14 @@ export default function Chat() {
         );
 
 
-        // clear previous realtime messages
+
+        // clear previous messages
+
         setMessages([]);
 
 
 
-        connectChatSocket(
+        const socket = connectChatSocket(
 
             currentUserId,
 
@@ -116,6 +124,9 @@ export default function Chat() {
             handleMessage
 
         );
+
+
+        socketRef.current = socket;
 
 
 
@@ -127,7 +138,12 @@ export default function Chat() {
             );
 
 
-            disconnectChatSocket();
+            disconnectChatSocket(
+                socketRef.current
+            );
+
+
+            socketRef.current = null;
 
 
         };
@@ -140,6 +156,7 @@ export default function Chat() {
         handleMessage
 
     ]);
+
 
 
 
@@ -167,6 +184,7 @@ export default function Chat() {
 
 
                 />
+
 
 
 
@@ -211,7 +229,14 @@ export default function Chat() {
                             );
 
 
-                            sendMessage(message);
+
+                            sendMessage(
+
+                                socketRef.current,
+
+                                message
+
+                            );
 
 
                         }}
