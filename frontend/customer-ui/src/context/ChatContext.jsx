@@ -64,7 +64,8 @@ export const ChatProvider = ({ children }) => {
                 );
 
 
-                // Add message in chat
+
+                // Add incoming message to chat
                 setMessages((prev)=>[
                     ...prev,
                     message
@@ -72,13 +73,22 @@ export const ChatProvider = ({ children }) => {
 
 
 
-                // Show notification
-                setNotificationMessage(
-                    message.message
-                );
+
+                // Notification only for admin messages
+                if(
+                    String(message.sender_id) !== String(customerId)
+                ){
 
 
-                setShowNotification(true);
+                    setNotificationMessage(
+                        message.message
+                    );
+
+
+                    setShowNotification(true);
+
+
+                }
 
 
             }
