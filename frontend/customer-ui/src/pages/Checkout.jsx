@@ -18,7 +18,20 @@ export default function Checkout() {
   const navigate = useNavigate();
 
 
-  const { product, quantity } = location.state || {};
+  const {
+    product,
+    quantity,
+    cartItems
+  } = location.state || {};
+
+
+
+  console.log(
+    "CHECKOUT STATE:",
+    location.state
+  );
+
+
 
   const [loading, setLoading] = useState(false);
 
@@ -33,13 +46,70 @@ export default function Checkout() {
       setLoading(true);
 
 
-      const data = {
 
-        product_id: product.id,
+      let data;
 
-        quantity: quantity
 
-      };
+
+      // BUY NOW FLOW
+
+      if(product){
+
+
+        data = {
+
+          product_id: product.id,
+
+          quantity: quantity || 1
+
+        };
+
+
+      }
+
+
+
+      // CART FLOW
+
+      else if(cartItems){
+
+
+        data = {
+
+          items: cartItems.map((item)=>({
+
+            product_id: item.id,
+
+            quantity: item.quantity || 1
+
+          }))
+
+        };
+
+
+      }
+
+
+
+      else {
+
+
+        alert(
+          "No product found"
+        );
+
+
+        return;
+
+
+      }
+
+
+
+      console.log(
+        "ORDER DATA:",
+        data
+      );
 
 
 
@@ -64,7 +134,8 @@ export default function Checkout() {
 
 
 
-    } catch(error) {
+    }
+    catch(error){
 
 
       console.log(
@@ -78,7 +149,8 @@ export default function Checkout() {
       );
 
 
-    } finally {
+    }
+    finally{
 
 
       setLoading(false);
@@ -88,7 +160,6 @@ export default function Checkout() {
 
 
   };
-
 
 
 
@@ -116,9 +187,6 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
 
-
-          {/* Left Section */}
-
           <div className="lg:col-span-2">
 
 
@@ -133,9 +201,6 @@ export default function Checkout() {
 
 
 
-
-          {/* Right Section */}
-
           <div>
 
 
@@ -145,12 +210,13 @@ export default function Checkout() {
 
               quantity={quantity}
 
+              cartItems={cartItems}
+
             />
 
 
 
             <button
-
 
               onClick={handlePlaceOrder}
 

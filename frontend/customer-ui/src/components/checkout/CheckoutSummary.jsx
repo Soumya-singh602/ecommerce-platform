@@ -1,10 +1,37 @@
 export default function CheckoutSummary({
   product,
-  quantity
+  quantity,
+  cartItems
 }) {
 
 
-  const subtotal = Number(product?.price || 0) * quantity;
+  let subtotal = 0;
+
+
+  if(product){
+
+    subtotal = Number(product.price || 0) * (quantity || 1);
+
+  }
+
+
+  else if(cartItems){
+
+
+    subtotal = cartItems.reduce(
+
+      (total, item) =>
+
+        total + Number(item.price || 0) * (item.quantity || 1),
+
+      0
+
+    );
+
+
+  }
+
+
 
   const shipping = 99;
 
@@ -31,20 +58,67 @@ export default function CheckoutSummary({
       <div className="space-y-4">
 
 
+        {
+          product && (
 
-        <div className="flex justify-between">
+            <div className="flex justify-between">
 
-          <span>
-            Product
-          </span>
+              <span>
+                Product
+              </span>
 
-          <span className="font-semibold">
+              <span className="font-semibold">
 
-            {product?.name}
+                {product.name}
 
-          </span>
+              </span>
 
-        </div>
+            </div>
+
+          )
+        }
+
+
+
+
+        {
+          cartItems && (
+
+            <div>
+
+              {
+                cartItems.map((item)=>(
+
+                  <div
+
+                  key={item.id}
+
+                  className="flex justify-between"
+
+                  >
+
+                    <span>
+                      {item.name}
+                    </span>
+
+
+                    <span>
+
+                      x{item.quantity}
+
+                    </span>
+
+
+                  </div>
+
+                ))
+              }
+
+            </div>
+
+          )
+        }
+
 
 
 
@@ -57,11 +131,16 @@ export default function CheckoutSummary({
 
           <span>
 
-            {quantity}
+            {
+              product
+              ? quantity
+              : cartItems?.length
+            }
 
           </span>
 
         </div>
+
 
 
 
@@ -83,6 +162,7 @@ export default function CheckoutSummary({
 
 
 
+
         <div className="flex justify-between">
 
           <span>
@@ -100,6 +180,7 @@ export default function CheckoutSummary({
 
 
 
+
         <div className="flex justify-between">
 
           <span>
@@ -113,6 +194,7 @@ export default function CheckoutSummary({
           </span>
 
         </div>
+
 
 
 

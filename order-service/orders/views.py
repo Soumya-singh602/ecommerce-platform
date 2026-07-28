@@ -24,46 +24,155 @@ def place_order(request):
 
     user = get_user_info(request)
 
-    print("User ID :", user["user_id"])
-    print("User Email :", user["user_email"])
-
     data["user_id"] = user["user_id"]
+
+
+    # ==========================
+    # CART ORDER
+    # ==========================
+
+    if "items" in request.data:
+
+
+        created_orders = []
+
+
+        for item in request.data["items"]:
+
+
+            product_id = item.get("product_id")
+            quantity = item.get("quantity",1)
+
+
+            response = requests.get(
+
+                f"http://product-service:8002/products/{product_id}/",
+
+                headers={
+                    "Authorization": request.headers.get("Authorization")
+                }
+
+            )
+
+
+            if response.status_code != 200:
+
+                raise NotFoundException(
+                    f"Product {product_id} not found"
+                )
+
+
+
+            order_data = {
+
+                "user_id": user["user_id"],
+
+                "product_id": product_id,
+
+                "quantity": quantity
+
+            }
+
+
+
+            serializer = OrderSerializer(
+                data=order_data
+            )
+
+
+
+            if serializer.is_valid():
+
+                serializer.save()
+
+                created_orders.append(
+                    serializer.data
+                )
+
+
+            else:
+
+                return Response(
+                    {
+                        "status":"failed",
+                        "errors":serializer.errors
+                    },
+                    status=400
+                )
+
+
+
+        return success_response(
+
+            message="Cart order placed successfully",
+
+            data=created_orders,
+
+            status_code=201
+
+        )
+
+
+
+
+    # ==========================
+    # BUY NOW ORDER
+    # ==========================
+
 
     product_id = request.data.get("product_id")
 
+
     response = requests.get(
-    f"http://product-service:8002/products/{product_id}/",
-    headers={
-        "Authorization": request.headers.get("Authorization")
-    }
-)
+
+        f"http://product-service:8002/products/{product_id}/",
+
+        headers={
+            "Authorization": request.headers.get("Authorization")
+        }
+
+    )
+
 
     if response.status_code != 200:
-        raise NotFoundException("Product not found")
 
-    serializer = OrderSerializer(data=data)
+        raise NotFoundException(
+            "Product not found"
+        )
+
+
+    serializer = OrderSerializer(
+        data=data
+    )
+
 
     if serializer.is_valid():
 
         serializer.save()
 
+
         return success_response(
+
             message="Order placed successfully",
+
             data=serializer.data,
+
             status_code=201
+
         )
 
+
     return Response(
+
         {
-            "status": "failed",
-            "message": "Validation failed",
-            "data": serializer.errors,
+            "status":"failed",
+            "message":"Validation failed",
+            "data":serializer.errors
         },
-        status=status.HTTP_400_BAD_REQUEST,
+
+        status=400
+
     )
-
-
-# ORDER LIST
 # ORDER LIST
 @api_view(["GET"])
 def order_list(request):
