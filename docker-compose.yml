@@ -60,6 +60,7 @@ services:
       - "8002:8002"
     volumes:
       - ./product-service:/app
+      - product_media_data:/app/media
     depends_on:
       - product-db
 
@@ -192,5 +193,6 @@ services:
 volumes:
   user_db_data:
   product_db_data:
+  product_media_data:
   order_db_data:
   chat_db_data:
