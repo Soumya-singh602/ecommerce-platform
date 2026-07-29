@@ -14,4 +14,4 @@ COPY order-service/ .
 
 EXPOSE 8003
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8003"]
+CMD ["gunicorn", "order_service.wsgi:application", "--bind", "0.0.0.0:8003"]

@@ -2,9 +2,11 @@ from django.shortcuts import render
 
 # Create your views here.
 import requests
+import os
 from rest_framework.decorators import api_view 
 from rest_framework.response import Response
 from rest_framework import status
+PRODUCT_SERVICE_URL = os.getenv("PRODUCT_SERVICE_URL")
 
 from .serializers import OrderSerializer
 from .models import Order
@@ -46,7 +48,7 @@ def place_order(request):
 
             response = requests.get(
 
-                f"http://product-service:8002/products/{product_id}/",
+                f"{PRODUCT_SERVICE_URL}/products/{product_id}/",
 
                 headers={
                     "Authorization": request.headers.get("Authorization")
@@ -125,7 +127,7 @@ def place_order(request):
 
     response = requests.get(
 
-        f"http://product-service:8002/products/{product_id}/",
+        f"{PRODUCT_SERVICE_URL}/products/{product_id}/",
 
         headers={
             "Authorization": request.headers.get("Authorization")
@@ -281,7 +283,7 @@ def order_list(request):
         product_response = requests.get(
 
 
-            f"http://product-service:8002/products/{order['product_id']}/",
+            f"{PRODUCT_SERVICE_URL}/products/{order['product_id']}/",
 
 
             headers={
@@ -366,7 +368,7 @@ def order_detail(request, id):
 
     product_response = requests.get(
 
-        f"http://product-service:8002/products/{order.product_id}/",
+        f"{PRODUCT_SERVICE_URL}/products/{order.product_id}/",
 
         headers={
 
@@ -599,7 +601,7 @@ def admin_order_list(request):
     for order in serializer.data:
 
         product_response = requests.get(
-            f"http://product-service:8002/products/{order['product_id']}/",
+            f"{PRODUCT_SERVICE_URL}/products/{order['product_id']}/",
             headers={
                 "Authorization": request.headers.get("Authorization")
             }
