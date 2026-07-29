@@ -8,10 +8,12 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY chat-service/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY chat-service/ .
 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8004", "chat_service.asgi:application"]
+EXPOSE 8004
+
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8004", "config.asgi:application"]
