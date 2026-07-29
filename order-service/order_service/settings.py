@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1&gfve#hyxr@e$07()s=0)wocv&01n0q8u++p690(va#^4hu8z'
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-development-key"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
+
 
 
 # Application definition
@@ -79,11 +86,11 @@ WSGI_APPLICATION = 'order_service.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "order_db",
-        "USER": "ecommerce",
-        "PASSWORD": "password123",
-        "HOST": "order-db",
-        "PORT": "3306",
+        "NAME": os.getenv("MYSQLDATABASE"),
+        "USER": os.getenv("MYSQLUSER"),
+        "PASSWORD": os.getenv("MYSQLPASSWORD"),
+        "HOST": os.getenv("MYSQLHOST"),
+        "PORT": os.getenv("MYSQLPORT"),
     }
 }
 
@@ -129,6 +136,5 @@ REST_FRAMEWORK = {"EXCEPTION_HANDLER": "ecommerce_common.handlers.ecommerce_exce
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "nginx",
-    "order-service",
+    ".onrender.com",
 ]
