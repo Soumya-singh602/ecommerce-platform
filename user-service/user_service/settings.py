@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!SECRET_KEY = 'dj
-SECRET_KEY = "django-insecure-(2v54@&o*pgnzi7e6=yv7ex4sz9_js%r#hi3iha0*t-0!3)-#w"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-development-key"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
+
 
 
 # Application definition
@@ -82,15 +89,13 @@ WSGI_APPLICATION = 'user_service.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "user_db",
-        "USER": "ecommerce",
-        "PASSWORD": "password123",
-        "HOST": "user-db",
-        "PORT": "3306",
+        "NAME": os.getenv("MYSQLDATABASE"),
+        "USER": os.getenv("MYSQLUSER"),
+        "PASSWORD": os.getenv("MYSQLPASSWORD"),
+        "HOST": os.getenv("MYSQLHOST"),
+        "PORT": os.getenv("MYSQLPORT", "3306"),
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -147,8 +152,7 @@ SIMPLE_JWT = {
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "nginx",
-    "user-service",
+    ".onrender.com",
 ]
 
 # CORS_ALLOWED_ORIGINS = [
