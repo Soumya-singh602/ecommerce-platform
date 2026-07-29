@@ -180,3 +180,45 @@ def dashboard(request):
             "conversations": data,
         }
     )
+@api_view(["GET"])
+def dashboard(request):
+
+    online_users = []
+
+    for user in redis_client.smembers("online_users"):
+
+        if isinstance(user, bytes):
+            online_users.append(user.decode())
+        else:
+            online_users.append(user)
+
+
+    conversations = Conversation.objects.all()
+
+
+    data = []
+
+    for conversation in conversations:
+
+        data.append(
+            {
+                "admin_id": conversation.admin_id,
+                "customer_id": conversation.customer_id,
+                "last_message": conversation.last_message,
+                "unread_count": conversation.unread_count,
+                "is_online": (
+                    conversation.customer_id
+                    in online_users
+                ),
+                "updated_at": conversation.updated_at,
+            }
+        )
+
+
+    return Response(
+        {
+            "status": "success",
+            "online_users": online_users,
+            "conversations": data,
+        }
+    )
