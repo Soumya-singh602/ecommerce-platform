@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8004"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8004", "chat_service.asgi:application"]
