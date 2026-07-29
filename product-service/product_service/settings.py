@@ -86,7 +86,12 @@ WSGI_APPLICATION = 'product_service.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
+database_url = os.getenv("DATABASE_URL")
+
+if not database_url:
+    raise ValueError("DATABASE_URL environment variable is not set")
+
+tmpPostgres = urlparse(database_url)
 
 DATABASES = {
     "default": {
