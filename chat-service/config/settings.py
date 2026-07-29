@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,16 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-6r!$jh$yhngz4!g=9cl7x+zi8*56rl$)f#y&k&_(37dc)%rj^*'
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-development-key"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "nginx",
-    "chat-service",
+    ".onrender.com",
 ]
 
 
@@ -83,11 +89,11 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "chat_db",
-        "USER": "root",
-        "PASSWORD": "root",
-        "HOST": "chat-db",
-        "PORT": "3306",
+        "NAME": os.getenv("MYSQLDATABASE"),
+        "USER": os.getenv("MYSQLUSER"),
+        "PASSWORD": os.getenv("MYSQLPASSWORD"),
+        "HOST": os.getenv("MYSQLHOST"),
+        "PORT": os.getenv("MYSQLPORT"),
     }
 }
 
@@ -134,12 +140,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [
-                {
-                    "address": "redis://redis:6379",
-                    "socket_timeout": 10,
-                }
-            ],
+            "hosts": [os.getenv("REDIS_URL")],
         },
     },
 }
