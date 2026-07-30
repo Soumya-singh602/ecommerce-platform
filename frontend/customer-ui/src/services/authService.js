@@ -21,6 +21,11 @@ export const loginUser = async(data)=>{
         data
     );
 
+    console.log(
+        "AUTH SERVICE LOGIN RESPONSE:",
+        response.data
+    );
+
     return response.data;
 
 };
