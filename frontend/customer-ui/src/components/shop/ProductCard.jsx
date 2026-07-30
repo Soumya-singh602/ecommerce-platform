@@ -32,8 +32,8 @@ export default function ProductCard({ product }) {
         <img
           src={
             product.image
-              ? `http://127.0.0.1:8002${product.image}`
-              : "https://picsum.photos/400/300"
+              ? `${import.meta.env.VITE_MEDIA_URL}${product.image}`
+              : "/placeholder.png"
           }
           alt={product.name}
           className="w-full h-60 object-cover"

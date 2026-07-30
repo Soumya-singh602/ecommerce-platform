@@ -26,10 +26,9 @@ export default function CartItem({ product }) {
 
                     src={
                         product.image
-                        ?
-                        `http://127.0.0.1:8002${product.image}`
-                        :
-                        "https://picsum.photos/150"
+                           ? `${import.meta.env.VITE_MEDIA_URL}${product.image}`
+                           : "/placeholder.png"
+                        
                     }
 
                     className="w-24 h-24 rounded-lg object-cover"
