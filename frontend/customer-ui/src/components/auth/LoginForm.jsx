@@ -49,6 +49,17 @@ export default function LoginForm() {
 
       console.log("LOGIN RESPONSE:", response);
 
+      // ROLE VALIDATION
+      if (response.data.role !== "customer") {
+
+        setError(
+           "Please login with customer account"
+        );
+
+        return;
+      }
+
+
 
 
       // Save JWT Token

@@ -26,6 +26,23 @@ export default function Login() {
 
             const response = await loginUser(email, password);
 
+            // =========================
+            // ROLE VALIDATION
+            // =========================
+
+            if (response.data.role !== "admin") {
+
+               setError(
+                "Admin account required"
+                );
+
+               setLoading(false);
+
+               return;
+            }
+
+
+
             localStorage.setItem("access", response.data.access);
 
             localStorage.setItem("refresh", response.data.refresh);
