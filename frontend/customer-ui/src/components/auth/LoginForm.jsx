@@ -45,14 +45,13 @@ export default function LoginForm() {
     try {
 
 
-      const response = await loginUser(formData);
+      const userData = await loginUser(formData);
 
 
-      console.log("LOGIN RESPONSE:", response);
-
-
-
-      const userData = response.data;
+      console.log(
+        "LOGIN RESPONSE:",
+        userData
+      );
 
 
 
@@ -115,7 +114,7 @@ export default function LoginForm() {
 
       console.log(
         "LOGIN ERROR:",
-        error.response?.data
+        error.response?.data || error.message
       );
 
 
@@ -261,3 +260,4 @@ export default function LoginForm() {
   );
 
 }
+
