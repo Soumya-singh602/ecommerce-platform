@@ -28,23 +28,44 @@ export const ChatProvider = ({ children }) => {
     const adminId = "6";
 
 
-    const user = JSON.parse(
-        localStorage.getItem("user")
-    );
+    const storedUser = localStorage.getItem("user");
 
 
-    const customerId = String(
-        user?.user_id
-    );
+    const user = storedUser
+        ? JSON.parse(storedUser)
+        : null;
+
+
+
+    const customerId = user?.user_id
+        ? String(user.user_id)
+        : null;
 
 
 
     useEffect(() => {
 
 
-        if (!customerId) {
+        const token = localStorage.getItem("access");
+
+
+
+        if (!token || !customerId) {
+
+
+            console.log(
+                "CHAT WAITING FOR LOGIN",
+                {
+                    token,
+                    customerId
+                }
+            );
+
+
             return;
+
         }
+
 
 
 
@@ -65,7 +86,6 @@ export const ChatProvider = ({ children }) => {
 
 
 
-                // Add incoming message to chat
                 setMessages((prev)=>[
                     ...prev,
                     message
@@ -74,7 +94,6 @@ export const ChatProvider = ({ children }) => {
 
 
 
-                // Notification only for admin messages
                 if(
                     String(message.sender_id) !== String(customerId)
                 ){
@@ -101,12 +120,17 @@ export const ChatProvider = ({ children }) => {
 
 
 
+
         return () => {
 
 
-            disconnectChatSocket(
-                socketRef.current
-            );
+            if(socketRef.current){
+
+                disconnectChatSocket(
+                    socketRef.current
+                );
+
+            }
 
 
             socketRef.current = null;
@@ -115,7 +139,9 @@ export const ChatProvider = ({ children }) => {
         };
 
 
+
     }, [customerId]);
+
 
 
 
@@ -129,19 +155,15 @@ export const ChatProvider = ({ children }) => {
 
                 socketRef,
 
-
                 messages,
 
                 setMessages,
-
 
                 showNotification,
 
                 setShowNotification,
 
-
                 notificationMessage
-
 
             }}
 
