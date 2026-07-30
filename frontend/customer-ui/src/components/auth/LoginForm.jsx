@@ -1,3 +1,4 @@
+```jsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/authService";
@@ -49,16 +50,23 @@ export default function LoginForm() {
 
       console.log("LOGIN RESPONSE:", response);
 
+
+
+      const userData = response.data;
+
+
+
       // ROLE VALIDATION
-      if (response.data.role !== "customer") {
+
+      if (userData.role !== "customer") {
 
         setError(
-           "Please login with customer account"
+          "Please login with customer account"
         );
 
         return;
-      }
 
+      }
 
 
 
@@ -66,13 +74,13 @@ export default function LoginForm() {
 
       localStorage.setItem(
         "access",
-        response.data.access
+        userData.access
       );
 
 
       localStorage.setItem(
         "refresh",
-        response.data.refresh
+        userData.refresh
       );
 
 
@@ -83,8 +91,15 @@ export default function LoginForm() {
 
         "user",
 
-        JSON.stringify(response.data)
+        JSON.stringify(userData)
 
+      );
+
+
+
+      console.log(
+        "SAVED TOKEN:",
+        localStorage.getItem("access")
       );
 
 
@@ -246,3 +261,4 @@ export default function LoginForm() {
   );
 
 }
+```
