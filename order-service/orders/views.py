@@ -15,6 +15,7 @@ from django.db.models import Count , Q
 from ecommerce_common.response import success_response
 from ecommerce_common.exceptions import NotFoundException
 from ecommerce_common.utils import get_user_info
+from django.http import JsonResponse
 
 
 
@@ -710,3 +711,11 @@ def admin_cancel_order(request, id):
         message="Order cancelled successfully",
         data=serializer.data
     )
+
+
+
+def health_check(request):
+    return JsonResponse({
+        "status": "ok",
+        "service": "order-service"
+    })
