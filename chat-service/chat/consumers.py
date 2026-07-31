@@ -49,11 +49,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         self.user = {
 
-         "id": str(user_id),
+           "id": str(user_id),
 
-          "email": "",
-
-          "role": "",
+           "email": self.scope.get(
+                "email",
+                ""
+             ),
+ 
+            "role": self.scope.get(
+                "role",
+                ""
+              ),
 
         }
         await self.channel_layer.group_add(
@@ -62,6 +68,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     )
 
         await self.accept()
+        print("========== WEBSOCKET ACCEPTED ==========")
+        print("ROOM :", self.room_group_name)
+        print("USER :", self.user)
 
         if self.user["role"] == "customer":
 
