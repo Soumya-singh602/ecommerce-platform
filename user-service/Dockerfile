@@ -14,4 +14,4 @@ COPY user-service/ .
 
 EXPOSE 8001
 
-CMD ["gunicorn", "user_service.wsgi:application", "--bind", "0.0.0.0:8001"]
+CMD ["sh", "-c", "gunicorn user_service.wsgi:application --bind 0.0.0.0:$PORT"]
