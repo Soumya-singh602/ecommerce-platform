@@ -19,6 +19,9 @@ export default function Chat(){
 
 
     const adminId = String(import.meta.env.VITE_ADMIN_ID);
+    console.log("ENV ADMIN ID =", import.meta.env.VITE_ADMIN_ID);
+    console.log("ADMIN ID =", adminId);
+    console.log("CUSTOMER ID =", customerId);
 
 
     const user = JSON.parse(
