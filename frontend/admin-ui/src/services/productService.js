@@ -1,40 +1,32 @@
 import api from "./axios";
 
 export const getProducts = async (
-    search="",
-    sort="",
-    minPrice="",
-    maxPrice="",
-    page=1
+    search = "",
+    sort = "",
+    minPrice = "",
+    maxPrice = "",
+    page = 1
 ) => {
-
 
     const params = {};
 
-
-    if(search){
+    if (search) {
         params.search = search;
     }
 
-
-    if(sort){
+    if (sort) {
         params.sort = sort;
     }
 
-
-    if(minPrice){
+    if (minPrice) {
         params.min_price = minPrice;
     }
 
-
-    if(maxPrice){
+    if (maxPrice) {
         params.max_price = maxPrice;
     }
 
-
     params.page = page;
-
-
 
     const response = await api.get(
         "/products/",
@@ -43,14 +35,15 @@ export const getProducts = async (
         }
     );
 
-
     return response.data.data;
 
 };
 
 export const deleteProduct = async (id) => {
 
-    const response = await api.delete(`/products/${id}/delete/`);
+    const response = await api.delete(
+        `/products/${id}/delete/`
+    );
 
     return response.data;
 
@@ -58,9 +51,20 @@ export const deleteProduct = async (id) => {
 
 export const updateProduct = async (id, data) => {
 
+    const formData = new FormData();
+
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("price", data.price);
+    formData.append("stock", data.stock);
+
+    if (data.image) {
+        formData.append("image", data.image);
+    }
+
     const response = await api.put(
         `/products/${id}/update/`,
-        data
+        formData
     );
 
     return response.data;
@@ -69,9 +73,20 @@ export const updateProduct = async (id, data) => {
 
 export const createProduct = async (data) => {
 
+    const formData = new FormData();
+
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("price", data.price);
+    formData.append("stock", data.stock);
+
+    if (data.image) {
+        formData.append("image", data.image);
+    }
+
     const response = await api.post(
         "/products/create/",
-        data
+        formData
     );
 
     return response.data;
