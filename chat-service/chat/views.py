@@ -12,6 +12,8 @@ from .services import get_user_details
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 import httpx
+from django.http import JsonResponse
+
 
 
 
@@ -222,3 +224,11 @@ def dashboard(request):
             "conversations": data,
         }
     )
+
+
+
+def health_check(request):
+    return JsonResponse({
+        "status": "ok",
+        "service": "chat-service"
+    })

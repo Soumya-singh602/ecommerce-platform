@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import chat_history , conversation_list , mark_messages_read , dashboard
+from .views import chat_history , conversation_list , mark_messages_read , dashboard , health_check
 
 
 urlpatterns = [
@@ -15,4 +15,5 @@ urlpatterns = [
     mark_messages_read,
 ),
     path("dashboard/",dashboard),
+    path("health/", health_check),
 ]
