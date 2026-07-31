@@ -15,6 +15,7 @@ from ecommerce_common.exceptions import NotFoundException
 from ecommerce_common.utils import get_user_info
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import parser_classes
+from django.http import JsonResponse
 
 
 
@@ -212,3 +213,10 @@ def delete_product(request, id):
             "product_id": id
         }
     )
+
+
+def health_check(request):
+    return JsonResponse({
+        "status": "ok",
+        "service": "product-service"
+    })
