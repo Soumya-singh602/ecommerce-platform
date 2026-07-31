@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import MainLayout from "../layouts/MainLayout";
 
-import { sendMessage } from "../services/chatSocket";
+import { sendMessage, connectChatSocket } from "../services/chatSocket";
 
 import { getChatHistory } from "../api/chatApi";
 
@@ -13,14 +13,9 @@ import { useChat } from "../context/ChatContext";
 export default function Chat(){
 
 
-    
-
     const [text, setText] = useState("");
 
-
-
     const { socketRef, messages, setMessages } = useChat();
-
 
 
     const adminId = "6";
@@ -34,7 +29,6 @@ export default function Chat(){
     const customerId = String(
         user?.user_id
     );
-
 
 
 
@@ -54,7 +48,6 @@ export default function Chat(){
 
 
         const loadHistory = async()=>{
-
 
             try{
 
@@ -77,13 +70,14 @@ export default function Chat(){
             }
             catch(error){
 
+
                 console.log(
                     "HISTORY ERROR:",
                     error
                 );
 
-            }
 
+            }
 
         };
 
@@ -93,7 +87,81 @@ export default function Chat(){
 
 
 
+
+
+        // ==========================
+        // CONNECT WEBSOCKET
+        // ==========================
+
+
+        const socket = connectChatSocket(
+
+            adminId,
+
+            customerId,
+
+            (message)=>{
+
+
+                console.log(
+                    "NEW MESSAGE:",
+                    message
+                );
+
+
+                setMessages(prev=>[
+
+                    ...prev,
+
+                    message
+
+                ]);
+
+
+            }
+
+        );
+
+
+
+        console.log(
+            "SOCKET CREATED:",
+            socket
+        );
+
+
+
+        socketRef.current = socket;
+
+
+
+        console.log(
+            "SOCKET REF:",
+            socketRef.current
+        );
+
+
+
+
+
+        return ()=>{
+
+
+            if(socketRef.current){
+
+
+                socketRef.current.close();
+
+
+            }
+
+
+        };
+
+
+
     },[customerId]);
+
 
 
 
@@ -118,6 +186,27 @@ export default function Chat(){
 
 
 
+        console.log(
+            "socketRef.current:",
+            socketRef.current
+        );
+
+
+
+        if(socketRef.current){
+
+
+            console.log(
+                "readyState:",
+                socketRef.current.readyState
+            );
+
+
+        }
+
+
+
+
         sendMessage(
 
             socketRef.current,
@@ -129,6 +218,8 @@ export default function Chat(){
 
 
         setText("");
+
+
 
     };
 
@@ -178,6 +269,7 @@ export default function Chat(){
 
 
                     {
+
                         messages.map((msg,index)=>(
 
 
@@ -216,7 +308,9 @@ export default function Chat(){
 
 
                                     <b>
+
                                         {msg.sender}
+
                                     </b>
 
 
