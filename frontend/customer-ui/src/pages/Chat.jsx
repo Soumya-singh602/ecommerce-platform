@@ -18,7 +18,7 @@ export default function Chat(){
     const { socketRef, messages, setMessages } = useChat();
 
 
-    const adminId = "6";
+    const adminId = String(import.meta.env.VITE_ADMIN_ID);
 
 
     const user = JSON.parse(
