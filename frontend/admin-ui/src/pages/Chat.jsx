@@ -23,6 +23,7 @@ export default function Chat() {
 
     // Logged in Admin
     const currentUserId = 4;
+    console.log("ADMIN ID:", currentUserId);
 
 
     const [selectedUser, setSelectedUser] = useState(null);
