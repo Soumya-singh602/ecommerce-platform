@@ -16,4 +16,4 @@ COPY chat-service/ .
 
 EXPOSE 8004
 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8004", "config.asgi:application"]
+CMD ["sh", "-c", "daphne -b 0.0.0.0 -p $PORT config.asgi:application"]
