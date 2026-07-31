@@ -1,101 +1,66 @@
 import { useEffect, useState } from "react";
-
 import MainLayout from "../layouts/MainLayout";
-
 import { sendMessage, connectChatSocket } from "../services/chatSocket";
-
 import { getChatHistory } from "../api/chatApi";
-
 import { useChat } from "../context/ChatContext";
 
-
-
-export default function Chat(){
-
+export default function Chat() {
 
     const [text, setText] = useState("");
 
     const { socketRef, messages, setMessages } = useChat();
 
-
     const adminId = String(import.meta.env.VITE_ADMIN_ID);
+
+    let user = null;
+
+    try {
+        const storedUser = localStorage.getItem("user");
+        user = storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+        console.error("Invalid user data:", error);
+    }
+
+    const customerId = user?.user_id
+        ? String(user.user_id)
+        : null;
+
     console.log("ENV ADMIN ID =", import.meta.env.VITE_ADMIN_ID);
     console.log("ADMIN ID =", adminId);
     console.log("CUSTOMER ID =", customerId);
 
+    useEffect(() => {
 
-    const user = JSON.parse(
-        localStorage.getItem("user")
-    );
+        if (!customerId) {
 
-
-    const customerId = String(
-        user?.user_id
-    );
-
-
-
-    useEffect(()=>{
-
-
-        if(!customerId){
-
-            console.log(
-                "CUSTOMER ID NOT FOUND"
-            );
+            console.log("CUSTOMER ID NOT FOUND");
 
             return;
 
         }
 
+        const loadHistory = async () => {
 
-
-        const loadHistory = async()=>{
-
-            try{
-
+            try {
 
                 const data = await getChatHistory(
                     adminId,
                     customerId
                 );
 
-
-                console.log(
-                    "HISTORY:",
-                    data
-                );
-
+                console.log("HISTORY:", data);
 
                 setMessages(data);
 
+            } catch (error) {
 
-            }
-            catch(error){
-
-
-                console.log(
-                    "HISTORY ERROR:",
-                    error
-                );
-
+                console.log("HISTORY ERROR:", error);
 
             }
 
         };
 
-
-
         loadHistory();
-
-
-
-
-
-        // ==========================
-        // CONNECT WEBSOCKET
-        // ==========================
-
 
         const socket = connectChatSocket(
 
@@ -103,16 +68,11 @@ export default function Chat(){
 
             customerId,
 
-            (message)=>{
+            (message) => {
 
+                console.log("NEW MESSAGE:", message);
 
-                console.log(
-                    "NEW MESSAGE:",
-                    message
-                );
-
-
-                setMessages(prev=>[
+                setMessages(prev => [
 
                     ...prev,
 
@@ -120,95 +80,50 @@ export default function Chat(){
 
                 ]);
 
-
             }
 
         );
 
-
-
-        console.log(
-            "SOCKET CREATED:",
-            socket
-        );
-
-
+        console.log("SOCKET CREATED:", socket);
 
         socketRef.current = socket;
 
+        console.log("SOCKET REF:", socketRef.current);
 
+        return () => {
 
-        console.log(
-            "SOCKET REF:",
-            socketRef.current
-        );
-
-
-
-
-
-        return ()=>{
-
-
-            if(socketRef.current){
-
+            if (socketRef.current) {
 
                 socketRef.current.close();
 
-
             }
-
 
         };
 
-
-
-    },[customerId]);
-
+    }, [adminId, customerId, socketRef, setMessages]);
 
 
 
+    const handleSend = () => {
 
+        console.log("SEND BUTTON CLICK");
 
-
-
-    const handleSend = ()=>{
-
-
-        console.log(
-            "SEND BUTTON CLICK"
-        );
-
-
-
-        if(!text.trim()){
+        if (!text.trim()) {
 
             return;
 
         }
 
+        console.log("socketRef.current:", socketRef.current);
 
-
-        console.log(
-            "socketRef.current:",
-            socketRef.current
-        );
-
-
-
-        if(socketRef.current){
-
+        if (socketRef.current) {
 
             console.log(
                 "readyState:",
                 socketRef.current.readyState
             );
 
-
         }
-
-
-
 
         sendMessage(
 
@@ -218,17 +133,9 @@ export default function Chat(){
 
         );
 
-
-
         setText("");
 
-
-
     };
-
-
-
-
 
 
 
@@ -236,156 +143,120 @@ export default function Chat(){
 
         <MainLayout>
 
-
             <div className="max-w-5xl mx-auto py-10 px-4">
 
-
                 <h1 className="text-3xl font-bold mb-6">
-
                     Chat With Admin
-
                 </h1>
 
-
-
-
                 <div
-                className="
-                border
-                rounded-xl
-                h-[500px]
-                flex
-                flex-col
-                "
+                    className="
+                    border
+                    rounded-xl
+                    h-[500px]
+                    flex
+                    flex-col
+                    "
                 >
 
-
-
-
                     <div
-                    className="
-                    flex-1
-                    p-4
-                    overflow-y-auto
-                    "
+                        className="
+                        flex-1
+                        p-4
+                        overflow-y-auto
+                        "
                     >
 
+                        {
 
-                    {
+                            messages.map((msg, index) => (
 
-                        messages.map((msg,index)=>(
+                                <div
 
+                                    key={msg.id || index}
 
-                            <div
+                                    className={
 
-                            key={msg.id || index}
+                                        String(msg.sender_id) === String(customerId)
 
-                            className={
+                                            ?
 
-                                String(msg.sender_id) === String(customerId)
+                                            "text-right mb-3"
 
-                                ?
+                                            :
 
-                                "text-right mb-3"
+                                            "text-left mb-3"
 
-                                :
-
-                                "text-left mb-3"
-
-                            }
-
-                            >
-
-
-                                <span
-
-                                className="
-                                inline-block
-                                bg-gray-200
-                                rounded-lg
-                                px-3
-                                py-2
-                                "
+                                    }
 
                                 >
 
+                                    <span
 
-                                    <b>
+                                        className="
+                                        inline-block
+                                        bg-gray-200
+                                        rounded-lg
+                                        px-3
+                                        py-2
+                                        "
 
-                                        {msg.sender}
+                                    >
 
-                                    </b>
+                                        <b>{msg.sender}</b>
 
+                                        : {msg.message}
 
-                                    :
+                                    </span>
 
-                                    {msg.message}
+                                </div>
 
+                            ))
 
-
-                                </span>
-
-
-                            </div>
-
-
-                        ))
-
-                    }
-
-
+                        }
 
                     </div>
 
-
-
-
-
                     <div
 
-                    className="
-                    border-t
-                    p-3
-                    flex
-                    gap-2
-                    "
+                        className="
+                        border-t
+                        p-3
+                        flex
+                        gap-2
+                        "
 
                     >
 
-
-
                         <input
 
-                        value={text}
+                            value={text}
 
-                        onChange={(e)=>
-                            setText(e.target.value)
-                        }
+                            onChange={(e) =>
+                                setText(e.target.value)
+                            }
 
-                        className="
-                        flex-1
-                        border
-                        rounded
-                        px-3
-                        "
+                            className="
+                            flex-1
+                            border
+                            rounded
+                            px-3
+                            "
 
-                        placeholder="Type message..."
+                            placeholder="Type message..."
 
                         />
 
-
-
-
                         <button
 
-                        onClick={handleSend}
+                            onClick={handleSend}
 
-                        className="
-                        bg-blue-600
-                        text-white
-                        px-5
-                        rounded
-                        "
+                            className="
+                            bg-blue-600
+                            text-white
+                            px-5
+                            rounded
+                            "
 
                         >
 
@@ -393,21 +264,14 @@ export default function Chat(){
 
                         </button>
 
-
-
                     </div>
-
-
 
                 </div>
 
-
             </div>
-
 
         </MainLayout>
 
     );
-
 
 }
