@@ -28,28 +28,34 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         self.room_group_name = f"chat_{ids[0]}_{ids[1]}"
 
-        headers = dict(self.scope["headers"])
+        user_id = self.scope.get("user_id")
 
-        print("HEADERS :", headers)
-        print("USER ID :", headers.get(b"x-user-id"))
-        print("EMAIL :", headers.get(b"x-user-email"))
-        print("ROLE :", headers.get(b"x-user-role"))
 
-        user_id = headers.get(b"x-user-id")
-        user_email = headers.get(b"x-user-email")
-        user_role = headers.get(b"x-user-role")
+        print(
+             "JWT USER ID:",
+              user_id
+            )
+
 
         if not user_id:
-          print("USER ID NOT FOUND")
-          await self.close(code=4001)
-          return
+
+         print("USER ID NOT FOUND")
+
+         await self.close(code=4001)
+
+         return
+
+
 
         self.user = {
-          "id": user_id.decode(),
-          "email": user_email.decode() if user_email else "",
-          "role": user_role.decode() if user_role else "",
-    }
 
+         "id": str(user_id),
+
+          "email": "",
+
+          "role": "",
+
+        }
         await self.channel_layer.group_add(
           self.room_group_name,
           self.channel_name,
