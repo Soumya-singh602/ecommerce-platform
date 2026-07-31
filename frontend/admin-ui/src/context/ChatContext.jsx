@@ -67,7 +67,7 @@ export const ChatProvider = ({ children }) => {
             adminId,
 
 
-            "all",
+            "6",
 
 
             (message) => {
