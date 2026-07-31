@@ -20,6 +20,7 @@ from .serializers import (
     ChangePasswordSerializer
 )
 from django.contrib.auth.hashers import check_password
+from django.http import JsonResponse
 
 
 # REGISTER USER
@@ -450,3 +451,10 @@ def verify_token(request):
 
 
     return response
+
+
+def health_check(request):
+    return JsonResponse({
+        "status": "ok",
+        "service": "user-service"
+    })
