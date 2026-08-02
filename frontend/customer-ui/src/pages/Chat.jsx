@@ -1,129 +1,229 @@
 import { useEffect, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
-import { sendMessage, connectChatSocket } from "../services/chatSocket";
+import { sendMessage } from "../services/chatSocket";
 import { getChatHistory } from "../api/chatApi";
 import { useChat } from "../context/ChatContext";
 
+
 export default function Chat() {
+
 
     const [text, setText] = useState("");
 
-    const { socketRef, messages, setMessages } = useChat();
 
-    const adminId = String(import.meta.env.VITE_ADMIN_ID);
+
+    const {
+        socketRef,
+        messages,
+        setMessages
+    } = useChat();
+
+
+
+
+    const adminId = String(
+        import.meta.env.VITE_ADMIN_ID
+    );
+
+
 
     let user = null;
 
+
     try {
-        const storedUser = localStorage.getItem("user");
-        user = storedUser ? JSON.parse(storedUser) : null;
-    } catch (error) {
-        console.error("Invalid user data:", error);
+
+        const storedUser =
+            localStorage.getItem("user");
+
+
+        user = storedUser
+            ? JSON.parse(storedUser)
+            : null;
+
+
+    } catch(error){
+
+        console.error(
+            "Invalid user data:",
+            error
+        );
+
     }
+
+
+
+
 
     const customerId = user?.user_id
         ? String(user.user_id)
         : null;
 
-    console.log("ENV ADMIN ID =", import.meta.env.VITE_ADMIN_ID);
-    console.log("ADMIN ID =", adminId);
-    console.log("CUSTOMER ID =", customerId);
+
+
+
+
+    console.log(
+        "ENV ADMIN ID =",
+        import.meta.env.VITE_ADMIN_ID
+    );
+
+
+    console.log(
+        "ADMIN ID =",
+        adminId
+    );
+
+
+    console.log(
+        "CUSTOMER ID =",
+        customerId
+    );
+
+
+
+
+
+
+
+    // =========================
+    // LOAD CHAT HISTORY ONLY
+    // SOCKET IS HANDLED BY ChatContext
+    // =========================
 
     useEffect(() => {
 
-        if (!customerId) {
 
-            console.log("CUSTOMER ID NOT FOUND");
+        if(!customerId){
+
+            console.log(
+                "CUSTOMER ID NOT FOUND"
+            );
 
             return;
 
         }
 
-        const loadHistory = async () => {
 
-            try {
 
-                const data = await getChatHistory(
-                    adminId,
-                    customerId
+
+
+        const loadHistory = async()=>{
+
+
+            try{
+
+
+                const data =
+                    await getChatHistory(
+                        adminId,
+                        customerId
+                    );
+
+
+
+                console.log(
+                    "HISTORY:",
+                    data
                 );
 
-                console.log("HISTORY:", data);
 
-                setMessages(data);
 
-            } catch (error) {
+                // remove duplicate messages
 
-                console.log("HISTORY ERROR:", error);
+                const uniqueMessages =
+                    data.filter(
+                        (msg,index,self)=>
+
+                        index ===
+                        self.findIndex(
+                            item =>
+                            item.id === msg.id
+                        )
+
+                    );
+
+
+
+                setMessages(
+                    uniqueMessages
+                );
+
+
+
+            }
+            catch(error){
+
+
+                console.log(
+                    "HISTORY ERROR:",
+                    error
+                );
+
 
             }
 
+
         };
+
+
 
         loadHistory();
 
-        const socket = connectChatSocket(
 
-            adminId,
 
-            customerId,
+    },[
+        adminId,
+        customerId,
+        setMessages
+    ]);
 
-            (message) => {
 
-                console.log("NEW MESSAGE:", message);
 
-                setMessages(prev => [
 
-                    ...prev,
 
-                    message
 
-                ]);
 
-            }
 
+
+    const handleSend = ()=>{
+
+
+        console.log(
+            "SEND BUTTON CLICK"
         );
 
-        console.log("SOCKET CREATED:", socket);
-
-        socketRef.current = socket;
-
-        console.log("SOCKET REF:", socketRef.current);
-
-        return () => {
-
-            if (socketRef.current) {
-
-                socketRef.current.close();
-
-            }
-
-        };
-
-    }, [adminId, customerId, socketRef, setMessages]);
 
 
-
-    const handleSend = () => {
-
-        console.log("SEND BUTTON CLICK");
-
-        if (!text.trim()) {
+        if(!text.trim()){
 
             return;
 
         }
 
-        console.log("socketRef.current:", socketRef.current);
 
-        if (socketRef.current) {
+
+
+        console.log(
+            "SOCKET:",
+            socketRef.current
+        );
+
+
+
+
+        if(socketRef.current){
+
 
             console.log(
-                "readyState:",
+                "READY STATE:",
                 socketRef.current.readyState
             );
 
+
         }
+
+
+
 
         sendMessage(
 
@@ -133,9 +233,19 @@ export default function Chat() {
 
         );
 
+
+
         setText("");
 
+
+
     };
+
+
+
+
+
+
 
 
 
@@ -143,11 +253,32 @@ export default function Chat() {
 
         <MainLayout>
 
-            <div className="max-w-5xl mx-auto py-10 px-4">
 
-                <h1 className="text-3xl font-bold mb-6">
+            <div
+                className="
+                max-w-5xl
+                mx-auto
+                py-10
+                px-4
+                "
+            >
+
+
+                <h1
+                    className="
+                    text-3xl
+                    font-bold
+                    mb-6
+                    "
+                >
+
                     Chat With Admin
+
                 </h1>
+
+
+
+
 
                 <div
                     className="
@@ -159,6 +290,10 @@ export default function Chat() {
                     "
                 >
 
+
+
+
+
                     <div
                         className="
                         flex-1
@@ -167,17 +302,22 @@ export default function Chat() {
                         "
                     >
 
+
+
                         {
+                            messages.map(
+                                (msg,index)=>(
 
-                            messages.map((msg, index) => (
 
-                                <div
+                                    <div
 
-                                    key={msg.id || index}
+                                        key={`${msg.id}-${index}`}
 
-                                    className={
+                                        className={
 
-                                        String(msg.sender_id) === String(customerId)
+                                            String(msg.sender_id)
+                                            ===
+                                            String(customerId)
 
                                             ?
 
@@ -187,35 +327,53 @@ export default function Chat() {
 
                                             "text-left mb-3"
 
-                                    }
-
-                                >
-
-                                    <span
-
-                                        className="
-                                        inline-block
-                                        bg-gray-200
-                                        rounded-lg
-                                        px-3
-                                        py-2
-                                        "
+                                        }
 
                                     >
 
-                                        <b>{msg.sender}</b>
 
-                                        : {msg.message}
 
-                                    </span>
+                                        <span
 
-                                </div>
+                                            className="
+                                            inline-block
+                                            bg-gray-200
+                                            rounded-lg
+                                            px-3
+                                            py-2
+                                            "
 
-                            ))
+                                        >
 
+                                            <b>
+                                                {msg.sender}
+                                            </b>
+
+                                            :
+                                            {msg.message}
+
+
+                                        </span>
+
+
+                                    </div>
+
+
+
+                                )
+
+                            )
                         }
 
+
+
                     </div>
+
+
+
+
+
+
 
                     <div
 
@@ -228,13 +386,20 @@ export default function Chat() {
 
                     >
 
+
+
                         <input
+
 
                             value={text}
 
-                            onChange={(e) =>
-                                setText(e.target.value)
+
+                            onChange={(e)=>
+                                setText(
+                                    e.target.value
+                                )
                             }
+
 
                             className="
                             flex-1
@@ -243,13 +408,20 @@ export default function Chat() {
                             px-3
                             "
 
+
                             placeholder="Type message..."
 
                         />
 
+
+
+
+
                         <button
 
+
                             onClick={handleSend}
+
 
                             className="
                             bg-blue-600
@@ -262,13 +434,23 @@ export default function Chat() {
 
                             Send
 
+
                         </button>
+
+
 
                     </div>
 
+
+
+
                 </div>
 
+
+
             </div>
+
+
 
         </MainLayout>
 

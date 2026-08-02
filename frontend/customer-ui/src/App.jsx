@@ -1,7 +1,10 @@
 import AppRoutes from "./routes/AppRoutes";
 import Notification from "./components/chat/Notification";
 
-import { ChatProvider, useChat } from "./context/ChatContext";
+import {
+    ChatProvider,
+    useChat
+} from "./context/ChatContext";
 
 
 function GlobalNotification(){
@@ -14,12 +17,21 @@ function GlobalNotification(){
 
 
     return (
+
         <Notification
+
             show={showNotification}
+
             message={notificationMessage}
-            onClose={() => setShowNotification(false)}
+
+            onClose={() =>
+                setShowNotification(false)
+            }
+
         />
+
     );
+
 }
 
 
@@ -27,6 +39,7 @@ function GlobalNotification(){
 export default function App(){
 
     return (
+
         <ChatProvider>
 
             <GlobalNotification />
@@ -34,5 +47,7 @@ export default function App(){
             <AppRoutes />
 
         </ChatProvider>
+
     );
+
 }

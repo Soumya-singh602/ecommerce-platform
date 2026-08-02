@@ -59,7 +59,7 @@ export default function LoginForm() {
         "SAVED TOKEN:",
         localStorage.getItem("access")
       );
-
+      window.dispatchEvent(new Event("storage"));
       // Redirect
       navigate("/");
 

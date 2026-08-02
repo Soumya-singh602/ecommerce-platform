@@ -1,9 +1,17 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState
+} from "react";
+
 
 import {
     connectChatSocket,
     disconnectChatSocket
 } from "../services/chatSocket";
+
 
 
 const ChatContext = createContext();
@@ -16,41 +24,130 @@ export const ChatProvider = ({ children }) => {
     const socketRef = useRef(null);
 
 
+
     const [messages, setMessages] = useState([]);
 
 
-    const [showNotification, setShowNotification] = useState(false);
-
-    const [notificationMessage, setNotificationMessage] = useState("");
-
-
-
-    const adminId = "6";
-
-
-    const storedUser = localStorage.getItem("user");
-
-
-    const user = storedUser
-        ? JSON.parse(storedUser)
-        : null;
+    const [
+        showNotification,
+        setShowNotification
+    ] = useState(false);
 
 
 
-    const customerId = user?.user_id
-        ? String(user.user_id)
-        : null;
+    const [
+        notificationMessage,
+        setNotificationMessage
+    ] = useState("");
 
+
+
+    const [
+        customerId,
+        setCustomerId
+    ] = useState(null);
+
+
+
+
+    const adminId = String(
+        import.meta.env.VITE_ADMIN_ID
+    );
+
+
+
+
+
+    // =========================
+    // LOAD LOGIN USER
+    // =========================
+
+    useEffect(() => {
+
+
+        const loadUser = () => {
+
+
+            const storedUser =
+                localStorage.getItem("user");
+
+
+
+            console.log(
+                "LOAD USER:",
+                storedUser
+            );
+
+
+
+            if(storedUser){
+
+
+                const user =
+                    JSON.parse(storedUser);
+
+
+
+                setCustomerId(
+                    String(user.user_id)
+                );
+
+
+            }
+
+
+        };
+
+
+
+        loadUser();
+
+
+
+        window.addEventListener(
+            "login",
+            loadUser
+        );
+
+
+
+        return () => {
+
+
+            window.removeEventListener(
+                "login",
+                loadUser
+            );
+
+
+        };
+
+
+    }, []);
+
+
+
+
+
+
+
+    // =========================
+    // CONNECT SOCKET
+    // =========================
 
 
     useEffect(() => {
 
 
-        const token = localStorage.getItem("access");
+        const token =
+            localStorage.getItem("access");
 
 
 
-        if (!token || !customerId) {
+        if(
+            !token ||
+            !customerId
+        ){
 
 
             console.log(
@@ -69,71 +166,161 @@ export const ChatProvider = ({ children }) => {
 
 
 
-        const socket = connectChatSocket(
-
-            adminId,
-
-            customerId,
-
-
-            (message) => {
-
-
-                console.log(
-                    "GLOBAL MESSAGE:",
-                    message
-                );
-
-
-
-                setMessages((prev)=>[
-                    ...prev,
-                    message
-                ]);
+        console.log(
+            "CONNECT CUSTOMER CHAT",
+            {
+                adminId,
+                customerId
+            }
+        );
 
 
 
 
-                if(
-                    String(message.sender_id) !== String(customerId)
-                ){
+
+        const socket =
+            connectChatSocket(
+
+                adminId,
+
+                customerId,
 
 
-                    setNotificationMessage(
-                        message.message
+                (message)=>{
+
+
+                    console.log(
+                        "GLOBAL MESSAGE:",
+                        message
                     );
 
 
-                    setShowNotification(true);
+
+
+
+                    // duplicate message remove
+
+                    setMessages((prev)=>{
+
+
+                        const exists =
+                            prev.some(
+                                item =>
+                                item.id === message.id
+                            );
+
+
+
+                        if(exists){
+
+                            return prev;
+
+                        }
+
+
+
+                        return [
+                            ...prev,
+                            message
+                        ];
+
+
+                    });
+
+
+
+
+
+
+                    console.log(
+                        "CHECK NOTIFICATION",
+                        {
+                            sender:
+                            message.sender_id,
+
+                            customer:
+                            customerId
+                        }
+                    );
+
+
+
+
+
+                    // other user message
+
+                    if(
+
+                        String(message.sender_id)
+                        !==
+                        String(customerId)
+
+                    ){
+
+
+
+                        console.log(
+                            "SHOW CUSTOMER NOTIFICATION"
+                        );
+
+
+
+                        setNotificationMessage(
+                            message.message
+                        );
+
+
+
+                        setShowNotification(
+                            true
+                        );
+
+
+                    }
+
 
 
                 }
 
 
-            }
-
-        );
-
-
-
-        socketRef.current = socket;
+            );
 
 
 
 
-        return () => {
+
+        socketRef.current =
+            socket;
+
+
+
+
+
+
+
+        return ()=>{
+
+
+            console.log(
+                "CHAT SOCKET CLEANUP"
+            );
+
 
 
             if(socketRef.current){
+
 
                 disconnectChatSocket(
                     socketRef.current
                 );
 
+
             }
 
 
+
             socketRef.current = null;
+
 
 
         };
@@ -147,33 +334,52 @@ export const ChatProvider = ({ children }) => {
 
 
 
+
+
     return (
+
 
         <ChatContext.Provider
 
+
             value={{
+
 
                 socketRef,
 
+
                 messages,
+
 
                 setMessages,
 
+
                 showNotification,
+
 
                 setShowNotification,
 
-                notificationMessage
+
+                notificationMessage,
+
+
+                setNotificationMessage
+
 
             }}
 
+
         >
+
 
             {children}
 
+
         </ChatContext.Provider>
 
+
     );
+
 
 };
 
@@ -181,4 +387,5 @@ export const ChatProvider = ({ children }) => {
 
 
 
-export const useChat = () => useContext(ChatContext);
+export const useChat = () =>
+    useContext(ChatContext);
