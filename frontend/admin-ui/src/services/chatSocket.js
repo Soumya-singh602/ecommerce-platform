@@ -132,3 +132,38 @@ export const disconnectChatSocket = (
     }
 
 };
+
+export const connectDashboardSocket = (onMessage) => {
+
+    const token = localStorage.getItem("access");
+
+    const socket = new WebSocket(
+        `${import.meta.env.VITE_WS_URL}/ws/dashboard/?token=${token}`
+    );
+
+    socket.onopen = () => {
+        console.log("DASHBOARD CONNECTED");
+    };
+
+    socket.onmessage = (event) => {
+
+        const data = JSON.parse(event.data);
+
+        console.log("DASHBOARD EVENT:", data);
+
+        if (onMessage) {
+            onMessage(data);
+        }
+
+    };
+
+    socket.onclose = () => {
+        console.log("DASHBOARD CLOSED");
+    };
+
+    socket.onerror = (error) => {
+        console.log(error);
+    };
+
+    return socket;
+};
