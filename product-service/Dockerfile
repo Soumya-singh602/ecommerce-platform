@@ -16,6 +16,7 @@ COPY product-service/ .
 COPY product-service/media /app/media
 
 RUN ls -R /app/media
+RUN echo "MEDIA FILE CHECK"
 
 EXPOSE 8002
 
