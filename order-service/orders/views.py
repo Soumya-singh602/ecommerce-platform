@@ -142,7 +142,8 @@ def place_order(request):
         raise NotFoundException(
             "Product not found"
         )
-
+    
+    product_data = response.json().get("data")
 
     serializer = OrderSerializer(
         data=data
