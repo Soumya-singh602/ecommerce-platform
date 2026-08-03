@@ -7,8 +7,8 @@ export default function ProductImage({ product }) {
       <img
         src={
           product?.image
-             ? `${import.meta.env.VITE_MEDIA_URL}${product.image}`
-             : "/placeholder.png"
+            ? product.image
+            : "/placeholder.png"
         }
         alt={product?.name || "Product"}
         className="w-full h-[500px] object-cover"
