@@ -158,7 +158,10 @@ def place_order(request):
 
             message="Order placed successfully",
 
-            data=serializer.data,
+            data={
+                 **serializer.data,
+                   "total_price": product_data["price"]
+                     },
 
             status_code=201
 

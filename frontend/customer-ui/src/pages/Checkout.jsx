@@ -8,6 +8,7 @@ import PaymentMethod from "../components/checkout/PaymentMethod";
 import CheckoutSummary from "../components/checkout/CheckoutSummary";
 
 import { placeOrder } from "../services/orderService";
+import { createPaymentIntent } from "../services/paymentService";
 
 
 export default function Checkout() {
@@ -113,25 +114,21 @@ export default function Checkout() {
 
 
 
-      const response = await placeOrder(data);
+    const response = await placeOrder(data);
 
+    console.log("ORDER RESPONSE:", response);
 
+    const paymentResponse = await createPaymentIntent({
+     order_id: response.data.id,
+     amount: response.data.total_price,
+     currency: "usd",
+     });
 
-      console.log(
-        "ORDER RESPONSE:",
-        response
-      );
+    console.log("PAYMENT RESPONSE:", paymentResponse);
 
+    alert("Order placed successfully");
 
-
-      alert(
-        "Order placed successfully"
-      );
-
-
-
-      navigate("/orders");
-
+    navigate("/orders");
 
 
     }
