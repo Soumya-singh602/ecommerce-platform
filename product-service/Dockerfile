@@ -12,6 +12,9 @@ RUN pip install /tmp/ecommerce-common
 
 COPY product-service/ .
 
+# media images container me copy hongi
+COPY product-service/media /app/media
+
 EXPOSE 8002
 
 CMD ["sh", "-c", "gunicorn product_service.wsgi:application --bind 0.0.0.0:$PORT"]
