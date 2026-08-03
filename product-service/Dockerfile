@@ -15,8 +15,7 @@ COPY product-service/ .
 # media images container me copy hongi
 COPY product-service/media /app/media
 
-RUN ls -R /app/media
-RUN echo "MEDIA FILE CHECK"
+RUN echo "MEDIA CHECK" && ls -R /app/media
 
 EXPOSE 8002
 
