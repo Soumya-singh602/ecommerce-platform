@@ -1,6 +1,15 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
+import {
+  Elements,
+  useStripe,
+  useElements,
+  CardElement
+} from "@stripe/react-stripe-js";
+
+import stripePromise from "../config/stripe";
+
 import MainLayout from "../layouts/MainLayout";
 import Breadcrumb from "../components/shop/Breadcrumb";
 import BillingForm from "../components/checkout/BillingForm";
@@ -11,12 +20,24 @@ import { placeOrder } from "../services/orderService";
 import { createPaymentIntent } from "../services/paymentService";
 
 
-export default function Checkout() {
+function Checkout() {
 
 
   const location = useLocation();
 
   const navigate = useNavigate();
+
+
+  const stripe = useStripe();
+
+  const elements = useElements();
+
+
+
+  const [loading, setLoading] = useState(false);
+
+  const [paymentType, setPaymentType] = useState("cod");
+
 
 
   const {
@@ -34,9 +55,6 @@ export default function Checkout() {
 
 
 
-  const [loading, setLoading] = useState(false);
-
-
 
   const handlePlaceOrder = async () => {
 
@@ -52,7 +70,7 @@ export default function Checkout() {
 
 
 
-      // BUY NOW FLOW
+      // BUY NOW
 
       if(product){
 
@@ -70,7 +88,7 @@ export default function Checkout() {
 
 
 
-      // CART FLOW
+      // CART ORDER
 
       else if(cartItems){
 
@@ -95,15 +113,12 @@ export default function Checkout() {
       else {
 
 
-        alert(
-          "No product found"
-        );
-
+        alert("No product found");
 
         return;
 
-
       }
+
 
 
 
@@ -114,40 +129,215 @@ export default function Checkout() {
 
 
 
-    const response = await placeOrder(data);
+      const response =
+        await placeOrder(data);
 
-    console.log("ORDER RESPONSE:", response);
 
-    let paymentData;
 
-    if (product) {
+      console.log(
+        "ORDER RESPONSE:",
+        response
+      );
 
-       paymentData = {
-       order_id: response.data.id,
-       amount: response.data.total_price,
-       currency: "usd",
-      };
 
-    } else {
 
-       paymentData = {
-       order_ids: response.data.order_ids,
-       amount: response.data.total_price,
-       currency: "usd",
-      };
+      let paymentData;
+
+
+
+      if(product){
+
+
+        paymentData = {
+
+          order_id: response.data.id,
+
+          amount: response.data.total_price,
+
+          currency:"usd"
+
+        };
+
+
+      }
+
+      else {
+
+
+        paymentData = {
+
+          order_ids: response.data.order_ids,
+
+          amount: response.data.total_price,
+
+          currency:"usd"
+
+        };
+
+
+      }
+
+
+
+
+
+      // CARD PAYMENT
+
+      if(paymentType === "card"){
+
+
+
+        const paymentResponse =
+          await createPaymentIntent(paymentData);
+
+
+
+        console.log(
+          "PAYMENT RESPONSE:",
+          paymentResponse
+        );
+
+
+
+        if(!stripe || !elements){
+
+
+          alert(
+            "Stripe not loaded"
+          );
+
+
+          return;
+
+
+        }
+
+
+
+
+        const cardElement =
+          elements.getElement(
+            CardElement
+          );
+
+
+
+        if(!cardElement){
+
+
+          alert(
+            "Please enter card details"
+          );
+
+
+          return;
+
+
+        }
+
+
+
+
+
+        const result =
+          await stripe.confirmCardPayment(
+
+            paymentResponse.client_secret,
+
+            {
+
+              payment_method:{
+
+                card:cardElement
+
+              }
+
+            }
+
+          );
+
+
+
+
+
+        if(result.error){
+
+
+          console.log(
+            "STRIPE ERROR:",
+            result.error
+          );
+
+
+          alert(
+            result.error.message
+          );
+
+
+          return;
+
+
+        }
+
+
+
+
+        console.log(
+          "PAYMENT SUCCESS:",
+          result.paymentIntent
+        );
+
+
+
+      }
+
+
+
+      // COD PAYMENT
+
+      else if(paymentType === "cod"){
+
+
+        console.log(
+          "COD ORDER"
+        );
+
+
+      }
+
+
+
+      // UPI
+
+      else if(paymentType === "upi"){
+
+
+        alert(
+          "UPI payment coming soon"
+        );
+
+
+        return;
+
+
+      }
+
+
+
+
+
+      alert(
+        "Order Completed Successfully"
+      );
+
+
+
+      navigate("/orders");
+
+
 
     }
 
-    const paymentResponse = await createPaymentIntent(paymentData);
-
-    console.log("PAYMENT RESPONSE:", paymentResponse);
-
-    alert("Order placed successfully");
-
-    navigate("/orders");
-
-
-    }
     catch(error){
 
 
@@ -163,6 +353,7 @@ export default function Checkout() {
 
 
     }
+
     finally{
 
 
@@ -173,6 +364,7 @@ export default function Checkout() {
 
 
   };
+
 
 
 
@@ -188,6 +380,7 @@ export default function Checkout() {
         <Breadcrumb />
 
 
+
         <h1 className="text-4xl font-bold mt-6 mb-10">
 
           Checkout
@@ -197,7 +390,9 @@ export default function Checkout() {
 
 
 
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
 
 
           <div className="lg:col-span-2">
@@ -206,10 +401,19 @@ export default function Checkout() {
             <BillingForm />
 
 
-            <PaymentMethod />
+
+            <PaymentMethod
+
+              paymentType={paymentType}
+
+              setPaymentType={setPaymentType}
+
+            />
+
 
 
           </div>
+
 
 
 
@@ -229,6 +433,7 @@ export default function Checkout() {
 
 
 
+
             <button
 
               onClick={handlePlaceOrder}
@@ -238,13 +443,16 @@ export default function Checkout() {
 
               className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-semibold"
 
-
             >
 
               {
+
                 loading
+
                 ? "Processing..."
+
                 : "Confirm Order"
+
               }
 
 
@@ -263,7 +471,27 @@ export default function Checkout() {
       </div>
 
 
+
     </MainLayout>
+
+  );
+
+}
+
+
+
+
+
+export default function CheckoutWrapper(){
+
+
+  return (
+
+    <Elements stripe={stripePromise}>
+
+      <Checkout />
+
+    </Elements>
 
   );
 
