@@ -6,6 +6,8 @@ import stripe
 
 from .models import Payment, PaymentOrder
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+
 
 
 @api_view(["GET"])
@@ -138,11 +140,17 @@ def payment_list(request):
         "data": data
     })
 
+
 @csrf_exempt
 def stripe_webhook(request):
 
-    payload = request.body
+    # Only POST requests
+    if request.method != "POST":
+        return HttpResponse("Method Not Allowed", status=405)
 
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
 
     try:
@@ -153,27 +161,20 @@ def stripe_webhook(request):
             settings.STRIPE_WEBHOOK_SECRET
         )
 
-    except ValueError:
+    except ValueError as e:
 
-        return Response(
-            {
-                "success": False,
-                "message": "Invalid payload"
-            },
-            status=400
-        )
+        print("INVALID PAYLOAD:", e)
 
-    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)
 
-        return Response(
-            {
-                "success": False,
-                "message": "Invalid signature"
-            },
-            status=400
-        )
+    except stripe.error.SignatureVerificationError as e:
 
-    # Payment Success
+        print("INVALID SIGNATURE:", e)
+
+        return HttpResponse(status=400)
+
+    print("EVENT TYPE:", event["type"])
+
     if event["type"] == "payment_intent.succeeded":
 
         payment_intent = event["data"]["object"]
@@ -187,22 +188,12 @@ def stripe_webhook(request):
             )
 
             payment.status = "paid"
-
             payment.save()
 
-            print(
-                "PAYMENT UPDATED:",
-                payment.id
-            )
+            print("PAYMENT UPDATED:", payment.id)
 
         except Payment.DoesNotExist:
 
-            print(
-                "Payment not found"
-            )
+            print("PAYMENT NOT FOUND:", stripe_payment_intent_id)
 
-    return Response(
-        {
-            "success": True
-        }
-    )
+    return HttpResponse(status=200)
