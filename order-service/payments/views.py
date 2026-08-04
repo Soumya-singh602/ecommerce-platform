@@ -5,6 +5,7 @@ from ecommerce_common.utils import get_user_info
 import stripe
 
 from .models import Payment, PaymentOrder
+from django.views.decorators.csrf import csrf_exempt
 
 
 @api_view(["GET"])
@@ -136,3 +137,72 @@ def payment_list(request):
         "message": "Payments fetched successfully",
         "data": data
     })
+
+@csrf_exempt
+def stripe_webhook(request):
+
+    payload = request.body
+
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+
+    try:
+
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig_header,
+            settings.STRIPE_WEBHOOK_SECRET
+        )
+
+    except ValueError:
+
+        return Response(
+            {
+                "success": False,
+                "message": "Invalid payload"
+            },
+            status=400
+        )
+
+    except stripe.error.SignatureVerificationError:
+
+        return Response(
+            {
+                "success": False,
+                "message": "Invalid signature"
+            },
+            status=400
+        )
+
+    # Payment Success
+    if event["type"] == "payment_intent.succeeded":
+
+        payment_intent = event["data"]["object"]
+
+        stripe_payment_intent_id = payment_intent["id"]
+
+        try:
+
+            payment = Payment.objects.get(
+                stripe_payment_intent_id=stripe_payment_intent_id
+            )
+
+            payment.status = "paid"
+
+            payment.save()
+
+            print(
+                "PAYMENT UPDATED:",
+                payment.id
+            )
+
+        except Payment.DoesNotExist:
+
+            print(
+                "Payment not found"
+            )
+
+    return Response(
+        {
+            "success": True
+        }
+    )

@@ -1,8 +1,14 @@
 from django.urls import path
-from .views import payment_health , create_payment_intent , payment_list
+from . import views
 
 urlpatterns = [
-    path("health/", payment_health, name="payment-health"),
-    path("create-payment-intent/", create_payment_intent),
-    path("", payment_list, name="payment-list"),
+    path("health/", views.payment_health),
+    path("create-payment-intent/", views.create_payment_intent),
+    path("list/", views.payment_list),
+
+    path(
+        "webhook/",
+        views.stripe_webhook,
+        name="stripe-webhook"
+    ),
 ]
