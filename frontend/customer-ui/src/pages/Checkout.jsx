@@ -5,7 +5,7 @@ import {
   Elements,
   useStripe,
   useElements,
-  CardElement
+  CardNumberElement
 } from "@stripe/react-stripe-js";
 
 import stripePromise from "../config/stripe";
@@ -217,7 +217,7 @@ function Checkout() {
 
         const cardElement =
           elements.getElement(
-            CardElement
+            CardNumberElement
           );
 
 

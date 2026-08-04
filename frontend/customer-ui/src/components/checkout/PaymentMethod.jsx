@@ -1,4 +1,10 @@
-import { CardElement } from "@stripe/react-stripe-js";
+import {
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement
+} from "@stripe/react-stripe-js";
+
+import { useState } from "react";
 
 
 export default function PaymentMethod({
@@ -24,23 +30,16 @@ export default function PaymentMethod({
         <label className="flex items-center gap-3 cursor-pointer">
 
           <input
-
             type="radio"
-
             name="payment"
-
             value="cod"
-
-            checked={paymentType === "cod"}
-
+            checked={paymentType==="cod"}
             onChange={(e)=>setPaymentType(e.target.value)}
-
           />
 
           <span>
             Cash on Delivery (COD)
           </span>
-
 
         </label>
 
@@ -52,17 +51,11 @@ export default function PaymentMethod({
 
 
           <input
-
             type="radio"
-
             name="payment"
-
             value="card"
-
-            checked={paymentType === "card"}
-
+            checked={paymentType==="card"}
             onChange={(e)=>setPaymentType(e.target.value)}
-
           />
 
 
@@ -78,12 +71,33 @@ export default function PaymentMethod({
 
 
         {
-          paymentType === "card" && (
+          paymentType==="card" && (
 
-            <div className="border rounded-lg p-4 mt-4">
+            <div className="space-y-4 mt-5">
 
 
-              <CardElement />
+              <div className="border p-3 rounded">
+
+                <CardNumberElement />
+
+              </div>
+
+
+
+              <div className="border p-3 rounded">
+
+                <CardExpiryElement />
+
+              </div>
+
+
+
+              <div className="border p-3 rounded">
+
+                <CardCvcElement />
+
+              </div>
+
 
 
             </div>
@@ -95,21 +109,16 @@ export default function PaymentMethod({
 
 
 
+
         <label className="flex items-center gap-3 cursor-pointer">
 
 
           <input
-
             type="radio"
-
             name="payment"
-
             value="upi"
-
-            checked={paymentType === "upi"}
-
+            checked={paymentType==="upi"}
             onChange={(e)=>setPaymentType(e.target.value)}
-
           />
 
 
@@ -125,9 +134,7 @@ export default function PaymentMethod({
       </div>
 
 
-
     </div>
 
   );
-
 }
