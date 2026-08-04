@@ -4,7 +4,7 @@ from django.conf import settings
 from ecommerce_common.utils import get_user_info
 import stripe
 
-from .models import Payment
+from .models import Payment, PaymentOrder
 
 
 @api_view(["GET"])
@@ -24,6 +24,7 @@ def create_payment_intent(request):
     amount = request.data.get("amount")
     currency = request.data.get("currency", "usd")
     order_id = request.data.get("order_id")
+    order_ids = request.data.get("order_ids")
 
     if not amount:
         return Response(
@@ -34,11 +35,11 @@ def create_payment_intent(request):
             status=400
         )
 
-    if not order_id:
+    if not order_id and not order_ids:
         return Response(
             {
                 "success": False,
-                "message": "Order ID is required"
+                "message": "Order ID(s) are required"
             },
             status=400
         )
@@ -52,14 +53,33 @@ def create_payment_intent(request):
             currency=currency,
         )
 
+        # Create Payment
         payment = Payment.objects.create(
             user_id=user["user_id"],
-            order_id=order_id,
+            order_id=order_id if order_id else order_ids[0],
             amount=amount,
             currency=currency,
             stripe_payment_intent_id=intent.id,
             status="pending"
         )
+
+        # Buy Now
+        if order_id:
+
+            PaymentOrder.objects.create(
+                payment=payment,
+                order_id=order_id
+            )
+
+        # Cart
+        if order_ids:
+
+            for oid in order_ids:
+
+                PaymentOrder.objects.create(
+                    payment=payment,
+                    order_id=oid
+                )
 
         return Response({
             "success": True,
@@ -70,6 +90,7 @@ def create_payment_intent(request):
         })
 
     except Exception as e:
+
         return Response(
             {
                 "success": False,
@@ -77,6 +98,7 @@ def create_payment_intent(request):
             },
             status=500
         )
+
 
 @api_view(["GET"])
 def payment_list(request):
@@ -90,9 +112,18 @@ def payment_list(request):
     data = []
 
     for payment in payments:
+
+        linked_orders = PaymentOrder.objects.filter(
+            payment=payment
+        ).values_list(
+            "order_id",
+            flat=True
+        )
+
         data.append({
             "id": payment.id,
             "order_id": payment.order_id,
+            "order_ids": list(linked_orders),
             "amount": str(payment.amount),
             "currency": payment.currency,
             "status": payment.status,
@@ -103,4 +134,4 @@ def payment_list(request):
         "success": True,
         "message": "Payments fetched successfully",
         "data": data
-    })  
+    })

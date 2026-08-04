@@ -9,6 +9,8 @@ class Payment(models.Model):
     ]
 
     user_id = models.IntegerField()
+
+    # Temporary compatibility field
     order_id = models.IntegerField()
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -29,4 +31,20 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Payment {self.order_id} - {self.status}"
+        return f"Payment {self.id} - {self.status}"
+
+
+class PaymentOrder(models.Model):
+
+    payment = models.ForeignKey(
+        Payment,
+        on_delete=models.CASCADE,
+        related_name="payment_orders"
+    )
+
+    order_id = models.IntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Payment {self.payment_id} -> Order {self.order_id}"

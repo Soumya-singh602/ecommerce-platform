@@ -118,11 +118,27 @@ export default function Checkout() {
 
     console.log("ORDER RESPONSE:", response);
 
-    const paymentResponse = await createPaymentIntent({
-     order_id: response.data.id,
-     amount: response.data.total_price,
-     currency: "usd",
-     });
+    let paymentData;
+
+    if (product) {
+
+       paymentData = {
+       order_id: response.data.id,
+       amount: response.data.total_price,
+       currency: "usd",
+      };
+
+    } else {
+
+       paymentData = {
+       order_ids: response.data.order_ids,
+       amount: response.data.total_price,
+       currency: "usd",
+      };
+
+    }
+
+    const paymentResponse = await createPaymentIntent(paymentData);
 
     console.log("PAYMENT RESPONSE:", paymentResponse);
 
