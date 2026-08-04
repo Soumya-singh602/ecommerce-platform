@@ -20,6 +20,7 @@ def create_payment_intent(request):
 
     # Logged in user
     user = get_user_info(request)
+    print("USER INFO FROM PAYMENT:", user)
 
     amount = request.data.get("amount")
     currency = request.data.get("currency", "usd")
