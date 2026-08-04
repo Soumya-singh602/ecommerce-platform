@@ -40,6 +40,11 @@ def place_order(request):
         created_orders = []
 
 
+        order_ids = []
+
+        total_price = 0
+
+
         for item in request.data["items"]:
 
 
@@ -56,6 +61,10 @@ def place_order(request):
                 }
 
             )
+
+            product_data = response.json().get("data")
+
+            total_price += float(product_data["price"]) * quantity
 
 
             if response.status_code != 200:
@@ -92,6 +101,10 @@ def place_order(request):
                     serializer.data
                 )
 
+                order_ids.append(
+                    serializer.data["id"]
+                )
+
 
             else:
 
@@ -109,7 +122,15 @@ def place_order(request):
 
             message="Cart order placed successfully",
 
-            data=created_orders,
+            data={
+                "orders": created_orders,
+
+                "order_ids": order_ids,
+
+                "total_price": total_price
+
+            },
+           
 
             status_code=201
 
