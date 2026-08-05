@@ -240,6 +240,12 @@ def health_check(request):
 @api_view(["GET"])
 def category_list(request):
 
+    user = get_user_info(request)
+
+    print("User ID :", user["user_id"])
+    print("User Email :", user["user_email"])
+
+
     categories = Category.objects.all()
 
     serializer = CategorySerializer(
