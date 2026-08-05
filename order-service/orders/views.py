@@ -2,7 +2,7 @@ from django.shortcuts import render
 # Create your views here.
 import requests
 import os
-PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL")
+from payments.models import PaymentOrder
 from rest_framework.decorators import api_view 
 from rest_framework.response import Response
 from rest_framework import status
@@ -643,29 +643,16 @@ def admin_order_list(request):
 
         payment_status = "pending"
 
-        try:
-
-            payment_response = requests.get(
-              f"{PAYMENT_SERVICE_URL}/payments/admin/list/",
-               headers={
-                "Authorization": request.headers.get("Authorization")
-            }
+        payment_order = (
+          PaymentOrder.objects
+          .select_related("payment")
+          .filter(order_id=order["id"])
+          .first()
         )
 
-            if payment_response.status_code == 200:
+        if payment_order:
 
-              payments = payment_response.json().get("data", [])
-
-              for payment in payments:
-
-                if order["id"] in payment.get("order_ids", []):
-
-                   payment_status = payment["status"]
-                   break
-
-        except Exception as e:
-
-            print("PAYMENT ERROR:", e)
+         payment_status = payment_order.payment.status
 
         order["payment_status"] = payment_status
 
