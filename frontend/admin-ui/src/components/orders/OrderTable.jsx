@@ -29,7 +29,7 @@ export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
                         <th className="p-4 text-left">
                             Status
                         </th>
-
+                        <th className="p-4 text-left">Payment</th>
                         <th className="p-4 text-left">
                             Date
                         </th>
@@ -51,7 +51,7 @@ export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
                             <tr>
 
                                 <td
-                                    colSpan="7"
+                                    colSpan="8"
                                     className="text-center p-6 text-gray-500"
                                 >
 
@@ -113,6 +113,26 @@ export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
                                             {order.status}
 
                                         </span>
+
+                                    <td className="p-4">
+
+                                        <span
+                                             className={
+                                             order.payment_status === "paid"
+                                            ? "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                                            : order.payment_status === "pending"
+                                            ? "bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm"
+                                            : order.payment_status === "failed"
+                                            ? "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
+                                            : "bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                                    }
+                                    >
+
+                                             {order.payment_status || "N/A"}
+
+                                    </span>
+
+                                    </td>
 
                                     </td>
 
