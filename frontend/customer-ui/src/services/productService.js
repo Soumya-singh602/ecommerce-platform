@@ -33,3 +33,31 @@ export const getProductDetails = async (id) => {
     return response.data;
 
 };
+
+// Get All Products (Without Pagination)
+export const getAllProducts = async () => {
+
+    const response = await api.get(
+        "/products/",
+        {
+            params:{
+                all:true
+            }
+        }
+    );
+
+
+    console.log(
+        "TOTAL:",
+        response.data.data.total_products
+    );
+
+    console.log(
+        "PRODUCT LENGTH:",
+        response.data.data.products.length
+    );
+
+
+    return response.data;
+
+};

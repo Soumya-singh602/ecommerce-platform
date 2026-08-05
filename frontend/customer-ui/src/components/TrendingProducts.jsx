@@ -1,67 +1,147 @@
-import ProductCard from "./ProductCard";
-
-const trendingProducts = [
-  {
-    id: 1,
-    title: "Gaming Mouse",
-    price: 1999,
-    image:
-      "https://images.unsplash.com/photo-1527814050087-3793815479db?w=500",
-  },
-  {
-    id: 2,
-    title: "Mechanical Keyboard",
-    price: 3499,
-    image:
-      "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=500",
-  },
-  {
-    id: 3,
-    title: "Bluetooth Speaker",
-    price: 2799,
-    image:
-      "https://images.unsplash.com/photo-1589003077984-894e133dabab?w=500",
-  },
-  {
-    id: 4,
-    title: "DSLR Camera",
-    price: 49999,
-    image:
-      "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500",
-  },
-];
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import ProductCard from "./shop/ProductCard";
+import { getAllProducts } from "../services/productService";
 
 export default function TrendingProducts() {
-  return (
-    <section className="max-w-7xl mx-auto mt-20 px-4">
 
-      <div className="flex justify-between items-center mb-8">
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-        <h2 className="text-3xl font-bold">
-          Trending Products
-        </h2>
 
-        <button className="text-blue-600 font-semibold">
-          View All
-        </button>
+    useEffect(() => {
 
-      </div>
+        fetchTrendingProducts();
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    }, []);
 
-        {trendingProducts.map((product) => (
 
-          <ProductCard
-            key={product.id}
-            title={product.title}
-            price={product.price}
-            image={product.image}
-          />
+    const fetchTrendingProducts = async () => {
 
-        ))}
+        try {
 
-      </div>
+            const response = await getAllProducts();
 
-    </section>
-  );
+
+            if (response.success) {
+
+
+                const sortedProducts = [
+                    ...response.data.products
+                ].sort(
+                    (a,b) =>
+                    new Date(b.created_at) -
+                    new Date(a.created_at)
+                );
+
+                console.log(
+                  "SORTED LENGTH:",
+                   sortedProducts.length
+                );
+
+                console.log(
+                   "SORTED DATA:",
+                    sortedProducts
+                  );
+
+
+                const trendingProducts =
+                    sortedProducts.slice(4,8);
+
+
+                console.log(
+                    "TRENDING PRODUCTS:",
+                    trendingProducts
+                );
+
+
+                setProducts(trendingProducts);
+
+
+            }
+
+
+        } catch(error) {
+
+            console.error(
+                "Trending Error:",
+                error
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+
+    if(loading){
+
+        return (
+            <section className="max-w-7xl mx-auto mt-20 px-4">
+                <h2 className="text-3xl font-bold mb-8">
+                    Trending Products
+                </h2>
+
+                <p>
+                    Loading products...
+                </p>
+
+            </section>
+        );
+
+    }
+
+
+    return (
+
+        <section className="max-w-7xl mx-auto mt-20 px-4">
+
+
+            <div className="flex justify-between items-center mb-8">
+
+
+                <h2 className="text-3xl font-bold">
+                    Trending Products
+                </h2>
+
+
+                <Link
+                    to="/shop"
+                    className="text-blue-600 font-semibold hover:underline"
+                >
+                    View All
+                </Link>
+
+
+            </div>
+
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+
+                {
+                    products.map(product => (
+
+                        <ProductCard
+
+                            key={product.id}
+
+                            product={product}
+
+                        />
+
+                    ))
+                }
+
+
+            </div>
+
+
+        </section>
+
+    );
+
 }

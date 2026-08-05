@@ -105,6 +105,22 @@ def product_list(request):
     if not products.exists():
 
      raise NotFoundException("No products found")
+
+    all_products = request.GET.get("all")
+
+    if all_products == "true":
+
+      serializer = ProductSerializer(products, many=True)
+
+      return success_response(
+          message="Products fetched successfully",
+          data={
+            "current_page": 1,
+            "total_pages": 1,
+            "total_products": products.count(),
+            "products": serializer.data,
+        }
+    )
     # PAGINATION
     page = request.GET.get("page", 1)
 
