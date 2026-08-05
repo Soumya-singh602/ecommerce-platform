@@ -1,4 +1,9 @@
-export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
+export default function OrderTable({
+    orders,
+    onView,
+    onUpdate,
+    onCancel,
+}) {
 
     return (
 
@@ -27,9 +32,13 @@ export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
                         </th>
 
                         <th className="p-4 text-left">
-                            Status
+                            Order Status
                         </th>
-                        <th className="p-4 text-left">Payment</th>
+
+                        <th className="p-4 text-left">
+                            Payment Status
+                        </th>
+
                         <th className="p-4 text-left">
                             Date
                         </th>
@@ -71,28 +80,22 @@ export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
                                 >
 
                                     <td className="p-4">
-
                                         #{order.id}
-
                                     </td>
 
                                     <td className="p-4">
-
                                         {order.user_id}
-
                                     </td>
 
                                     <td className="p-4">
-
                                         {order.product_id}
-
                                     </td>
 
                                     <td className="p-4">
-
                                         {order.quantity}
-
                                     </td>
+
+                                    {/* Order Status */}
 
                                     <td className="p-4">
 
@@ -114,25 +117,27 @@ export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
 
                                         </span>
 
+                                    </td>
+
+                                    {/* Payment Status */}
+
                                     <td className="p-4">
 
                                         <span
-                                             className={
-                                             order.payment_status === "paid"
-                                            ? "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
-                                            : order.payment_status === "pending"
-                                            ? "bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm"
-                                            : order.payment_status === "failed"
-                                            ? "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
-                                            : "bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
-                                    }
-                                    >
+                                            className={
+                                                order.payment_status === "paid"
+                                                    ? "bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
+                                                    : order.payment_status === "pending"
+                                                    ? "bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm"
+                                                    : order.payment_status === "failed"
+                                                    ? "bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm"
+                                                    : "bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm"
+                                            }
+                                        >
 
-                                             {order.payment_status || "N/A"}
+                                            {order.payment_status || "N/A"}
 
-                                    </span>
-
-                                    </td>
+                                        </span>
 
                                     </td>
 
@@ -163,10 +168,12 @@ export default function OrderTable({ orders, onView  , onUpdate ,onCancel }) {
                                         </button>
 
                                         <button
-                                             onClick={() => onCancel(order.id)}
-                                             className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700"
+                                            onClick={() => onCancel(order.id)}
+                                            className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700"
                                         >
-                                              Cancel
+
+                                            Cancel
+
                                         </button>
 
                                     </td>
