@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.core.paginator import Paginator , EmptyPage
 
-from .models import Product , Category
-from .serializers import ProductSerializer , CategorySerializer
+from .models import Product , Category , Banner
+from .serializers import ProductSerializer , CategorySerializer , BannerSerializer
 from django.db.models import Q
 from ecommerce_common.response import success_response
 from ecommerce_common.exceptions import NotFoundException
@@ -256,4 +256,129 @@ def category_list(request):
     return success_response(
         message="Categories fetched successfully",
         data=serializer.data
+    )
+
+@api_view(["GET"])
+def banner_detail(request):
+
+    banner = Banner.objects.filter(
+        is_active=True
+    ).first()
+
+    if not banner:
+
+        return Response(
+            {
+                "success": False,
+                "message": "No active banner found",
+                "data": None
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    serializer = BannerSerializer(banner)
+
+    return success_response(
+        message="Banner fetched successfully",
+        data=serializer.data
+    )
+
+@api_view(["GET"])
+def banner_list(request):
+
+    banners = Banner.objects.all().order_by("-created_at")
+
+    serializer = BannerSerializer(
+        banners,
+        many=True
+    )
+
+    return success_response(
+        message="Banners fetched successfully",
+        data=serializer.data
+    )
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
+def create_banner(request):
+
+    serializer = BannerSerializer(data=request.data)
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return success_response(
+            message="Banner created successfully",
+            data=serializer.data,
+            status_code=201
+        )
+
+    return Response(
+        {
+            "success": False,
+            "message": "Validation failed",
+            "data": serializer.errors
+        },
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+@api_view(["PUT"])
+@parser_classes([MultiPartParser, FormParser])
+def update_banner(request, id):
+
+    try:
+
+        banner = Banner.objects.get(id=id)
+
+    except Banner.DoesNotExist:
+
+        raise NotFoundException(
+            "Banner not found"
+        )
+
+    serializer = BannerSerializer(
+        banner,
+        data=request.data,
+        partial=True
+    )
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return success_response(
+            message="Banner updated successfully",
+            data=serializer.data
+        )
+
+    return Response(
+        {
+            "success": False,
+            "message": "Validation failed",
+            "data": serializer.errors
+        },
+        status=status.HTTP_400_BAD_REQUEST
+    )
+
+@api_view(["DELETE"])
+def delete_banner(request, id):
+
+    try:
+
+        banner = Banner.objects.get(id=id)
+
+    except Banner.DoesNotExist:
+
+        raise NotFoundException(
+            "Banner not found"
+        )
+
+    banner.delete()
+
+    return success_response(
+        message="Banner deleted successfully",
+        data={
+            "banner_id": id
+        }
     )

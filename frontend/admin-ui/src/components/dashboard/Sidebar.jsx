@@ -5,7 +5,8 @@ import {
     Users,
     MessageCircle,
     Settings,
-    LogOut
+    LogOut,
+    Image
 } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -78,6 +79,14 @@ export default function Sidebar() {
                 >
                     <MessageCircle size={22} />
                     <span>Chat</span>
+                </Link>
+
+                <Link
+                    to="/banners"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition"
+                >
+                    <Image size={22} />
+                    <span>Banners</span>
                 </Link>
 
                 <Link

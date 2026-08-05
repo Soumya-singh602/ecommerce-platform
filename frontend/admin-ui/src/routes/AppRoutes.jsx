@@ -3,13 +3,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Products from "../pages/Products";
+import ProductDetail from "../pages/ProductDetail";
 import Orders from "../pages/Orders";
 import Customers from "../pages/Customers";
 import Chat from "../pages/Chat";
 import Settings from "../pages/Settings";
+import Banners from "../pages/Banners";
+import AddBanner from "../pages/AddBanners";
+import EditBanner from "../pages/EditBanners";
 
 import ProtectedRoute from "./ProtectedRoute";
-import ProductDetail from "../pages/ProductDetail";
 
 export default function AppRoutes() {
 
@@ -36,6 +39,15 @@ export default function AppRoutes() {
                 element={
                     <ProtectedRoute>
                         <Products />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/products/:id"
+                element={
+                    <ProtectedRoute>
+                        <ProductDetail />
                     </ProtectedRoute>
                 }
             />
@@ -76,6 +88,35 @@ export default function AppRoutes() {
                 }
             />
 
+            {/* Banner Routes */}
+
+            <Route
+                path="/banners"
+                element={
+                    <ProtectedRoute>
+                        <Banners />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/banners/add"
+                element={
+                    <ProtectedRoute>
+                        <AddBanner />
+                    </ProtectedRoute>
+                }
+            />
+
+            <Route
+                path="/banners/:id/edit"
+                element={
+                    <ProtectedRoute>
+                        <EditBanner />
+                    </ProtectedRoute>
+                }
+            />
+
             <Route
                 path="/"
                 element={<Navigate to="/dashboard" replace />}
@@ -86,8 +127,6 @@ export default function AppRoutes() {
                 element={<Navigate to="/dashboard" replace />}
             />
 
-            <Route
-               path="/products/:id"element={<ProtectedRoute><ProductDetail /></ProtectedRoute>}/>
         </Routes>
 
     );
