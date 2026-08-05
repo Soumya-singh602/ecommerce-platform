@@ -230,5 +230,26 @@ def stripe_webhook(request):
 
             print("PAYMENT NOT FOUND:", stripe_payment_intent_id)
 
+    elif event["type"] == "payment_intent.payment_failed":
+
+       payment_intent = event["data"]["object"]
+
+       stripe_payment_intent_id = payment_intent["id"]
+
+    try:
+
+        payment = Payment.objects.get(
+            stripe_payment_intent_id=stripe_payment_intent_id
+        )
+
+        payment.status = "failed"
+        payment.save()
+
+        print("PAYMENT FAILED:", payment.id)
+
+    except Payment.DoesNotExist:
+
+        print("PAYMENT NOT FOUND:", stripe_payment_intent_id)       
+
     return HttpResponse(status=200)
 
