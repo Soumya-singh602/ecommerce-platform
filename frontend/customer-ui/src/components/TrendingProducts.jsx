@@ -3,96 +3,111 @@ import { Link } from "react-router-dom";
 import ProductCard from "./shop/ProductCard";
 import { getAllProducts } from "../services/productService";
 
+
 export default function TrendingProducts() {
+
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
 
-    useEffect(() => {
+
+    useEffect(()=>{
 
         fetchTrendingProducts();
 
-    }, []);
+    },[]);
 
 
-    const fetchTrendingProducts = async () => {
 
-        try {
+
+    const fetchTrendingProducts = async()=>{
+
+
+        try{
+
 
             const response = await getAllProducts();
 
 
-            if (response.success) {
+
+            if(response.success){
+
 
 
                 const sortedProducts = [
                     ...response.data.products
                 ].sort(
-                    (a,b) =>
-                    new Date(b.created_at) -
-                    new Date(a.created_at)
+                    (a,b)=>
+                        new Date(b.created_at) -
+                        new Date(a.created_at)
                 );
 
-                console.log(
-                  "SORTED LENGTH:",
-                   sortedProducts.length
-                );
-
-                console.log(
-                   "SORTED DATA:",
-                    sortedProducts
-                  );
 
 
-                const trendingProducts =
-                    sortedProducts.slice(4,8);
+                // Skip Featured products
+                // Show next 4 products
+                const trendingProducts = sortedProducts.slice(4,8);
 
-
-                console.log(
-                    "TRENDING PRODUCTS:",
-                    trendingProducts
-                );
 
 
                 setProducts(trendingProducts);
 
 
+
             }
 
 
-        } catch(error) {
+
+        }catch(error){
+
 
             console.error(
-                "Trending Error:",
+                "Error fetching trending products:",
                 error
             );
 
-        } finally {
+
+        }finally{
+
 
             setLoading(false);
 
+
         }
+
 
     };
 
 
+
+
     if(loading){
 
+
         return (
+
             <section className="max-w-7xl mx-auto mt-20 px-4">
+
+
                 <h2 className="text-3xl font-bold mb-8">
                     Trending Products
                 </h2>
+
 
                 <p>
                     Loading products...
                 </p>
 
+
             </section>
+
         );
 
+
     }
+
+
 
 
     return (
@@ -108,22 +123,28 @@ export default function TrendingProducts() {
                 </h2>
 
 
+
                 <Link
                     to="/shop"
                     className="text-blue-600 font-semibold hover:underline"
                 >
+
                     View All
+
                 </Link>
 
 
             </div>
 
 
+
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
 
                 {
-                    products.map(product => (
+                    products.map((product)=>(
+
 
                         <ProductCard
 
@@ -133,6 +154,7 @@ export default function TrendingProducts() {
 
                         />
 
+
                     ))
                 }
 
@@ -140,8 +162,10 @@ export default function TrendingProducts() {
             </div>
 
 
+
         </section>
 
     );
+
 
 }
