@@ -11,4 +11,10 @@ urlpatterns = [
         views.stripe_webhook,
         name="stripe-webhook"
     ),
+
+    path(
+    "admin/list/",
+    views.admin_payment_list,
+    name="admin-payment-list"
+),
 ]

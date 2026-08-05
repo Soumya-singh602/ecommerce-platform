@@ -141,6 +141,40 @@ def payment_list(request):
     })
 
 
+@api_view(["GET"])
+def admin_payment_list(request):
+
+    payments = Payment.objects.all().order_by("-created_at")
+
+    data = []
+
+    for payment in payments:
+
+        linked_orders = PaymentOrder.objects.filter(
+            payment=payment
+        ).values_list(
+            "order_id",
+            flat=True
+        )
+
+        data.append({
+            "id": payment.id,
+            "user_id": payment.user_id,
+            "order_id": payment.order_id,
+            "order_ids": list(linked_orders),
+            "amount": str(payment.amount),
+            "currency": payment.currency,
+            "status": payment.status,
+            "created_at": payment.created_at,
+        })
+
+    return Response({
+        "success": True,
+        "message": "All payments fetched successfully",
+        "data": data
+    })
+
+
 @csrf_exempt
 def stripe_webhook(request):
 
@@ -197,3 +231,4 @@ def stripe_webhook(request):
             print("PAYMENT NOT FOUND:", stripe_payment_intent_id)
 
     return HttpResponse(status=200)
+
