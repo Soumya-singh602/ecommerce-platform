@@ -1,31 +1,32 @@
-const categories = [
-  {
-    id: 1,
-    title: "Electronics",
-    image:
-      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600",
-  },
-  {
-    id: 2,
-    title: "Fashion",
-    image:
-      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600",
-  },
-  {
-    id: 3,
-    title: "Home & Living",
-    image:
-      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600",
-  },
-  {
-    id: 4,
-    title: "Beauty",
-    image:
-      "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600",
-  },
-];
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 
 export default function Categories() {
+
+  const [categories, setCategories] = useState([]);
+
+
+  useEffect(() => {
+
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/categories/`)
+      .then((res) => {
+
+        console.log("CATEGORY DATA:", res.data);
+
+        setCategories(res.data.data);
+
+      })
+      .catch((error) => {
+
+        console.log("Category Error:", error);
+
+      });
+
+  }, []);
+
+
   return (
     <section className="max-w-7xl mx-auto mt-20 px-4">
 
@@ -41,6 +42,7 @@ export default function Categories() {
 
       </div>
 
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
 
         {categories.map((category) => (
@@ -51,15 +53,20 @@ export default function Categories() {
           >
 
             <img
-              src={category.image}
-              alt={category.title}
+              src={
+                category.image
+                ? `${import.meta.env.VITE_MEDIA_URL}${category.image}`
+                : "https://via.placeholder.com/600"
+              }
+              alt={category.name}
               className="h-64 w-full object-cover group-hover:scale-105 transition duration-500"
             />
+
 
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
 
               <h3 className="text-white text-2xl font-bold">
-                {category.title}
+                {category.name}
               </h3>
 
             </div>

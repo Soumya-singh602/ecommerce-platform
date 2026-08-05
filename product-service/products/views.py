@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.core.paginator import Paginator , EmptyPage
 
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Product , Category
+from .serializers import ProductSerializer , CategorySerializer
 from django.db.models import Q
 from ecommerce_common.response import success_response
 from ecommerce_common.exceptions import NotFoundException
@@ -236,3 +236,18 @@ def health_check(request):
         "status": "ok",
         "service": "product-service"
     })
+
+@api_view(["GET"])
+def category_list(request):
+
+    categories = Category.objects.all()
+
+    serializer = CategorySerializer(
+        categories,
+        many=True
+    )
+
+    return success_response(
+        message="Categories fetched successfully",
+        data=serializer.data
+    )
