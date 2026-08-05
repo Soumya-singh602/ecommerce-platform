@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { getBanner } from "../services/bannerService";
+import { useNavigate } from "react-router-dom";
 
 
 export default function Hero() {
 
     const [banner, setBanner] = useState(null);
 
+    const navigate = useNavigate();
 
-    useEffect(() => {
 
-        const fetchBanner = async () => {
+    useEffect(()=>{
 
-            try {
+        const fetchBanner = async()=>{
+
+            try{
 
                 const response = await getBanner();
 
@@ -21,12 +23,9 @@ export default function Hero() {
                 setBanner(response.data);
 
             }
-            catch(error) {
+            catch(error){
 
-                console.log(
-                    "BANNER ERROR:",
-                    error
-                );
+                console.log("BANNER ERROR:", error);
 
             }
 
@@ -35,7 +34,7 @@ export default function Hero() {
 
         fetchBanner();
 
-    }, []);
+    },[]);
 
 
 
@@ -52,7 +51,7 @@ export default function Hero() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
 
-                <div
+                <div 
                 className="lg:col-span-2 rounded-2xl p-12 text-white bg-cover bg-center"
                 style={{
                     backgroundImage:
@@ -60,29 +59,66 @@ export default function Hero() {
                 }}
                 >
 
+
                     <p className="uppercase tracking-widest">
-
-                        {banner.subtitle}
-
+                        New Collection
                     </p>
 
 
                     <h1 className="text-5xl font-bold mt-4">
-
                         {banner.title}
-
                     </h1>
 
 
+                    <p className="mt-6 text-lg">
+                        {banner.subtitle}
+                    </p>
 
-                    <Link
-                    to={banner.button_link}
-                    className="inline-block mt-8 bg-white text-blue-700 px-8 py-3 rounded-xl font-semibold"
+
+
+                    <button
+
+                    onClick={()=>navigate(banner.button_link)}
+
+                    className="mt-8 bg-white text-blue-700 px-8 py-3 rounded-xl font-semibold hover:bg-gray-100"
+
                     >
 
                         {banner.button_text}
 
-                    </Link>
+                    </button>
+
+
+                </div>
+
+
+                <div className="space-y-4">
+
+
+                    {
+                    [
+                        "Electronics",
+                        "Fashion",
+                        "Home & Living",
+                    ].map(item=>(
+
+                        <div
+                        key={item}
+                        className="bg-white shadow rounded-xl p-6"
+                        >
+
+                            <h3 className="font-semibold text-lg">
+                                {item}
+                            </h3>
+
+                            <p className="text-gray-500 mt-2">
+                                Explore Collection
+                            </p>
+
+                        </div>
+
+                    ))
+                    }
 
 
                 </div>
