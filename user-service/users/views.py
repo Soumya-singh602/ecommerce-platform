@@ -64,6 +64,9 @@ def login_user(request):
 
         refresh = RefreshToken.for_user(user)
 
+        refresh["email"] = user.email
+        refresh["role"] = user.role
+
         return success_response(
           message="Login successful",
           data={

@@ -475,7 +475,7 @@ def create_stripe_customer(request):
 
 
     customer = stripe.Customer.create(
-        email=user["email"]
+        email=user["user_email"]
     )
 
 
