@@ -1,30 +1,39 @@
-import { ShoppingCart, Search, User, Menu, MessageCircle } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { getUser, isAuthenticated, logout } from "../utils/auth";
-import { useCart } from "../context/CartContext";
+import {
+  ShoppingCart,
+  Search,
+  User,
+  Menu,
+  MessageCircle,
+} from "lucide-react";
 
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import { useState } from "react";
+
+import {
+  getUser,
+  isAuthenticated,
+  logout,
+} from "../utils/auth";
+
+import { useCart } from "../context/CartContext";
 
 export default function Navbar() {
 
-
   const navigate = useNavigate();
-
 
   const [loggedIn, setLoggedIn] = useState(
     isAuthenticated()
   );
 
+  const [search, setSearch] = useState("");
 
   const user = getUser();
 
-
   const { cartItems } = useCart();
-
-
-  console.log("NAVBAR CART ITEMS:", cartItems);
-
-
 
   const handleLogout = () => {
 
@@ -36,7 +45,21 @@ export default function Navbar() {
 
   };
 
+  const handleSearch = () => {
 
+    const keyword = search.trim();
+
+    if (!keyword) {
+
+      navigate("/shop");
+
+      return;
+
+    }
+
+    navigate(`/shop?search=${encodeURIComponent(keyword)}`);
+
+  };
 
   return (
 
@@ -46,24 +69,21 @@ export default function Navbar() {
 
         <div className="flex items-center justify-between h-16">
 
-
-          {/* Logo + Navigation */}
+          {/* Logo */}
 
           <div className="flex items-center">
-
 
             <Link to="/">
 
               <h1 className="text-3xl font-bold text-blue-600">
+
                 Ecommerce
+
               </h1>
 
             </Link>
 
-
-
             <div className="hidden lg:flex gap-8 ml-12">
-
 
               <Link
                 to="/"
@@ -72,8 +92,6 @@ export default function Navbar() {
                 Home
               </Link>
 
-
-
               <Link
                 to="/shop"
                 className="hover:text-blue-600 transition-colors"
@@ -81,64 +99,55 @@ export default function Navbar() {
                 Shop
               </Link>
 
-
             </div>
 
-
           </div>
-
-
-
-
 
           {/* Search */}
 
           <div className="hidden md:flex w-2/5">
 
-
             <div className="flex w-full border rounded-lg overflow-hidden">
 
-
               <input
-
                 type="text"
-
                 placeholder="Search Products..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => {
 
+                  if (e.key === "Enter") {
+
+                    handleSearch();
+
+                  }
+
+                }}
                 className="w-full px-4 py-2 outline-none"
-
               />
 
+              <button
+                onClick={handleSearch}
+                className="px-4 bg-blue-600 text-white"
+              >
 
-              <button className="px-4 bg-blue-600 text-white">
-
-                <Search size={20}/>
+                <Search size={20} />
 
               </button>
 
-
             </div>
-
 
           </div>
 
-
-
-
-
-
-
-          {/* Icons + Auth */}
+          {/* Right Side */}
 
           <div className="flex items-center gap-6">
 
-
-
             {
+
               loggedIn ? (
 
                 <>
-
 
                   <span className="hidden md:block text-sm">
 
@@ -146,146 +155,78 @@ export default function Navbar() {
 
                   </span>
 
-
-
                   <button
-
                     onClick={handleLogout}
-
                     className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-
                   >
 
                     Logout
 
                   </button>
 
-
                 </>
-
 
               ) : (
 
                 <>
 
-
                   <Link
-
                     to="/login"
-
                     className="hover:text-blue-600 transition-colors"
-
                   >
 
                     <User />
 
                   </Link>
 
-
-
                   <Link
-
                     to="/register"
-
                     className="hidden md:block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-
                   >
 
                     Register
 
                   </Link>
 
-
                 </>
-
 
               )
 
             }
 
-
-
-
-
-
-
-            {/* Chat */}
-
             {
+
               loggedIn && (
 
                 <Link to="/chat">
 
                   <MessageCircle
-
                     size={26}
-
-                    className="
-                    cursor-pointer
-                    hover:text-blue-600
-                    transition-colors
-                    "
-
+                    className="cursor-pointer hover:text-blue-600 transition-colors"
                   />
 
                 </Link>
 
               )
+
             }
 
-
-
-
-
-
-
-
-            {/* Cart */}
-
             <Link
-
               to="/cart"
-
               className="relative"
-
             >
 
-
               <ShoppingCart
-
                 size={28}
-
-                className="
-                cursor-pointer
-                hover:text-blue-600
-                transition-colors
-                "
-
+                className="cursor-pointer hover:text-blue-600 transition-colors"
               />
 
-
-
               {
+
                 cartItems.length > 0 && (
 
                   <span
-
-                    className="
-                    absolute
-                    -top-3
-                    -right-3
-                    bg-red-600
-                    text-white
-                    text-sm
-                    font-bold
-                    rounded-full
-                    w-6
-                    h-6
-                    flex
-                    items-center
-                    justify-center
-                    "
-
+                    className="absolute -top-3 -right-3 bg-red-600 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center"
                   >
 
                     {cartItems.length}
@@ -293,37 +234,21 @@ export default function Navbar() {
                   </span>
 
                 )
-              }
 
+              }
 
             </Link>
 
-
-
-
-
-
-
-
-            {/* Mobile Menu */}
-
             <Menu
-
               size={26}
-
               className="md:hidden cursor-pointer"
-
             />
-
 
           </div>
 
-
         </div>
 
-
       </div>
-
 
     </header>
 

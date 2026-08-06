@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 import Breadcrumb from "../components/shop/Breadcrumb";
@@ -10,320 +11,205 @@ import Pagination from "../components/shop/Pagination";
 
 import { getProducts } from "../services/productService";
 
-
 export default function Shop() {
 
+    const [searchParams] = useSearchParams();
 
-  const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState(
+        searchParams.get("search") || ""
+    );
 
+    const [ordering, setOrdering] = useState("");
 
-  const [search, setSearch] = useState("");
+    const [page, setPage] = useState(1);
 
-  const [ordering, setOrdering] = useState("");
+    const [totalPages, setTotalPages] = useState(1);
 
-  const [page, setPage] = useState(1);
+    useEffect(() => {
 
+        const keyword = searchParams.get("search") || "";
 
-  const [totalPages, setTotalPages] = useState(1);
+        setSearch(keyword);
 
+        setPage(1);
 
+    }, [searchParams]);
 
+    const fetchProducts = async () => {
 
+        try {
 
-  const fetchProducts = async () => {
+            setLoading(true);
 
+            const response = await getProducts({
 
-    try {
+                search: search,
+                sort: ordering,
+                page: page
 
+            });
 
-      setLoading(true);
+            console.log("PRODUCT RESPONSE:", response);
 
+            if (response.success && response.data) {
 
+                setProducts(response.data.products);
 
-      const response = await getProducts({
-
-        search: search,
-
-        sort: ordering,
-
-        page: page
-
-      });
-
-
-
-      console.log(
-        "PRODUCT RESPONSE:",
-        response
-      );
-
-
-
-
-      // Backend Response:
-      /*
-        {
-          success:true,
-          data:{
-             current_page:1,
-             total_pages:2,
-             total_products:6,
-             products:[]
-          }
-        }
-      */
-
-
-
-      if(
-        response.success &&
-        response.data
-      ){
-
-
-        setProducts(
-          response.data.products
-        );
-
-
-        setTotalPages(
-          response.data.total_pages
-        );
-
-
-      }
-
-
-      else{
-
-
-        setProducts([]);
-
-
-      }
-
-
-
-
-    }
-
-
-    catch(error){
-
-
-      console.log(
-        "PRODUCT ERROR:",
-        error
-      );
-
-
-      setProducts([]);
-
-
-    }
-
-
-    finally{
-
-
-      setLoading(false);
-
-
-    }
-
-
-
-  };
-
-
-
-
-
-  useEffect(()=>{
-
-
-    fetchProducts();
-
-
-  },[
-    search,
-    ordering,
-    page
-  ]);
-
-
-
-
-
-
-  return (
-
-    <MainLayout>
-
-
-      <div className="max-w-7xl mx-auto py-10 px-4">
-
-
-        <Breadcrumb />
-
-
-
-        <h1 className="text-4xl font-bold">
-
-          Shop
-
-        </h1>
-
-
-
-
-        <div className="mt-6 flex flex-col md:flex-row gap-4 md:items-center">
-
-
-          <div className="flex-1">
-
-
-            <SearchBar
-
-              value={search}
-
-              setSearch={(value)=>{
-
-                setSearch(value);
-
-                setPage(1);
-
-              }}
-
-            />
-
-
-          </div>
-
-
-
-
-          <SortDropdown
-
-            setOrdering={(value)=>{
-
-              setOrdering(value);
-
-              setPage(1);
-
-            }}
-
-          />
-
-
-
-        </div>
-
-
-
-
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-10">
-
-
-
-          <div>
-
-
-            <FilterSidebar />
-
-
-          </div>
-
-
-
-
-
-          <div className="lg:col-span-3">
-
-
-
-            <h2 className="text-2xl font-semibold mb-6">
-
-              Products
-
-            </h2>
-
-
-
-
-
-            {
-
-            loading ? (
-
-
-              <p>
-
-                Loading products...
-
-              </p>
-
-
-            ) : products.length > 0 ? (
-
-
-              <ProductGrid
-
-                products={products}
-
-              />
-
-
-            ) : (
-
-
-              <p>
-
-                No products found
-
-              </p>
-
-
-            )
-
+                setTotalPages(response.data.total_pages);
 
             }
 
+            else {
 
+                setProducts([]);
 
+            }
 
+        }
 
-            <Pagination
+        catch (error) {
 
-              page={page}
+            console.log("PRODUCT ERROR:", error);
 
-              setPage={setPage}
+            setProducts([]);
 
-              totalPages={totalPages}
+        }
 
-            />
+        finally {
 
+            setLoading(false);
 
+        }
 
-          </div>
+    };
 
+    useEffect(() => {
 
+        fetchProducts();
 
+    }, [
 
-        </div>
+        search,
+        ordering,
+        page
 
+    ]);
 
+    return (
 
-      </div>
+        <MainLayout>
 
+            <div className="max-w-7xl mx-auto py-10 px-4">
 
+                <Breadcrumb />
 
-    </MainLayout>
+                <h1 className="text-4xl font-bold">
 
-  );
+                    Shop
 
+                </h1>
+
+                <div className="mt-6 flex flex-col md:flex-row gap-4 md:items-center">
+
+                    <div className="flex-1">
+
+                        <SearchBar
+
+                            value={search}
+
+                            setSearch={(value) => {
+
+                                setSearch(value);
+
+                                setPage(1);
+
+                            }}
+
+                        />
+
+                    </div>
+
+                    <SortDropdown
+
+                        setOrdering={(value) => {
+
+                            setOrdering(value);
+
+                            setPage(1);
+
+                        }}
+
+                    />
+
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-10">
+
+                    <div>
+
+                        <FilterSidebar />
+
+                    </div>
+
+                    <div className="lg:col-span-3">
+
+                        <h2 className="text-2xl font-semibold mb-6">
+
+                            Products
+
+                        </h2>
+
+                        {
+
+                            loading ? (
+
+                                <p>
+
+                                    Loading products...
+
+                                </p>
+
+                            ) : products.length > 0 ? (
+
+                                <ProductGrid
+
+                                    products={products}
+
+                                />
+
+                            ) : (
+
+                                <p>
+
+                                    No products found
+
+                                </p>
+
+                            )
+
+                        }
+
+                        <Pagination
+
+                            page={page}
+
+                            setPage={setPage}
+
+                            totalPages={totalPages}
+
+                        />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </MainLayout>
+
+    );
 
 }
