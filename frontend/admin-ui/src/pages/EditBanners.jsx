@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "../services/axios";
 import { updateBanner } from "../services/bannerService";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function EditBanner() {
 
@@ -21,13 +22,11 @@ export default function EditBanner() {
 
     });
 
-
     useEffect(() => {
 
         fetchBanner();
 
     }, []);
-
 
     const fetchBanner = async () => {
 
@@ -57,7 +56,6 @@ export default function EditBanner() {
 
     };
 
-
     const handleChange = (e) => {
 
         const { name, value } = e.target;
@@ -71,7 +69,6 @@ export default function EditBanner() {
 
     };
 
-
     const handleImage = (e) => {
 
         setFormData({
@@ -83,7 +80,6 @@ export default function EditBanner() {
         });
 
     };
-
 
     const handleSubmit = async (e) => {
 
@@ -117,10 +113,9 @@ export default function EditBanner() {
 
     };
 
-
     return (
 
-        <div className="p-8">
+        <DashboardLayout>
 
             <h1 className="text-3xl font-bold mb-8">
                 Edit Banner
@@ -184,7 +179,7 @@ export default function EditBanner() {
 
             </form>
 
-        </div>
+        </DashboardLayout>
 
     );
 
