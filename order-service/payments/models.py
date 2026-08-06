@@ -48,3 +48,21 @@ class PaymentOrder(models.Model):
 
     def __str__(self):
         return f"Payment {self.payment_id} -> Order {self.order_id}"
+
+class PaymentCustomer(models.Model):
+
+    user_id = models.IntegerField(
+        unique=True
+    )
+
+    stripe_customer_id = models.CharField(
+        max_length=255,
+        unique=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return f"{self.user_id} - {self.stripe_customer_id}"

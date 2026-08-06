@@ -4,7 +4,7 @@ from django.conf import settings
 from ecommerce_common.utils import get_user_info
 import stripe
 
-from .models import Payment, PaymentOrder
+from .models import Payment, PaymentOrder , PaymentCustomer
 from orders.models import Order
 
 from django.views.decorators.csrf import csrf_exempt
@@ -452,3 +452,102 @@ def stripe_webhook(request):
     return HttpResponse(
         status=200
     )
+
+@api_view(["POST"])
+def create_stripe_customer(request):
+
+    user = get_user_info(request)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+    existing_customer = PaymentCustomer.objects.filter(
+        user_id=user["user_id"]
+    ).first()
+
+
+    if existing_customer:
+
+        return Response({
+            "success": True,
+            "customer_id": existing_customer.stripe_customer_id
+        })
+
+
+    customer = stripe.Customer.create(
+        email=user["email"]
+    )
+
+
+    PaymentCustomer.objects.create(
+
+        user_id=user["user_id"],
+
+        stripe_customer_id=customer.id
+
+    )
+
+
+    return Response({
+
+        "success": True,
+
+        "customer_id": customer.id
+
+    })
+
+@api_view(["POST"])
+def create_setup_intent(request):
+
+    user = get_user_info(request)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+    customer = PaymentCustomer.objects.filter(
+        user_id=user["user_id"]
+    ).first()
+
+
+    if not customer:
+
+        return Response(
+            {
+                "success": False,
+                "message": "Stripe customer not found"
+            },
+            status=400
+        )
+
+
+    try:
+
+        setup_intent = stripe.SetupIntent.create(
+
+            customer=customer.stripe_customer_id,
+
+            payment_method_types=[
+                "card"
+            ]
+
+        )
+
+
+        return Response({
+
+            "success": True,
+
+            "client_secret": setup_intent.client_secret
+
+        })
+
+
+    except Exception as e:
+
+        return Response({
+
+            "success": False,
+
+            "error": str(e)
+
+        }, status=500)

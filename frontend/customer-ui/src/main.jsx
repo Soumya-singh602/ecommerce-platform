@@ -3,8 +3,16 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+
 import "./index.css";
 import App from "./App";
+
+
+const stripePromise = loadStripe(
+    import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+);
 
 
 ReactDOM.createRoot(
@@ -13,11 +21,15 @@ ReactDOM.createRoot(
 
     <BrowserRouter>
 
-        <CartProvider>
+        <Elements stripe={stripePromise}>
 
-            <App />
+            <CartProvider>
 
-        </CartProvider>
+                <App />
+
+            </CartProvider>
+
+        </Elements>
 
     </BrowserRouter>
 
