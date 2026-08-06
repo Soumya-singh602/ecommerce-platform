@@ -12,6 +12,7 @@ import ProtectedRoute from "../components/auth/ProtectedRoute";
 import MyOrders from "../pages/MyOrders";
 import OrderDetails from "../pages/OrderDetails";
 import Chat from "../pages/Chat";
+import Profile from "../pages/Profile";
 
 export default function AppRoutes() {
   return (
@@ -35,6 +36,15 @@ export default function AppRoutes() {
 
       <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
       <Route path="/chat" element={<ProtectedRoute><Chat/></ProtectedRoute>}/>
+      <Route 
+    path="/profile" 
+    element={
+        <ProtectedRoute>
+            <Profile />
+        </ProtectedRoute>
+    }
+/>
     </Routes>
+     
   );
 }
