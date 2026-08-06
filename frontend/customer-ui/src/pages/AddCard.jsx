@@ -8,8 +8,10 @@ import {
 
 import {
     createStripeCustomer,
-    createSetupIntent
+    createSetupIntent,
+    saveCard
 } from "../services/paymentService";
+
 
 export default function AddCard() {
 
@@ -21,6 +23,7 @@ export default function AddCard() {
 
     const [loading, setLoading] = useState(true);
 
+
     useEffect(() => {
 
         const setup = async () => {
@@ -29,17 +32,28 @@ export default function AddCard() {
 
                 await createStripeCustomer();
 
-                const response = await createSetupIntent();
+                const response =
+                    await createSetupIntent();
 
-                setClientSecret(response.client_secret);
 
-            } catch (error) {
+                setClientSecret(
+                    response.client_secret
+                );
 
-                console.log("SETUP ERROR:", error);
 
-                alert("Unable to initialize card setup.");
+            } catch(error){
 
-            } finally {
+                console.log(
+                    "SETUP ERROR:",
+                    error
+                );
+
+                alert(
+                    "Unable to initialize card setup"
+                );
+
+            }
+            finally{
 
                 setLoading(false);
 
@@ -47,83 +61,139 @@ export default function AddCard() {
 
         };
 
+
         setup();
 
-    }, []);
+    },[]);
 
-    const handleSubmit = async (e) => {
+
+
+    const handleSubmit = async(e)=>{
 
         e.preventDefault();
 
-        if (!stripe || !elements || !clientSecret) {
+
+        if(!stripe || !elements || !clientSecret){
 
             return;
 
         }
 
-        const card = elements.getElement(CardElement);
 
-        const result = await stripe.confirmCardSetup(
+        const card =
+            elements.getElement(
+                CardElement
+            );
 
-            clientSecret,
 
-            {
+        const result =
+            await stripe.confirmCardSetup(
 
-                payment_method: {
+                clientSecret,
 
-                    card,
+                {
+                    payment_method:{
+                        card: card
+                    }
+                }
 
-                },
+            );
 
-            }
 
-        );
+        if(result.error){
 
-        if (result.error) {
+            alert(
+                result.error.message
+            );
 
-            alert(result.error.message);
-
-        } else {
-
-            alert("Card Saved Successfully");
-
-            console.log(result.setupIntent);
+            return;
 
         }
 
+
+        const paymentMethodId =
+            result.setupIntent.payment_method;
+
+
+        console.log(
+            "PAYMENT METHOD:",
+            paymentMethodId
+        );
+
+
+        try {
+
+
+            const response =
+                await saveCard({
+
+                    payment_method_id:
+                    paymentMethodId
+
+                });
+
+
+            console.log(
+                "SAVE CARD RESPONSE:",
+                response
+            );
+
+
+            alert(
+                "Card Saved Successfully"
+            );
+
+
+        }
+        catch(error){
+
+            console.log(
+                "SAVE CARD ERROR:",
+                error
+            );
+
+            alert(
+                "Card save failed"
+            );
+
+        }
+
+
     };
 
-    if (loading) {
+
+
+    if(loading){
 
         return (
-
             <div className="text-center mt-10">
-
                 Loading...
-
             </div>
-
         );
 
     }
+
+
 
     return (
 
         <div className="max-w-xl mx-auto mt-10 bg-white shadow p-6 rounded-xl">
 
+
             <h1 className="text-2xl font-bold mb-5">
-
                 Save Card
-
             </h1>
 
+
             <form onSubmit={handleSubmit}>
+
 
                 <div className="border p-4 rounded">
 
                     <CardElement />
 
                 </div>
+
 
                 <button
 
@@ -137,7 +207,9 @@ export default function AddCard() {
 
                 </button>
 
+
             </form>
+
 
         </div>
 

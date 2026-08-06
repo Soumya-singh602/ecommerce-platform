@@ -4,7 +4,7 @@ from django.conf import settings
 from ecommerce_common.utils import get_user_info
 import stripe
 
-from .models import Payment, PaymentOrder , PaymentCustomer
+from .models import Payment, PaymentOrder , PaymentCustomer , SavedCard
 from orders.models import Order
 
 from django.views.decorators.csrf import csrf_exempt
@@ -551,3 +551,74 @@ def create_setup_intent(request):
             "error": str(e)
 
         }, status=500)
+
+@api_view(["POST"])
+def save_card(request):
+
+    user = get_user_info(request)
+
+    payment_method_id = request.data.get(
+        "payment_method_id"
+    )
+
+
+    if not payment_method_id:
+
+        return Response(
+            {
+                "success":False,
+                "message":"Payment method required"
+            },
+            status=400
+        )
+
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+    payment_method = stripe.PaymentMethod.retrieve(
+        payment_method_id
+    )
+
+
+    card = payment_method.card
+
+
+    saved_card = SavedCard.objects.create(
+
+        user_id=user["user_id"],
+
+        stripe_payment_method_id=payment_method.id,
+
+        brand=card.brand,
+
+        last4=card.last4,
+
+        exp_month=card.exp_month,
+
+        exp_year=card.exp_year
+
+    )
+
+
+    return Response({
+
+        "success":True,
+
+        "message":"Card saved",
+
+        "card":{
+
+            "id":saved_card.id,
+
+            "brand":saved_card.brand,
+
+            "last4":saved_card.last4,
+
+            "exp_month":saved_card.exp_month,
+
+            "exp_year":saved_card.exp_year
+
+        }
+
+    })

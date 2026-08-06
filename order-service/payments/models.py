@@ -66,3 +66,32 @@ class PaymentCustomer(models.Model):
 
     def __str__(self):
         return f"{self.user_id} - {self.stripe_customer_id}"
+
+class SavedCard(models.Model):
+
+    user_id = models.IntegerField()
+
+    stripe_payment_method_id = models.CharField(
+        max_length=255,
+        unique=True
+    )
+
+    brand = models.CharField(
+        max_length=50
+    )
+
+    last4 = models.CharField(
+        max_length=4
+    )
+
+    exp_month = models.IntegerField()
+
+    exp_year = models.IntegerField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+
+    def __str__(self):
+        return f"{self.brand} **** {self.last4}"

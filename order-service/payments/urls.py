@@ -45,4 +45,9 @@ urlpatterns = [
         views.create_setup_intent
     ),
 
+    path(
+    "save-card/",
+    views.save_card
+),
+
 ]

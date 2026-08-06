@@ -51,3 +51,14 @@ export const createSetupIntent = async () => {
     return response.data;
 
 };
+
+export const saveCard = async (data) => {
+
+    const response = await api.post(
+        "/payments/save-card/",
+        data
+    );
+
+    return response.data;
+
+};
