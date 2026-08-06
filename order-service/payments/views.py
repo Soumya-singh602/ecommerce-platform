@@ -576,49 +576,112 @@ def save_card(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-    payment_method = stripe.PaymentMethod.retrieve(
-        payment_method_id
-    )
+    try:
+
+        customer = PaymentCustomer.objects.get(
+            user_id=user["user_id"]
+        )
 
 
-    card = payment_method.card
+        payment_method = stripe.PaymentMethod.retrieve(
+            payment_method_id
+        )
 
 
-    saved_card = SavedCard.objects.create(
+        card = payment_method.card
 
-        user_id=user["user_id"],
 
-        stripe_payment_method_id=payment_method.id,
+        saved_card = SavedCard.objects.create(
 
-        brand=card.brand,
+            user_id=user["user_id"],
 
-        last4=card.last4,
+            stripe_customer_id=
+            customer.stripe_customer_id,
 
-        exp_month=card.exp_month,
+            stripe_payment_method_id=
+            payment_method.id,
 
-        exp_year=card.exp_year
+            brand=card.brand,
 
-    )
+            last4=card.last4,
+
+            exp_month=card.exp_month,
+
+            exp_year=card.exp_year
+
+        )
+
+
+        return Response({
+
+            "success":True,
+
+            "message":"Card saved",
+
+            "card":{
+
+                "id":saved_card.id,
+
+                "brand":saved_card.brand,
+
+                "last4":saved_card.last4,
+
+                "exp_month":saved_card.exp_month,
+
+                "exp_year":saved_card.exp_year
+
+            }
+
+        })
+
+
+    except Exception as e:
+
+        print("SAVE CARD ERROR:",e)
+
+        return Response({
+
+            "success":False,
+
+            "error":str(e)
+
+        },status=500)
+
+@api_view(["GET"])
+def saved_cards(request):
+
+    user = get_user_info(request)
+
+
+    cards = SavedCard.objects.filter(
+        user_id=user["user_id"]
+    ).order_by("-created_at")
+
+
+    data = []
+
+
+    for card in cards:
+
+        data.append({
+
+            "id": card.id,
+
+            "brand": card.brand,
+
+            "last4": card.last4,
+
+            "exp_month": card.exp_month,
+
+            "exp_year": card.exp_year
+
+        })
 
 
     return Response({
 
-        "success":True,
+        "success": True,
 
-        "message":"Card saved",
-
-        "card":{
-
-            "id":saved_card.id,
-
-            "brand":saved_card.brand,
-
-            "last4":saved_card.last4,
-
-            "exp_month":saved_card.exp_month,
-
-            "exp_year":saved_card.exp_year
-
-        }
+        "data": data
 
     })

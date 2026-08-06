@@ -49,5 +49,10 @@ urlpatterns = [
     "save-card/",
     views.save_card
 ),
+    path(
+        "saved-cards/",
+        views.saved_cards
+    ),
+
 
 ]
