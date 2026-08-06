@@ -4,6 +4,7 @@ import {
   User,
   Menu,
   MessageCircle,
+  Package,
 } from "lucide-react";
 
 import {
@@ -201,7 +202,6 @@ export default function Navbar() {
 
             {
 
-
               loggedIn ? (
 
                 <>
@@ -225,12 +225,28 @@ export default function Navbar() {
 
 
 
+                  {/* My Orders */}
+
+                  <Link
+
+                    to="/orders"
+
+                    className="hover:text-blue-600 transition-colors"
+
+                    title="My Orders"
+
+                  >
+
+                    <Package size={26} />
+
+                  </Link>
+
+
+
 
                   <span className="hidden md:block text-sm">
 
-
                     {user?.email}
-
 
                   </span>
 
@@ -246,7 +262,6 @@ export default function Navbar() {
                   >
 
                     Logout
-
 
                   </button>
 
