@@ -80,7 +80,7 @@ export default function ProductInfo({ product }) {
 
       <h2 className="text-3xl font-bold text-blue-600 mt-6">
 
-        ₹{product?.price}
+        ₹{product?.price * quantity}
 
       </h2>
 
