@@ -302,11 +302,21 @@ def banner_list(request):
 @parser_classes([MultiPartParser, FormParser])
 def create_banner(request):
 
+    print("FILES:", request.FILES)
+    print("DATA:", request.data)
+
     serializer = BannerSerializer(data=request.data)
 
     if serializer.is_valid():
 
-        serializer.save()
+        
+
+        banner = serializer.save()
+
+
+        print("IMAGE NAME:", banner.image.name)
+        print("IMAGE PATH:", banner.image.path)
+
 
         return success_response(
             message="Banner created successfully",
