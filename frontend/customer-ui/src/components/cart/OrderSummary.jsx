@@ -28,7 +28,7 @@ Number(item.price) * Number(item.quantity || 1)
 
 const shipping = subtotal > 0 ? 99 : 0;
 
-const tax = Math.round(subtotal * 0.10);
+const tax = Math.round(subtotal * 0.005);
 
 
 // Final Total
