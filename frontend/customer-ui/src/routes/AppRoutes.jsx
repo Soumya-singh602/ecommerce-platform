@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 
 import Home from "../pages/Home";
@@ -20,186 +21,141 @@ import SavedCards from "../pages/SavedCards";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
+// Footer Pages
+import Contact from "../pages/Contact";
+import ShippingPolicy from "../pages/ShippingPolicy";
+import ReturnPolicy from "../pages/ReturnPolicy";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
 
 export default function AppRoutes() {
-
-
-return (
-
-<Routes>
-
-
-{/* Public Pages */}
-
-<Route
-path="/"
-element={<Home />}
-/>
-
-
-<Route
-path="/shop"
-element={<Shop />}
-/>
-
-
-<Route
-path="/product/:id"
-element={<ProductDetails />}
-/>
-
-
-<Route
-path="/login"
-element={<Login />}
-/>
-
-
-<Route
-path="/register"
-element={<Register />}
-/>
-
-
-<Route
-path="/cart"
-element={<Cart />}
-/>
-
-
-
-{/* Protected Pages */}
-
-
-<Route
-
-path="/checkout"
-
-element={
-
-<ProtectedRoute>
-
-<Checkout />
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-<Route
-
-path="/orders"
-
-element={
-
-<ProtectedRoute>
-
-<MyOrders />
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-<Route
-
-path="/orders/:id"
-
-element={
-
-<ProtectedRoute>
-
-<OrderDetails />
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-<Route
-
-path="/chat"
-
-element={
-
-<ProtectedRoute>
-
-<Chat />
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-<Route
-
-path="/profile"
-
-element={
-
-<ProtectedRoute>
-
-<Profile />
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-<Route
-
-path="/add-card"
-
-element={
-
-<ProtectedRoute>
-
-<AddCard />
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-<Route
-
-path="/saved-cards"
-
-element={
-
-<ProtectedRoute>
-
-<SavedCards />
-
-</ProtectedRoute>
-
-}
-
-/>
-
-
-
-</Routes>
-
-
-);
-
+  return (
+    <Routes>
+
+      {/* =========================
+          PUBLIC PAGES
+      ========================== */}
+
+      <Route
+        path="/"
+        element={<Home />}
+      />
+
+      <Route
+        path="/shop"
+        element={<Shop />}
+      />
+
+      <Route
+        path="/product/:id"
+        element={<ProductDetails />}
+      />
+
+      <Route
+        path="/login"
+        element={<Login />}
+      />
+
+      <Route
+        path="/register"
+        element={<Register />}
+      />
+
+      <Route
+        path="/cart"
+        element={<Cart />}
+      />
+
+      {/* =========================
+          FOOTER PAGES
+      ========================== */}
+
+      <Route
+        path="/contact"
+        element={<Contact />}
+      />
+
+      <Route
+        path="/shipping-policy"
+        element={<ShippingPolicy />}
+      />
+
+      <Route
+        path="/return-policy"
+        element={<ReturnPolicy />}
+      />
+
+      <Route
+        path="/privacy-policy"
+        element={<PrivacyPolicy />}
+      />
+
+      {/* =========================
+          PROTECTED PAGES
+      ========================== */}
+
+      <Route
+        path="/checkout"
+        element={
+          <ProtectedRoute>
+            <Checkout />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <MyOrders />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/orders/:id"
+        element={
+          <ProtectedRoute>
+            <OrderDetails />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/add-card"
+        element={
+          <ProtectedRoute>
+            <AddCard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/saved-cards"
+        element={
+          <ProtectedRoute>
+            <SavedCards />
+          </ProtectedRoute>
+        }
+      />
+
+    </Routes>
+  );
 }

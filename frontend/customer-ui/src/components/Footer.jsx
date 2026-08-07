@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+
 import {
   ShoppingCart,
   Package,
@@ -11,7 +12,6 @@ import {
 
 import { isAuthenticated } from "../utils/auth";
 import { useCart } from "../context/CartContext";
-
 
 export default function Footer() {
 
@@ -83,10 +83,22 @@ export default function Footer() {
   // ============================================================
 
   const supportLinks = [
-    "Contact Us",
-    "Shipping Policy",
-    "Return Policy",
-    "Privacy Policy"
+    {
+      label: "Contact Us",
+      path: "/contact"
+    },
+    {
+      label: "Shipping Policy",
+      path: "/shipping-policy"
+    },
+    {
+      label: "Return Policy",
+      path: "/return-policy"
+    },
+    {
+      label: "Privacy Policy",
+      path: "/privacy-policy"
+    }
   ];
 
 
@@ -156,9 +168,7 @@ export default function Footer() {
             <ShoppingCart size={18} />
 
             <span>
-
               Cart ({cartItems.length})
-
             </span>
 
           </Link>
@@ -173,9 +183,7 @@ export default function Footer() {
         <div>
 
           <h3 className="font-semibold text-lg mb-5">
-
             Quick Links
-
           </h3>
 
 
@@ -263,7 +271,7 @@ export default function Footer() {
 
 
         {/* ======================================================
-            CONTACT / SUPPORT
+            CUSTOMER SUPPORT
         ====================================================== */}
 
         <div>
@@ -275,20 +283,24 @@ export default function Footer() {
           </h3>
 
 
-          <ul className="space-y-3 text-gray-400">
+          <ul className="space-y-3">
 
-            {supportLinks.map((item) => (
+            {supportLinks.map((link) => (
 
-              <li
-                key={item}
-                className="
-                  hover:text-blue-400
-                  cursor-pointer
-                  transition
-                "
-              >
+              <li key={link.path}>
 
-                {item}
+                <Link
+                  to={link.path}
+                  className="
+                    text-gray-400
+                    hover:text-blue-400
+                    transition
+                  "
+                >
+
+                  {link.label}
+
+                </Link>
 
               </li>
 
@@ -313,9 +325,7 @@ export default function Footer() {
               <Mail size={17} />
 
               <span>
-
                 support@ecommerce.com
-
               </span>
 
             </div>
@@ -333,9 +343,7 @@ export default function Footer() {
               <Phone size={17} />
 
               <span>
-
                 +91 9876543210
-
               </span>
 
             </div>
@@ -376,17 +384,13 @@ export default function Footer() {
         >
 
           <p>
-
             © {currentYear} Ecommerce.
             All rights reserved.
-
           </p>
 
 
           <p>
-
             Secure Shopping • Trusted Payments • Fast Delivery
-
           </p>
 
         </div>
