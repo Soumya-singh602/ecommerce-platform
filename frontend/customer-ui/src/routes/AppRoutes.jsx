@@ -65,6 +65,7 @@ export default function AppRoutes() {
         element={<Cart />}
       />
 
+
       {/* =========================
           FOOTER PAGES
       ========================== */}
@@ -88,6 +89,7 @@ export default function AppRoutes() {
         path="/privacy-policy"
         element={<PrivacyPolicy />}
       />
+
 
       {/* =========================
           PROTECTED PAGES
@@ -159,3 +161,4 @@ export default function AppRoutes() {
     </Routes>
   );
 }
+
