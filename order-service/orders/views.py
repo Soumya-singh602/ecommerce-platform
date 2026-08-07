@@ -81,7 +81,27 @@ def place_order(request):
 
                 "product_id": product_id,
 
-                "quantity": quantity
+                "quantity": quantity,
+
+                "address": request.data.get(
+                          "address"
+                ),
+
+
+                "city": request.data.get(
+                         "city"
+                ),
+
+
+                 "phone": request.data.get(
+                           "phone"
+                ),
+
+
+                "pincode": request.data.get(
+                           "pincode"
+                )
+
 
             }
 

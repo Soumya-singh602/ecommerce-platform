@@ -44,6 +44,17 @@ function Checkout() {
 
   const [loadingCards, setLoadingCards] = useState(true);
 
+  const [billingData, setBillingData] = useState({
+
+  name:"",
+  email:"",
+  phone:"",
+  address:"",
+  city:"",
+  pincode:""
+
+});
+
 
   const {
     product,
@@ -383,6 +394,22 @@ function Checkout() {
           quantity:
             quantity || 1,
 
+          address:
+            billingData.address,
+
+
+          city:
+            billingData.city,
+
+
+          phone:
+            billingData.phone,
+
+
+          pincode:
+             billingData.pincode
+
+
         };
 
       }
@@ -407,7 +434,20 @@ function Checkout() {
 
               })
             ),
+              address:
+                billingData.address,
 
+
+              city:
+                billingData.city,
+
+
+              phone:
+                billingData.phone,
+
+
+              pincode:
+                billingData.pincode
         };
 
       }
@@ -827,7 +867,12 @@ function Checkout() {
 
           <div className="lg:col-span-2">
 
-            <BillingForm />
+            <BillingForm 
+                 billingData={billingData}
+
+                 setBillingData={setBillingData}
+
+            />
 
 
             <PaymentMethod
