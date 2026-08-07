@@ -4,10 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Mail,
   Phone,
-  MapPin,
-  Facebook,
-  Instagram,
-  Twitter
+  MapPin
 } from "lucide-react";
 
 export default function Footer() {
@@ -87,37 +84,6 @@ export default function Footer() {
             delivery.
 
           </p>
-
-
-          {/* SOCIAL MEDIA */}
-
-          <div className="flex gap-4 mt-6">
-
-            <a
-              href="#"
-              className="text-gray-400 hover:text-blue-400 transition"
-              aria-label="Facebook"
-            >
-              <Facebook size={20} />
-            </a>
-
-            <a
-              href="#"
-              className="text-gray-400 hover:text-pink-400 transition"
-              aria-label="Instagram"
-            >
-              <Instagram size={20} />
-            </a>
-
-            <a
-              href="#"
-              className="text-gray-400 hover:text-blue-400 transition"
-              aria-label="Twitter"
-            >
-              <Twitter size={20} />
-            </a>
-
-          </div>
 
         </div>
 
@@ -204,9 +170,7 @@ export default function Footer() {
             Contact Us
           </h3>
 
-
           <div className="space-y-4">
-
 
             <div className="flex items-start gap-3 text-gray-400">
 
