@@ -34,11 +34,9 @@ function Checkout() {
   const stripe = useStripe();
   const elements = useElements();
 
-
   const [loading, setLoading] = useState(false);
 
   const [paymentType, setPaymentType] = useState("cod");
-
 
   // Saved cards
   const [savedCards, setSavedCards] = useState([]);
@@ -62,9 +60,9 @@ function Checkout() {
 
 
   /*
-  ==========================================
+  =====================================================
   LOAD SAVED CARDS
-  ==========================================
+  =====================================================
   */
 
   useEffect(() => {
@@ -75,7 +73,9 @@ function Checkout() {
 
         setLoadingCards(true);
 
-        const response = await getSavedCards();
+        const response =
+          await getSavedCards();
+
 
         console.log(
           "SAVED CARDS RESPONSE:",
@@ -85,28 +85,34 @@ function Checkout() {
 
         if (response?.success) {
 
-          const cards = response.data || [];
+          const cards =
+            response.data || [];
+
 
           setSavedCards(cards);
 
 
           /*
-          Select default card first.
-          If no default card exists,
-          select first card.
+          Select first saved card
+          automatically.
           */
 
           if (cards.length > 0) {
 
             const defaultCard =
               cards.find(
-                (card) => card.is_default === true
+                (card) =>
+                  card.is_default === true
               ) || cards[0];
 
 
-            setSelectedCard(defaultCard);
+            setSelectedCard(
+              defaultCard
+            );
 
-            setPaymentType("saved");
+            setPaymentType(
+              "saved"
+            );
 
           }
 
@@ -140,12 +146,14 @@ function Checkout() {
 
 
   /*
-  ==========================================
+  =====================================================
   PAYMENT TYPE CHANGE
-  ==========================================
+  =====================================================
   */
 
-  const handlePaymentTypeChange = (type) => {
+  const handlePaymentTypeChange = (
+    type
+  ) => {
 
     setPaymentType(type);
 
@@ -160,9 +168,109 @@ function Checkout() {
 
 
   /*
-  ==========================================
+  =====================================================
+  CONFIRM STRIPE PAYMENT
+  =====================================================
+  */
+
+  const confirmStripePayment = async (
+    clientSecret,
+    paymentMethod
+  ) => {
+
+    if (!stripe) {
+
+      throw new Error(
+        "Stripe is not loaded"
+      );
+
+    }
+
+
+    console.log(
+      "CONFIRMING STRIPE PAYMENT..."
+    );
+
+
+    const result =
+      await stripe.confirmCardPayment(
+
+        clientSecret,
+
+        {
+          payment_method:
+            paymentMethod
+        }
+
+      );
+
+
+    console.log(
+      "STRIPE CONFIRM RESULT:",
+      result
+    );
+
+
+    if (result.error) {
+
+      console.log(
+        "STRIPE PAYMENT ERROR:",
+        result.error
+      );
+
+      throw new Error(
+        result.error.message ||
+        "Payment failed"
+      );
+
+    }
+
+
+    if (
+      !result.paymentIntent
+    ) {
+
+      throw new Error(
+        "Payment Intent response missing"
+      );
+
+    }
+
+
+    console.log(
+      "PAYMENT INTENT STATUS:",
+      result.paymentIntent.status
+    );
+
+
+    /*
+    =================================================
+    PAYMENT MUST BE SUCCEEDED
+    =================================================
+    */
+
+    if (
+      result.paymentIntent.status !==
+      "succeeded"
+    ) {
+
+      throw new Error(
+        "Payment not completed. Stripe status: " +
+        result.paymentIntent.status
+      );
+
+    }
+
+
+    return result.paymentIntent;
+
+  };
+
+
+  /*
+  =====================================================
   PLACE ORDER
-  ==========================================
+  =====================================================
   */
 
   const handlePlaceOrder = async () => {
@@ -173,12 +281,38 @@ function Checkout() {
 
 
       /*
-      ========================================
-      SAVED CARD VALIDATION
-      ========================================
+      ================================================
+      STRIPE LOADED CHECK
+      ================================================
       */
 
-      if (paymentType === "saved") {
+      if (
+        paymentType === "saved" ||
+        paymentType === "new-card"
+      ) {
+
+        if (!stripe) {
+
+          alert(
+            "Stripe is not loaded"
+          );
+
+          return;
+
+        }
+
+      }
+
+
+      /*
+      ================================================
+      SAVED CARD VALIDATION
+      ================================================
+      */
+
+      if (
+        paymentType === "saved"
+      ) {
 
         if (!selectedCard) {
 
@@ -191,7 +325,9 @@ function Checkout() {
         }
 
 
-        if (!selectedCard.payment_method_id) {
+        if (
+          !selectedCard.payment_method_id
+        ) {
 
           alert(
             "Selected card is invalid"
@@ -205,17 +341,22 @@ function Checkout() {
 
 
       /*
-      ========================================
+      ================================================
       NEW CARD VALIDATION
-      ========================================
+      ================================================
       */
 
-      if (paymentType === "new-card") {
+      let cardNumber = null;
 
-        if (!stripe || !elements) {
+
+      if (
+        paymentType === "new-card"
+      ) {
+
+        if (!elements) {
 
           alert(
-            "Stripe is not loaded"
+            "Stripe Elements is not loaded"
           );
 
           return;
@@ -223,7 +364,7 @@ function Checkout() {
         }
 
 
-        const cardNumber =
+        cardNumber =
           elements.getElement(
             CardNumberElement
           );
@@ -243,9 +384,9 @@ function Checkout() {
 
 
       /*
-      ========================================
+      ================================================
       CREATE ORDER DATA
-      ========================================
+      ================================================
       */
 
       let data;
@@ -257,28 +398,36 @@ function Checkout() {
 
         data = {
 
-          product_id: product.id,
+          product_id:
+            product.id,
 
-          quantity: quantity || 1
+          quantity:
+            quantity || 1
 
         };
 
       }
 
 
-      // CART ORDER
+      // CART
 
       else if (cartItems) {
 
         data = {
 
-          items: cartItems.map((item) => ({
+          items:
 
-            product_id: item.id,
+            cartItems.map(
+              (item) => ({
 
-            quantity: item.quantity || 1
+                product_id:
+                  item.id,
 
-          }))
+                quantity:
+                  item.quantity || 1
+
+              })
+            )
 
         };
 
@@ -303,9 +452,9 @@ function Checkout() {
 
 
       /*
-      ========================================
+      ================================================
       CREATE ORDER
-      ========================================
+      ================================================
       */
 
       const response =
@@ -318,10 +467,22 @@ function Checkout() {
       );
 
 
+      if (
+        !response?.success
+      ) {
+
+        throw new Error(
+          response?.message ||
+          "Order creation failed"
+        );
+
+      }
+
+
       /*
-      ========================================
+      ================================================
       PAYMENT DATA
-      ========================================
+      ================================================
       */
 
       let paymentData;
@@ -331,11 +492,14 @@ function Checkout() {
 
         paymentData = {
 
-          order_id: response.data.id,
+          order_id:
+            response.data.id,
 
-          amount: response.data.total_price,
+          amount:
+            response.data.total_price,
 
-          currency: "usd"
+          currency:
+            "usd"
 
         };
 
@@ -345,11 +509,14 @@ function Checkout() {
 
         paymentData = {
 
-          order_ids: response.data.order_ids,
+          order_ids:
+            response.data.order_ids,
 
-          amount: response.data.total_price,
+          amount:
+            response.data.total_price,
 
-          currency: "usd"
+          currency:
+            "usd"
 
         };
 
@@ -357,18 +524,24 @@ function Checkout() {
 
 
       /*
-      ========================================
+      =================================================
       SAVED CARD PAYMENT
-      ========================================
+      =================================================
       */
 
-      if (paymentType === "saved") {
+      if (
+        paymentType === "saved"
+      ) {
 
         console.log(
           "USING SAVED CARD:",
           selectedCard
         );
 
+
+        /*
+        CREATE PAYMENT INTENT
+        */
 
         const paymentResponse =
           await createPaymentIntent({
@@ -387,96 +560,56 @@ function Checkout() {
         );
 
 
-        if (!paymentResponse?.success) {
+        if (
+          !paymentResponse?.success
+        ) {
 
-          alert(
+          throw new Error(
             paymentResponse?.error ||
             paymentResponse?.message ||
-            "Payment failed"
+            "Payment Intent creation failed"
           );
-
-          return;
 
         }
 
 
         /*
-        If backend says additional
-        authentication is required.
+        ==============================================
+        CONFIRM SAVED CARD PAYMENT
+        ==============================================
         */
 
-        if (
-          paymentResponse.requires_action &&
-          stripe &&
-          paymentResponse.client_secret
-        ) {
+        const paymentIntent =
+          await confirmStripePayment(
 
-          const result =
-            await stripe.confirmCardPayment(
-              paymentResponse.client_secret
-            );
+            paymentResponse.client_secret,
+
+            selectedCard.payment_method_id
+
+          );
 
 
-          if (result.error) {
-
-            console.log(
-              "SAVED CARD STRIPE ERROR:",
-              result.error
-            );
-
-            alert(
-              result.error.message
-            );
-
-            return;
-
-          }
-
-        }
+        console.log(
+          "SAVED CARD PAYMENT SUCCESS:",
+          paymentIntent
+        );
 
       }
 
 
       /*
-      ========================================
+      =================================================
       NEW CARD PAYMENT
-      ========================================
+      =================================================
       */
 
-      else if (paymentType === "new-card") {
-
-        if (!stripe || !elements) {
-
-          alert(
-            "Stripe is not loaded"
-          );
-
-          return;
-
-        }
-
-
-        const cardNumber =
-          elements.getElement(
-            CardNumberElement
-          );
-
-
-        if (!cardNumber) {
-
-          alert(
-            "Please enter card details"
-          );
-
-          return;
-
-        }
+      else if (
+        paymentType === "new-card"
+      ) {
 
 
         /*
-        ======================================
-        CREATE STRIPE PAYMENT METHOD
-        ======================================
+        CREATE PAYMENT METHOD
         */
 
         const {
@@ -499,11 +632,9 @@ function Checkout() {
             error
           );
 
-          alert(
+          throw new Error(
             error.message
           );
-
-          return;
 
         }
 
@@ -515,9 +646,9 @@ function Checkout() {
 
 
         /*
-        ======================================
+        ==============================================
         SAVE NEW CARD
-        ======================================
+        ==============================================
         */
 
         const saveResponse =
@@ -535,33 +666,23 @@ function Checkout() {
         );
 
 
-        if (!saveResponse?.success) {
+        if (
+          !saveResponse?.success
+        ) {
 
-          console.log(
-            "CARD SAVE FAILED:",
-            saveResponse
-          );
-
-          /*
-          Payment will not continue with
-          an unsaved/unattached card.
-          */
-
-          alert(
+          throw new Error(
             saveResponse?.error ||
             saveResponse?.message ||
             "Unable to save card"
           );
 
-          return;
-
         }
 
 
         /*
-        ======================================
+        ==============================================
         CREATE PAYMENT INTENT
-        ======================================
+        ==============================================
         */
 
         const paymentResponse =
@@ -581,64 +702,52 @@ function Checkout() {
         );
 
 
-        if (!paymentResponse?.success) {
+        if (
+          !paymentResponse?.success
+        ) {
 
-          alert(
+          throw new Error(
             paymentResponse?.error ||
             paymentResponse?.message ||
-            "Payment failed"
+            "Payment Intent creation failed"
           );
-
-          return;
 
         }
 
 
         /*
-        ======================================
-        3D SECURE / ADDITIONAL ACTION
-        ======================================
+        ==============================================
+        CONFIRM NEW CARD PAYMENT
+        ==============================================
         */
 
-        if (
-          paymentResponse.requires_action &&
-          stripe &&
-          paymentResponse.client_secret
-        ) {
+        const paymentIntent =
+          await confirmStripePayment(
 
-          const result =
-            await stripe.confirmCardPayment(
-              paymentResponse.client_secret
-            );
+            paymentResponse.client_secret,
+
+            paymentMethod.id
+
+          );
 
 
-          if (result.error) {
-
-            console.log(
-              "STRIPE ERROR:",
-              result.error
-            );
-
-            alert(
-              result.error.message
-            );
-
-            return;
-
-          }
-
-        }
+        console.log(
+          "NEW CARD PAYMENT SUCCESS:",
+          paymentIntent
+        );
 
       }
 
 
       /*
-      ========================================
+      =================================================
       COD
-      ========================================
+      =================================================
       */
 
-      else if (paymentType === "cod") {
+      else if (
+        paymentType === "cod"
+      ) {
 
         console.log(
           "COD ORDER"
@@ -648,12 +757,14 @@ function Checkout() {
 
 
       /*
-      ========================================
+      =================================================
       UPI
-      ========================================
+      =================================================
       */
 
-      else if (paymentType === "upi") {
+      else if (
+        paymentType === "upi"
+      ) {
 
         alert(
           "UPI payment coming soon"
@@ -665,9 +776,9 @@ function Checkout() {
 
 
       /*
-      ========================================
-      SUCCESS
-      ========================================
+      =================================================
+      FINAL SUCCESS
+      =================================================
       */
 
       alert(
@@ -675,7 +786,9 @@ function Checkout() {
       );
 
 
-      navigate("/orders");
+      navigate(
+        "/orders"
+      );
 
     }
 
@@ -696,6 +809,7 @@ function Checkout() {
       alert(
         error?.response?.data?.error ||
         error?.response?.data?.message ||
+        error?.message ||
         "Order failed"
       );
 
@@ -711,9 +825,9 @@ function Checkout() {
 
 
   /*
-  ==========================================
+  =====================================================
   UI
-  ==========================================
+  =====================================================
   */
 
   return (
@@ -721,7 +835,6 @@ function Checkout() {
     <MainLayout>
 
       <div className="max-w-7xl mx-auto py-10 px-4">
-
 
         <Breadcrumb />
 
@@ -738,21 +851,26 @@ function Checkout() {
 
           <div className="lg:col-span-2">
 
-
             <BillingForm />
 
 
             <PaymentMethod
 
-              paymentType={paymentType}
+              paymentType={
+                paymentType
+              }
 
               setPaymentType={
                 handlePaymentTypeChange
               }
 
-              savedCards={savedCards}
+              savedCards={
+                savedCards
+              }
 
-              selectedCard={selectedCard}
+              selectedCard={
+                selectedCard
+              }
 
               setSelectedCard={
                 setSelectedCard
@@ -764,12 +882,10 @@ function Checkout() {
 
             />
 
-
           </div>
 
 
           <div>
-
 
             <CheckoutSummary
 
@@ -784,9 +900,13 @@ function Checkout() {
 
             <button
 
-              onClick={handlePlaceOrder}
+              onClick={
+                handlePlaceOrder
+              }
 
-              disabled={loading}
+              disabled={
+                loading
+              }
 
               className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
 
@@ -804,15 +924,12 @@ function Checkout() {
 
             </button>
 
-
           </div>
 
 
         </div>
 
-
       </div>
-
 
     </MainLayout>
 
@@ -822,16 +939,18 @@ function Checkout() {
 
 
 /*
-==========================================
+=====================================================
 STRIPE ELEMENTS WRAPPER
-==========================================
+=====================================================
 */
 
 export default function CheckoutWrapper() {
 
   return (
 
-    <Elements stripe={stripePromise}>
+    <Elements
+      stripe={stripePromise}
+    >
 
       <Checkout />
 
