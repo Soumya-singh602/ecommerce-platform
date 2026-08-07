@@ -1,9 +1,13 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import MainLayout from "../layouts/MainLayout";
 
-import { getOrders, cancelOrder } from "../services/orderService";
+import {
+  getOrders,
+  cancelOrder
+} from "../services/orderService";
 
 export default function MyOrders() {
 
@@ -12,11 +16,25 @@ export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+  // ============================================================
+  // MEDIA URL
+  // ============================================================
+
+  const MEDIA_URL =
+    import.meta.env.VITE_MEDIA_URL || "";
+
+
+  // ============================================================
+  // FETCH ORDERS
+  // ============================================================
+
   useEffect(() => {
 
     fetchOrders();
 
   }, []);
+
 
   const fetchOrders = async () => {
 
@@ -29,18 +47,25 @@ export default function MyOrders() {
         response
       );
 
+
       setOrders(
-        response.data.orders
+        response?.data?.orders || []
       );
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       console.log(
         "ORDER ERROR:",
         error
       );
 
-    } finally {
+      setOrders([]);
+
+    }
+
+    finally {
 
       setLoading(false);
 
@@ -48,33 +73,81 @@ export default function MyOrders() {
 
   };
 
+
+  // ============================================================
+  // PRODUCT IMAGE URL
+  // ============================================================
+
+  const getProductImage = (image) => {
+
+    if (!image) {
+      return null;
+    }
+
+
+    // Already complete URL
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+
+      return image;
+
+    }
+
+
+    // Remove duplicate slash
+    return `${MEDIA_URL.replace(/\/$/, "")}/${image.replace(/^\//, "")}`;
+
+  };
+
+
+  // ============================================================
+  // CANCEL ORDER
+  // ============================================================
+
   const handleCancelOrder = async (id) => {
 
     try {
 
-      const response = await cancelOrder(id);
+      const response =
+        await cancelOrder(id);
 
       console.log(
         "CANCEL RESPONSE:",
         response
       );
 
-      alert("Order cancelled successfully");
+
+      alert(
+        "Order cancelled successfully"
+      );
+
 
       fetchOrders();
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       console.log(
         "CANCEL ERROR:",
         error
       );
 
-      alert("Cancel failed");
+
+      alert(
+        "Cancel failed"
+      );
 
     }
 
   };
+
+
+  // ============================================================
+  // LOADING
+  // ============================================================
 
   if (loading) {
 
@@ -94,17 +167,24 @@ export default function MyOrders() {
 
   }
 
+
+  // ============================================================
+  // UI
+  // ============================================================
+
   return (
 
     <MainLayout>
 
       <div className="max-w-7xl mx-auto py-10 px-4">
 
+
         <h1 className="text-3xl font-bold mb-8">
 
           My Orders
 
         </h1>
+
 
         {
           orders.length === 0 ? (
@@ -117,221 +197,418 @@ export default function MyOrders() {
 
           ) : (
 
-            orders.map((order) => (
+            orders.map((order) => {
 
-              <div
 
-                key={order.id}
+              const productImage =
+                getProductImage(
+                  order.product?.image
+                );
 
-                className="border rounded-xl p-6 mb-5 shadow-sm bg-white"
 
-              >
+              return (
 
-                {/* Header */}
+                <div
 
-                <div className="flex justify-between items-center">
+                  key={order.id}
 
-                  <h2 className="text-xl font-bold">
+                  className="
+                    border
+                    rounded-xl
+                    p-6
+                    mb-5
+                    shadow-sm
+                    bg-white
+                  "
 
-                    Order #{order.id}
+                >
 
-                  </h2>
 
-                  <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 font-semibold">
+                  {/* ==================================================
+                      HEADER
+                  ================================================== */}
 
-                    {order.status}
 
-                  </span>
+                  <div className="
+                    flex
+                    justify-between
+                    items-center
+                  ">
 
-                </div>
 
-                {/* Product Details */}
+                    <h2 className="text-xl font-bold">
 
-                <div className="mt-6 flex gap-5">
+                      Order #{order.id}
 
-                  <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                    </h2>
+
+
+                    <span className="
+                      px-3
+                      py-1
+                      rounded-full
+                      bg-yellow-100
+                      text-yellow-700
+                      font-semibold
+                    ">
+
+                      {order.status}
+
+                    </span>
+
+
+                  </div>
+
+
+
+                  {/* ==================================================
+                      PRODUCT DETAILS
+                  ================================================== */}
+
+
+                  <div className="
+                    mt-6
+                    flex
+                    gap-5
+                  ">
+
+
+                    {/* PRODUCT IMAGE */}
+
+
+                    <div className="
+                      w-32
+                      h-32
+                      bg-gray-100
+                      rounded-lg
+                      overflow-hidden
+                      flex
+                      items-center
+                      justify-center
+                      flex-shrink-0
+                    ">
+
+
+                      {
+                        productImage ? (
+
+                          <img
+
+                            src={productImage}
+
+                            alt={
+                              order.product?.name ||
+                              "Product"
+                            }
+
+                            className="
+                              w-full
+                              h-full
+                              object-cover
+                              rounded-lg
+                            "
+
+                            onError={(e) => {
+
+                              console.log(
+                                "ORDER IMAGE LOAD ERROR:",
+                                productImage
+                              );
+
+                              e.currentTarget.style.display =
+                                "none";
+
+                            }}
+
+                          />
+
+                        ) : (
+
+                          <span className="text-gray-400">
+
+                            No Image
+
+                          </span>
+
+                        )
+                      }
+
+
+                    </div>
+
+
+
+                    {/* PRODUCT INFORMATION */}
+
+
+                    <div>
+
+
+                      <h3 className="text-xl font-bold">
+
+                        {order.product?.name ||
+                          "Product"}
+
+                      </h3>
+
+
+                      <p className="
+                        text-gray-600
+                        mt-2
+                      ">
+
+                        {order.product?.description ||
+                          "No description available"}
+
+                      </p>
+
+
+                      <p className="
+                        text-blue-600
+                        font-bold
+                        text-lg
+                        mt-2
+                      ">
+
+                        ₹
+                        {order.product?.price || 0}
+
+                      </p>
+
+
+                    </div>
+
+
+                  </div>
+
+
+
+                  {/* ==================================================
+                      ORDER INFO
+                  ================================================== */}
+
+
+                  <div className="
+                    mt-6
+                    space-y-3
+                  ">
+
+
+                    <p>
+
+                      Quantity:
+
+                      <span className="
+                        font-semibold
+                        ml-2
+                      ">
+
+                        {order.quantity}
+
+                      </span>
+
+                    </p>
+
+
+
+                    <p>
+
+                      Total Amount:
+
+                      <span className="
+                        font-semibold
+                        ml-2
+                      ">
+
+                        ₹
+                        {
+                          Number(
+                            order.product?.price || 0
+                          ) *
+                          Number(
+                            order.quantity || 0
+                          )
+                        }
+
+                      </span>
+
+                    </p>
+
+
+
+                    <p>
+
+                      Address:
+
+                      <span className="
+                        font-semibold
+                        ml-2
+                      ">
+
+                        {order.address || "N/A"}
+
+                      </span>
+
+                    </p>
+
+
+
+                    <p>
+
+                      City:
+
+                      <span className="
+                        font-semibold
+                        ml-2
+                      ">
+
+                        {order.city || "N/A"}
+
+                      </span>
+
+                    </p>
+
+
+
+                    <p>
+
+                      Phone:
+
+                      <span className="
+                        font-semibold
+                        ml-2
+                      ">
+
+                        {order.phone || "N/A"}
+
+                      </span>
+
+                    </p>
+
+
+
+                    <p>
+
+                      Pincode:
+
+                      <span className="
+                        font-semibold
+                        ml-2
+                      ">
+
+                        {order.pincode || "N/A"}
+
+                      </span>
+
+                    </p>
+
+
+
+                    <p>
+
+                      Order Date:
+
+                      <span className="
+                        font-semibold
+                        ml-2
+                      ">
+
+                        {
+                          order.created_at
+                            ? new Date(
+                                order.created_at
+                              ).toLocaleDateString()
+                            : "N/A"
+                        }
+
+                      </span>
+
+                    </p>
+
+
+                  </div>
+
+
+
+                  {/* ==================================================
+                      BUTTONS
+                  ================================================== */}
+
+
+                  <div className="
+                    flex
+                    gap-4
+                    mt-6
+                  ">
+
+
+                    <button
+
+                      onClick={() =>
+                        navigate(
+                          `/orders/${order.id}`
+                        )
+                      }
+
+                      className="
+                        bg-blue-600
+                        text-white
+                        px-5
+                        py-2
+                        rounded-lg
+                        hover:bg-blue-700
+                      "
+
+                    >
+
+                      View Details
+
+                    </button>
+
+
 
                     {
-                      order.product?.image ? (
+                      order.status !== "Cancelled" && (
 
-                        <img
+                        <button
 
-                          src={order.product.image}
+                          onClick={() =>
+                            handleCancelOrder(
+                              order.id
+                            )
+                          }
 
-                          alt={order.product.name}
+                          className="
+                            bg-red-600
+                            text-white
+                            px-5
+                            py-2
+                            rounded-lg
+                            hover:bg-red-700
+                          "
 
-                          className="w-full h-full object-cover rounded-lg"
+                        >
 
-                        />
+                          Cancel Order
 
-                      ) : (
-
-                        <span className="text-gray-400">
-
-                          No Image
-
-                        </span>
+                        </button>
 
                       )
                     }
 
-                  </div>
-
-                  <div>
-
-                    <h3 className="text-xl font-bold">
-
-                      {order.product?.name}
-
-                    </h3>
-
-                    <p className="text-gray-600 mt-2">
-
-                      {order.product?.description}
-
-                    </p>
-
-                    <p className="text-blue-600 font-bold text-lg mt-2">
-
-                      ₹{order.product?.price}
-
-                    </p>
 
                   </div>
 
-                </div>
-
-                {/* Order Info */}
-
-                <div className="mt-6 space-y-3">
-
-                  <p>
-
-                    Quantity:
-
-                    <span className="font-semibold ml-2">
-
-                      {order.quantity}
-
-                    </span>
-
-                  </p>
-
-                  <p>
-
-                    Total Amount:
-
-                    <span className="font-semibold ml-2">
-
-                      ₹{Number(order.product?.price || 0) * order.quantity}
-
-                    </span>
-
-                  </p>
-
-                  <p>
-
-                    Address:
-
-                    <span className="font-semibold ml-2">
-
-                      {order.address}
-
-                    </span>
-
-                  </p>
-
-                  <p>
-
-                    City:
-
-                    <span className="font-semibold ml-2">
-
-                      {order.city}
-
-                    </span>
-
-                  </p>
-
-                  <p>
-
-                    Phone:
-
-                    <span className="font-semibold ml-2">
-
-                      {order.phone}
-
-                    </span>
-
-                  </p>
-
-                  <p>
-
-                    Pincode:
-
-                    <span className="font-semibold ml-2">
-
-                      {order.pincode}
-
-                    </span>
-
-                  </p>
-
-                  <p>
-
-                    Order Date:
-
-                    <span className="font-semibold ml-2">
-
-                      {new Date(order.created_at).toLocaleDateString()}
-
-                    </span>
-
-                  </p>
 
                 </div>
 
-                {/* Buttons */}
+              );
 
-                <div className="flex gap-4 mt-6">
+            })
 
-                  <button
-
-                    onClick={() => navigate(`/orders/${order.id}`)}
-
-                    className="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700"
-
-                  >
-
-                    View Details
-
-                  </button>
-
-                  {
-                    order.status !== "Cancelled" && (
-
-                      <button
-
-                        onClick={() => handleCancelOrder(order.id)}
-
-                        className="bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700"
-
-                      >
-
-                        Cancel Order
-
-                      </button>
-
-                    )
-                  }
-
-                </div>
-
-              </div>
-
-            ))
           )
         }
+
 
       </div>
 
@@ -340,3 +617,4 @@ export default function MyOrders() {
   );
 
 }
+
