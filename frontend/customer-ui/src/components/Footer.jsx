@@ -2,29 +2,17 @@
 import { Link } from "react-router-dom";
 
 import {
-  ShoppingCart,
-  Package,
-  User,
-  CreditCard,
   Mail,
-  Phone
+  Phone,
+  MapPin,
+  Facebook,
+  Instagram,
+  Twitter
 } from "lucide-react";
-
-import { isAuthenticated } from "../utils/auth";
-import { useCart } from "../context/CartContext";
 
 export default function Footer() {
 
   const currentYear = new Date().getFullYear();
-
-  const loggedIn = isAuthenticated();
-
-  const { cartItems } = useCart();
-
-
-  // ============================================================
-  // QUICK LINKS
-  // ============================================================
 
   const quickLinks = [
     {
@@ -34,53 +22,8 @@ export default function Footer() {
     {
       label: "Shop",
       path: "/shop"
-    },
-    {
-      label: "Cart",
-      path: "/cart"
     }
   ];
-
-
-  // ============================================================
-  // ACCOUNT LINKS
-  // ============================================================
-
-  const accountLinks = loggedIn
-    ? [
-        {
-          label: "My Orders",
-          path: "/orders",
-          icon: Package
-        },
-        {
-          label: "My Profile",
-          path: "/profile",
-          icon: User
-        },
-        {
-          label: "Saved Cards",
-          path: "/saved-cards",
-          icon: CreditCard
-        }
-      ]
-    : [
-        {
-          label: "Login",
-          path: "/login",
-          icon: User
-        },
-        {
-          label: "Register",
-          path: "/register",
-          icon: User
-        }
-      ];
-
-
-  // ============================================================
-  // SUPPORT LINKS
-  // ============================================================
 
   const supportLinks = [
     {
@@ -101,14 +44,13 @@ export default function Footer() {
     }
   ];
 
-
   return (
 
     <footer className="bg-gray-900 text-white mt-16">
 
-      {/* ========================================================
+      {/* =========================
           MAIN FOOTER
-      ======================================================== */}
+      ========================== */}
 
       <div
         className="
@@ -124,68 +66,71 @@ export default function Footer() {
         "
       >
 
-        {/* ======================================================
+        {/* =========================
             BRAND
-        ====================================================== */}
+        ========================== */}
 
         <div>
 
           <Link to="/">
 
             <h2 className="text-2xl font-bold text-blue-400">
-
               Ecommerce
-
             </h2>
 
           </Link>
 
+          <p className="text-gray-400 mt-4 leading-7">
 
-          <p className="text-gray-400 mt-4 leading-6">
-
-            Shop quality products at the best prices.
-            Fast delivery, secure payments and a
-            simple shopping experience.
+            Your trusted online shopping destination for
+            quality products, secure payments and reliable
+            delivery.
 
           </p>
 
 
-          {/* CART STATUS */}
+          {/* SOCIAL MEDIA */}
 
-          <Link
-            to="/cart"
-            className="
-              inline-flex
-              items-center
-              gap-2
-              mt-5
-              text-gray-300
-              hover:text-blue-400
-              transition
-            "
-          >
+          <div className="flex gap-4 mt-6">
 
-            <ShoppingCart size={18} />
+            <a
+              href="#"
+              className="text-gray-400 hover:text-blue-400 transition"
+              aria-label="Facebook"
+            >
+              <Facebook size={20} />
+            </a>
 
-            <span>
-              Cart ({cartItems.length})
-            </span>
+            <a
+              href="#"
+              className="text-gray-400 hover:text-pink-400 transition"
+              aria-label="Instagram"
+            >
+              <Instagram size={20} />
+            </a>
 
-          </Link>
+            <a
+              href="#"
+              className="text-gray-400 hover:text-blue-400 transition"
+              aria-label="Twitter"
+            >
+              <Twitter size={20} />
+            </a>
+
+          </div>
 
         </div>
 
 
-        {/* ======================================================
+        {/* =========================
             QUICK LINKS
-        ====================================================== */}
+        ========================== */}
 
         <div>
 
           <h3 className="font-semibold text-lg mb-5">
             Quick Links
           </h3>
-
 
           <ul className="space-y-3">
 
@@ -201,9 +146,7 @@ export default function Footer() {
                     transition
                   "
                 >
-
                   {link.label}
-
                 </Link>
 
               </li>
@@ -215,73 +158,15 @@ export default function Footer() {
         </div>
 
 
-        {/* ======================================================
-            ACCOUNT
-        ====================================================== */}
-
-        <div>
-
-          <h3 className="font-semibold text-lg mb-5">
-
-            {loggedIn
-              ? "My Account"
-              : "Account"
-            }
-
-          </h3>
-
-
-          <ul className="space-y-3">
-
-            {accountLinks.map((link) => {
-
-              const Icon = link.icon;
-
-              return (
-
-                <li key={link.path}>
-
-                  <Link
-                    to={link.path}
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      text-gray-400
-                      hover:text-blue-400
-                      transition
-                    "
-                  >
-
-                    <Icon size={17} />
-
-                    {link.label}
-
-                  </Link>
-
-                </li>
-
-              );
-
-            })}
-
-          </ul>
-
-        </div>
-
-
-        {/* ======================================================
+        {/* =========================
             CUSTOMER SUPPORT
-        ====================================================== */}
+        ========================== */}
 
         <div>
 
           <h3 className="font-semibold text-lg mb-5">
-
             Customer Support
-
           </h3>
-
 
           <ul className="space-y-3">
 
@@ -297,9 +182,7 @@ export default function Footer() {
                     transition
                   "
                 >
-
                   {link.label}
-
                 </Link>
 
               </li>
@@ -308,21 +191,29 @@ export default function Footer() {
 
           </ul>
 
+        </div>
 
-          {/* CONTACT DETAILS */}
 
-          <div className="mt-6 space-y-3">
+        {/* =========================
+            CONTACT
+        ========================== */}
 
-            <div
-              className="
-                flex
-                items-center
-                gap-3
-                text-gray-400
-              "
-            >
+        <div>
 
-              <Mail size={17} />
+          <h3 className="font-semibold text-lg mb-5">
+            Contact Us
+          </h3>
+
+
+          <div className="space-y-4">
+
+
+            <div className="flex items-start gap-3 text-gray-400">
+
+              <Mail
+                size={18}
+                className="mt-1 flex-shrink-0"
+              />
 
               <span>
                 support@ecommerce.com
@@ -331,19 +222,29 @@ export default function Footer() {
             </div>
 
 
-            <div
-              className="
-                flex
-                items-center
-                gap-3
-                text-gray-400
-              "
-            >
+            <div className="flex items-start gap-3 text-gray-400">
 
-              <Phone size={17} />
+              <Phone
+                size={18}
+                className="mt-1 flex-shrink-0"
+              />
 
               <span>
                 +91 9876543210
+              </span>
+
+            </div>
+
+
+            <div className="flex items-start gap-3 text-gray-400">
+
+              <MapPin
+                size={18}
+                className="mt-1 flex-shrink-0"
+              />
+
+              <span>
+                India
               </span>
 
             </div>
@@ -355,23 +256,18 @@ export default function Footer() {
       </div>
 
 
-      {/* ========================================================
+      {/* =========================
           BOTTOM FOOTER
-      ======================================================== */}
+      ========================== */}
 
-      <div
-        className="
-          border-t
-          border-gray-800
-          px-5
-          py-5
-        "
-      >
+      <div className="border-t border-gray-800">
 
         <div
           className="
             max-w-7xl
             mx-auto
+            px-5
+            py-5
             flex
             flex-col
             md:flex-row
@@ -379,18 +275,21 @@ export default function Footer() {
             justify-between
             gap-3
             text-sm
-            text-gray-500
           "
         >
 
-          <p>
+          <p className="text-gray-500">
+
             © {currentYear} Ecommerce.
             All rights reserved.
+
           </p>
 
 
-          <p>
+          <p className="text-gray-500">
+
             Secure Shopping • Trusted Payments • Fast Delivery
+
           </p>
 
         </div>
@@ -398,8 +297,6 @@ export default function Footer() {
       </div>
 
     </footer>
-
   );
-
 }
 
