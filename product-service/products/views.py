@@ -301,10 +301,12 @@ def banner_list(request):
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def create_banner(request):
-
+    print("====================")
     print("FILES:", request.FILES)
     print("DATA:", request.data)
-
+    print("IMAGE")
+    print(request.FILES.get("image"))
+    print("====================")
     serializer = BannerSerializer(data=request.data)
 
     if serializer.is_valid():
