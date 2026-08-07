@@ -51,7 +51,6 @@ def create_payment_intent(request):
         user
     )
 
-
     amount = request.data.get("amount")
 
     currency = request.data.get(
@@ -71,7 +70,6 @@ def create_payment_intent(request):
         "payment_method"
     )
 
-
     # --------------------------------------------------------
     # VALIDATE AMOUNT
     # --------------------------------------------------------
@@ -79,7 +77,6 @@ def create_payment_intent(request):
     if not amount:
 
         return Response(
-
             {
                 "success": False,
 
@@ -88,9 +85,7 @@ def create_payment_intent(request):
             },
 
             status=400
-
         )
-
 
     # --------------------------------------------------------
     # VALIDATE ORDER
@@ -99,7 +94,6 @@ def create_payment_intent(request):
     if not order_id and not order_ids:
 
         return Response(
-
             {
                 "success": False,
 
@@ -108,12 +102,9 @@ def create_payment_intent(request):
             },
 
             status=400
-
         )
 
-
     stripe.api_key = settings.STRIPE_SECRET_KEY
-
 
     try:
 
@@ -127,45 +118,27 @@ def create_payment_intent(request):
                 int(float(amount) * 100),
 
             "currency":
-                currency,
-
-            
+                currency
 
         }
 
-
-        # ----------------------------------------------------
+        # ====================================================
         # PAYMENT METHOD
-        # ----------------------------------------------------
-
-        intent_data = {
-
-                "amount":
-                 int(float(amount) * 100),
-
-                "currency":
-                   currency
-}
-
+        # ====================================================
 
         if payment_method_id:
 
             customer = PaymentCustomer.objects.get(
-            user_id=user["user_id"]
-    )
+                user_id=user["user_id"]
+            )
 
             intent_data["customer"] = (
-              customer.stripe_customer_id
-    )
+                customer.stripe_customer_id
+            )
 
             intent_data["payment_method"] = (
-             payment_method_id
-    )
-
-
-        intent = stripe.PaymentIntent.create(
-          **intent_data
-)
+                payment_method_id
+            )
 
         # ====================================================
         # CREATE STRIPE PAYMENT INTENT
@@ -175,12 +148,15 @@ def create_payment_intent(request):
             **intent_data
         )
 
-
         print(
             "PAYMENT INTENT:",
             intent.id
         )
 
+        print(
+            "PAYMENT INTENT STATUS:",
+            intent.status
+        )
 
         # ====================================================
         # CREATE PAYMENT DB RECORD
@@ -207,7 +183,6 @@ def create_payment_intent(request):
 
         )
 
-
         # ====================================================
         # SINGLE ORDER
         # ====================================================
@@ -221,7 +196,6 @@ def create_payment_intent(request):
                 order_id=order_id
 
             )
-
 
         # ====================================================
         # MULTIPLE ORDERS
@@ -238,7 +212,6 @@ def create_payment_intent(request):
                     order_id=oid
 
                 )
-
 
         # ====================================================
         # RESPONSE
@@ -265,6 +238,23 @@ def create_payment_intent(request):
 
         })
 
+    except PaymentCustomer.DoesNotExist:
+
+        print(
+            "STRIPE CUSTOMER NOT FOUND:",
+            user["user_id"]
+        )
+
+        return Response(
+            {
+                "success": False,
+
+                "error":
+                    "Stripe customer not found"
+            },
+
+            status=400
+        )
 
     except stripe.error.StripeError as e:
 
@@ -274,18 +264,15 @@ def create_payment_intent(request):
         )
 
         return Response(
-
             {
                 "success": False,
 
-                "error": str(e)
-
+                "error":
+                    str(e)
             },
 
             status=400
-
         )
-
 
     except Exception as e:
 
@@ -295,16 +282,14 @@ def create_payment_intent(request):
         )
 
         return Response(
-
             {
                 "success": False,
 
-                "error": str(e)
-
+                "error":
+                    str(e)
             },
 
             status=500
-
         )
 
 
@@ -317,7 +302,6 @@ def payment_list(request):
 
     user = get_user_info(request)
 
-
     payments = Payment.objects.filter(
 
         user_id=user["user_id"]
@@ -326,9 +310,7 @@ def payment_list(request):
         "-created_at"
     )
 
-
     data = []
-
 
     for payment in payments:
 
@@ -341,7 +323,6 @@ def payment_list(request):
                 flat=True
             )
         )
-
 
         data.append({
 
@@ -368,7 +349,6 @@ def payment_list(request):
 
         })
 
-
     return Response({
 
         "success": True,
@@ -393,9 +373,7 @@ def admin_payment_list(request):
         "-created_at"
     )
 
-
     data = []
-
 
     for payment in payments:
 
@@ -408,7 +386,6 @@ def admin_payment_list(request):
                 flat=True
             )
         )
-
 
         data.append({
 
@@ -438,7 +415,6 @@ def admin_payment_list(request):
 
         })
 
-
     return Response({
 
         "success": True,
@@ -466,16 +442,13 @@ def stripe_webhook(request):
             status=405
         )
 
-
     stripe.api_key = settings.STRIPE_SECRET_KEY
-
 
     payload = request.body
 
     sig_header = request.META.get(
         "HTTP_STRIPE_SIGNATURE"
     )
-
 
     try:
 
@@ -489,7 +462,6 @@ def stripe_webhook(request):
 
         )
 
-
     except ValueError as e:
 
         print(
@@ -500,7 +472,6 @@ def stripe_webhook(request):
         return HttpResponse(
             status=400
         )
-
 
     except stripe.error.SignatureVerificationError as e:
 
@@ -513,12 +484,10 @@ def stripe_webhook(request):
             status=400
         )
 
-
     print(
         "EVENT TYPE:",
         event["type"]
     )
-
 
     # ========================================================
     # PAYMENT SUCCESS
@@ -534,7 +503,6 @@ def stripe_webhook(request):
             payment_intent["id"]
         )
 
-
         try:
 
             payment = Payment.objects.get(
@@ -544,11 +512,9 @@ def stripe_webhook(request):
 
             )
 
-
             payment.status = "paid"
 
             payment.save()
-
 
             for item in PaymentOrder.objects.filter(
                 payment=payment
@@ -560,11 +526,9 @@ def stripe_webhook(request):
                         id=item.order_id
                     )
 
-
                     order.status = "Confirmed"
 
                     order.save()
-
 
                 except Order.DoesNotExist:
 
@@ -573,12 +537,10 @@ def stripe_webhook(request):
                         item.order_id
                     )
 
-
             print(
                 "PAYMENT SUCCESS:",
                 payment.id
             )
-
 
         except Payment.DoesNotExist:
 
@@ -586,7 +548,6 @@ def stripe_webhook(request):
                 "PAYMENT NOT FOUND:",
                 stripe_payment_intent_id
             )
-
 
     # ========================================================
     # PAYMENT FAILED
@@ -602,7 +563,6 @@ def stripe_webhook(request):
             payment_intent["id"]
         )
 
-
         try:
 
             payment = Payment.objects.get(
@@ -612,11 +572,9 @@ def stripe_webhook(request):
 
             )
 
-
             payment.status = "failed"
 
             payment.save()
-
 
             for item in PaymentOrder.objects.filter(
                 payment=payment
@@ -628,11 +586,9 @@ def stripe_webhook(request):
                         id=item.order_id
                     )
 
-
                     order.status = "Failed"
 
                     order.save()
-
 
                 except Order.DoesNotExist:
 
@@ -641,12 +597,10 @@ def stripe_webhook(request):
                         item.order_id
                     )
 
-
             print(
                 "PAYMENT FAILED:",
                 payment.id
             )
-
 
         except Payment.DoesNotExist:
 
@@ -654,7 +608,6 @@ def stripe_webhook(request):
                 "PAYMENT NOT FOUND:",
                 stripe_payment_intent_id
             )
-
 
     return HttpResponse(
         status=200
@@ -672,13 +625,11 @@ def create_stripe_customer(request):
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-
     existing_customer = (
         PaymentCustomer.objects.filter(
             user_id=user["user_id"]
         ).first()
     )
-
 
     if existing_customer:
 
@@ -687,11 +638,9 @@ def create_stripe_customer(request):
             "success": True,
 
             "customer_id":
-                existing_customer
-                .stripe_customer_id
+                existing_customer.stripe_customer_id
 
         })
-
 
     try:
 
@@ -701,7 +650,6 @@ def create_stripe_customer(request):
 
         )
 
-
         PaymentCustomer.objects.create(
 
             user_id=user["user_id"],
@@ -709,7 +657,6 @@ def create_stripe_customer(request):
             stripe_customer_id=customer.id
 
         )
-
 
         return Response({
 
@@ -720,20 +667,17 @@ def create_stripe_customer(request):
 
         })
 
-
     except stripe.error.StripeError as e:
 
         return Response(
-
             {
                 "success": False,
 
-                "error": str(e)
-
+                "error":
+                    str(e)
             },
 
             status=400
-
         )
 
 
@@ -748,18 +692,15 @@ def create_setup_intent(request):
 
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-
     customer = (
         PaymentCustomer.objects.filter(
             user_id=user["user_id"]
         ).first()
     )
 
-
     if not customer:
 
         return Response(
-
             {
                 "success": False,
 
@@ -768,9 +709,7 @@ def create_setup_intent(request):
             },
 
             status=400
-
         )
-
 
     try:
 
@@ -785,7 +724,6 @@ def create_setup_intent(request):
 
         )
 
-
         return Response({
 
             "success": True,
@@ -795,36 +733,30 @@ def create_setup_intent(request):
 
         })
 
-
     except stripe.error.StripeError as e:
 
         return Response(
-
             {
                 "success": False,
 
-                "error": str(e)
-
+                "error":
+                    str(e)
             },
 
             status=400
-
         )
-
 
     except Exception as e:
 
         return Response(
-
             {
                 "success": False,
 
-                "error": str(e)
-
+                "error":
+                    str(e)
             },
 
             status=500
-
         )
 
 
@@ -837,16 +769,13 @@ def save_card(request):
 
     user = get_user_info(request)
 
-
     payment_method_id = request.data.get(
         "payment_method_id"
     )
 
-
     if not payment_method_id:
 
         return Response(
-
             {
                 "success": False,
 
@@ -855,12 +784,9 @@ def save_card(request):
             },
 
             status=400
-
         )
 
-
     stripe.api_key = settings.STRIPE_SECRET_KEY
-
 
     try:
 
@@ -874,7 +800,6 @@ def save_card(request):
 
         )
 
-
         # ====================================================
         # CHECK DUPLICATE
         # ====================================================
@@ -887,7 +812,6 @@ def save_card(request):
                 payment_method_id
 
         ).first()
-
 
         if existing_card:
 
@@ -923,7 +847,6 @@ def save_card(request):
 
             })
 
-
         # ====================================================
         # ATTACH PAYMENT METHOD TO CUSTOMER
         # ====================================================
@@ -939,13 +862,11 @@ def save_card(request):
             )
         )
 
-
         # ====================================================
         # CARD DETAILS
         # ====================================================
 
         card = payment_method.card
-
 
         # ====================================================
         # SAVE IN DATABASE
@@ -967,7 +888,6 @@ def save_card(request):
             exp_year=card.exp_year
 
         )
-
 
         # ====================================================
         # RESPONSE
@@ -1005,11 +925,9 @@ def save_card(request):
 
         })
 
-
     except PaymentCustomer.DoesNotExist:
 
         return Response(
-
             {
                 "success": False,
 
@@ -1018,9 +936,7 @@ def save_card(request):
             },
 
             status=400
-
         )
-
 
     except stripe.error.StripeError as e:
 
@@ -1030,18 +946,15 @@ def save_card(request):
         )
 
         return Response(
-
             {
                 "success": False,
 
-                "error": str(e)
-
+                "error":
+                    str(e)
             },
 
             status=400
-
         )
-
 
     except Exception as e:
 
@@ -1051,16 +964,14 @@ def save_card(request):
         )
 
         return Response(
-
             {
                 "success": False,
 
-                "error": str(e)
-
+                "error":
+                    str(e)
             },
 
             status=500
-
         )
 
 
@@ -1073,7 +984,6 @@ def saved_cards(request):
 
     user = get_user_info(request)
 
-
     cards = SavedCard.objects.filter(
 
         user_id=user["user_id"]
@@ -1082,9 +992,7 @@ def saved_cards(request):
         "-created_at"
     )
 
-
     data = []
-
 
     for card in cards:
 
@@ -1109,7 +1017,6 @@ def saved_cards(request):
                 card.stripe_payment_method_id
 
         })
-
 
     return Response({
 
