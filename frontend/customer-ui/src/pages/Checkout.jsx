@@ -70,7 +70,8 @@ function Checkout() {
 
         setLoadingCards(true);
 
-        const response = await getSavedCards();
+        const response =
+          await getSavedCards();
 
         console.log(
           "SAVED CARDS RESPONSE:",
@@ -80,7 +81,9 @@ function Checkout() {
 
         if (response?.success) {
 
-          const cards = response.data || [];
+          const cards =
+            response.data || [];
+
 
           setSavedCards(cards);
 
@@ -94,9 +97,13 @@ function Checkout() {
               ) || cards[0];
 
 
-            setSelectedCard(defaultCard);
+            setSelectedCard(
+              defaultCard
+            );
 
-            setPaymentType("saved");
+            setPaymentType(
+              "saved"
+            );
 
           }
 
@@ -137,6 +144,7 @@ function Checkout() {
 
     setPaymentType(type);
 
+
     if (type !== "saved") {
 
       setSelectedCard(null);
@@ -174,10 +182,14 @@ function Checkout() {
 
     const result =
       await stripe.confirmCardPayment(
+
         clientSecret,
+
         {
-          payment_method: paymentMethodId,
+          payment_method:
+            paymentMethodId,
         }
+
       );
 
 
@@ -187,12 +199,17 @@ function Checkout() {
     );
 
 
+    // ============================================================
+    // STRIPE PAYMENT ERROR
+    // ============================================================
+
     if (result.error) {
 
       console.log(
         "STRIPE PAYMENT ERROR:",
         result.error
       );
+
 
       throw new Error(
         result.error.message ||
@@ -216,6 +233,10 @@ function Checkout() {
       result.paymentIntent.status
     );
 
+
+    // ============================================================
+    // PAYMENT MUST BE SUCCESSFUL
+    // ============================================================
 
     if (
       result.paymentIntent.status !==
@@ -272,7 +293,9 @@ function Checkout() {
       // SAVED CARD VALIDATION
       // ========================================================
 
-      if (paymentType === "saved") {
+      if (
+        paymentType === "saved"
+      ) {
 
         if (!selectedCard) {
 
@@ -307,7 +330,9 @@ function Checkout() {
       let cardNumber = null;
 
 
-      if (paymentType === "new-card") {
+      if (
+        paymentType === "new-card"
+      ) {
 
         if (!elements) {
 
@@ -370,6 +395,7 @@ function Checkout() {
         orderData = {
 
           items:
+
             cartItems.map(
               (item) => ({
 
@@ -409,7 +435,9 @@ function Checkout() {
       // ========================================================
 
       const orderResponse =
-        await placeOrder(orderData);
+        await placeOrder(
+          orderData
+        );
 
 
       console.log(
@@ -418,7 +446,9 @@ function Checkout() {
       );
 
 
-      if (!orderResponse?.success) {
+      if (
+        !orderResponse?.success
+      ) {
 
         throw new Error(
           orderResponse?.message ||
@@ -474,7 +504,9 @@ function Checkout() {
       // SAVED CARD PAYMENT
       // ========================================================
 
-      if (paymentType === "saved") {
+      if (
+        paymentType === "saved"
+      ) {
 
         console.log(
           "USING SAVED CARD:",
@@ -499,7 +531,9 @@ function Checkout() {
         );
 
 
-        if (!paymentResponse?.success) {
+        if (
+          !paymentResponse?.success
+        ) {
 
           throw new Error(
             paymentResponse?.error ||
@@ -532,7 +566,10 @@ function Checkout() {
       // NEW CARD PAYMENT
       // ========================================================
 
-      else if (paymentType === "new-card") {
+      else if (
+        paymentType === "new-card"
+      ) {
+
 
         // ------------------------------------------------------
         // CREATE PAYMENT METHOD
@@ -558,6 +595,7 @@ function Checkout() {
             error
           );
 
+
           throw new Error(
             error.message
           );
@@ -572,38 +610,16 @@ function Checkout() {
 
 
         // ------------------------------------------------------
-        // SAVE / ATTACH CARD
-        // ------------------------------------------------------
-
-        const saveResponse =
-          await saveCard({
-
-            payment_method_id:
-              paymentMethod.id,
-
-          });
-
-
-        console.log(
-          "SAVE CARD RESPONSE:",
-          saveResponse
-        );
-
-
-        if (!saveResponse?.success) {
-
-          throw new Error(
-            saveResponse?.error ||
-            saveResponse?.message ||
-            "Unable to save card"
-          );
-
-        }
-
-
-        // ------------------------------------------------------
         // CREATE PAYMENT INTENT
         // ------------------------------------------------------
+
+        /*
+         IMPORTANT:
+
+         Card ko payment se pehle save nahi kar rahe.
+
+         Pehle PaymentIntent create hoga.
+        */
 
         const paymentResponse =
           await createPaymentIntent({
@@ -622,7 +638,9 @@ function Checkout() {
         );
 
 
-        if (!paymentResponse?.success) {
+        if (
+          !paymentResponse?.success
+        ) {
 
           throw new Error(
             paymentResponse?.error ||
@@ -652,6 +670,56 @@ function Checkout() {
           paymentIntent
         );
 
+
+        // ------------------------------------------------------
+        // SAVE CARD ONLY AFTER SUCCESS
+        // ------------------------------------------------------
+
+        try {
+
+          const saveResponse =
+            await saveCard({
+
+              payment_method_id:
+                paymentMethod.id,
+
+            });
+
+
+          console.log(
+            "SAVE CARD AFTER SUCCESS:",
+            saveResponse
+          );
+
+
+          if (
+            !saveResponse?.success
+          ) {
+
+            console.log(
+              "CARD SAVE FAILED AFTER PAYMENT:",
+              saveResponse
+            );
+
+          }
+
+        }
+
+        catch (saveError) {
+
+          /*
+           Payment successful hai.
+           Card save fail hone par payment ko
+           failed nahi karna hai.
+          */
+
+          console.log(
+            "CARD SAVE ERROR AFTER PAYMENT:",
+            saveError
+          );
+
+        }
+
       }
 
 
@@ -659,7 +727,9 @@ function Checkout() {
       // COD
       // ========================================================
 
-      else if (paymentType === "cod") {
+      else if (
+        paymentType === "cod"
+      ) {
 
         console.log(
           "COD ORDER"
@@ -672,7 +742,9 @@ function Checkout() {
       // UPI
       // ========================================================
 
-      else if (paymentType === "upi") {
+      else if (
+        paymentType === "upi"
+      ) {
 
         alert(
           "UPI payment coming soon"
@@ -684,7 +756,7 @@ function Checkout() {
 
 
       // ========================================================
-      // SUCCESS
+      // FINAL SUCCESS
       // ========================================================
 
       alert(
