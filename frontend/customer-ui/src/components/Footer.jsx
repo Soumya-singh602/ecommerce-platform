@@ -11,6 +11,10 @@ export default function Footer() {
 
   const currentYear = new Date().getFullYear();
 
+  // ============================================================
+  // QUICK LINKS
+  // ============================================================
+
   const quickLinks = [
     {
       label: "Home",
@@ -21,6 +25,11 @@ export default function Footer() {
       path: "/shop"
     }
   ];
+
+
+  // ============================================================
+  // CUSTOMER SUPPORT LINKS
+  // ============================================================
 
   const supportLinks = [
     {
@@ -41,13 +50,14 @@ export default function Footer() {
     }
   ];
 
+
   return (
 
     <footer className="bg-gray-900 text-white mt-16">
 
-      {/* =========================
+      {/* ========================================================
           MAIN FOOTER
-      ========================== */}
+      ======================================================== */}
 
       <div
         className="
@@ -63,9 +73,9 @@ export default function Footer() {
         "
       >
 
-        {/* =========================
+        {/* ======================================================
             BRAND
-        ========================== */}
+        ====================================================== */}
 
         <div>
 
@@ -76,6 +86,7 @@ export default function Footer() {
             </h2>
 
           </Link>
+
 
           <p className="text-gray-400 mt-4 leading-7">
 
@@ -88,15 +99,16 @@ export default function Footer() {
         </div>
 
 
-        {/* =========================
+        {/* ======================================================
             QUICK LINKS
-        ========================== */}
+        ====================================================== */}
 
         <div>
 
           <h3 className="font-semibold text-lg mb-5">
             Quick Links
           </h3>
+
 
           <ul className="space-y-3">
 
@@ -112,7 +124,9 @@ export default function Footer() {
                     transition
                   "
                 >
+
                   {link.label}
+
                 </Link>
 
               </li>
@@ -124,15 +138,16 @@ export default function Footer() {
         </div>
 
 
-        {/* =========================
+        {/* ======================================================
             CUSTOMER SUPPORT
-        ========================== */}
+        ====================================================== */}
 
         <div>
 
           <h3 className="font-semibold text-lg mb-5">
             Customer Support
           </h3>
+
 
           <ul className="space-y-3">
 
@@ -148,7 +163,9 @@ export default function Footer() {
                     transition
                   "
                 >
+
                   {link.label}
+
                 </Link>
 
               </li>
@@ -160,9 +177,9 @@ export default function Footer() {
         </div>
 
 
-        {/* =========================
+        {/* ======================================================
             CONTACT
-        ========================== */}
+        ====================================================== */}
 
         <div>
 
@@ -170,9 +187,24 @@ export default function Footer() {
             Contact Us
           </h3>
 
+
           <div className="space-y-4">
 
-            <div className="flex items-start gap-3 text-gray-400">
+            {/* ==================================================
+                EMAIL
+            ================================================== */}
+
+            <a
+              href="mailto:support@ecommerce.com"
+              className="
+                flex
+                items-start
+                gap-3
+                text-gray-400
+                hover:text-blue-400
+                transition
+              "
+            >
 
               <Mail
                 size={18}
@@ -183,10 +215,24 @@ export default function Footer() {
                 support@ecommerce.com
               </span>
 
-            </div>
+            </a>
 
 
-            <div className="flex items-start gap-3 text-gray-400">
+            {/* ==================================================
+                PHONE
+            ================================================== */}
+
+            <a
+              href="tel:+919876543210"
+              className="
+                flex
+                items-start
+                gap-3
+                text-gray-400
+                hover:text-blue-400
+                transition
+              "
+            >
 
               <Phone
                 size={18}
@@ -197,10 +243,26 @@ export default function Footer() {
                 +91 9876543210
               </span>
 
-            </div>
+            </a>
 
 
-            <div className="flex items-start gap-3 text-gray-400">
+            {/* ==================================================
+                LOCATION
+            ================================================== */}
+
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=India"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                flex
+                items-start
+                gap-3
+                text-gray-400
+                hover:text-blue-400
+                transition
+              "
+            >
 
               <MapPin
                 size={18}
@@ -211,7 +273,7 @@ export default function Footer() {
                 India
               </span>
 
-            </div>
+            </a>
 
           </div>
 
@@ -220,9 +282,9 @@ export default function Footer() {
       </div>
 
 
-      {/* =========================
+      {/* ========================================================
           BOTTOM FOOTER
-      ========================== */}
+      ======================================================== */}
 
       <div className="border-t border-gray-800">
 
@@ -261,6 +323,8 @@ export default function Footer() {
       </div>
 
     </footer>
+
   );
+
 }
 
