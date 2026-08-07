@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 
 import Home from "../pages/Home";
@@ -21,7 +20,6 @@ import SavedCards from "../pages/SavedCards";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
-// Footer Pages
 import Contact from "../pages/Contact";
 import ShippingPolicy from "../pages/ShippingPolicy";
 import ReturnPolicy from "../pages/ReturnPolicy";
@@ -31,9 +29,7 @@ export default function AppRoutes() {
   return (
     <Routes>
 
-      {/* =========================
-          PUBLIC PAGES
-      ========================== */}
+      {/* PUBLIC */}
 
       <Route
         path="/"
@@ -66,9 +62,7 @@ export default function AppRoutes() {
       />
 
 
-      {/* =========================
-          FOOTER PAGES
-      ========================== */}
+      {/* FOOTER PAGES */}
 
       <Route
         path="/contact"
@@ -91,9 +85,7 @@ export default function AppRoutes() {
       />
 
 
-      {/* =========================
-          PROTECTED PAGES
-      ========================== */}
+      {/* PROTECTED */}
 
       <Route
         path="/checkout"
@@ -161,4 +153,3 @@ export default function AppRoutes() {
     </Routes>
   );
 }
-
