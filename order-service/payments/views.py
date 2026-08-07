@@ -129,13 +129,7 @@ def create_payment_intent(request):
             "currency":
                 currency,
 
-            "automatic_payment_methods": {
-
-                "enabled": True,
-
-                "allow_redirects": "never"
-
-            }
+            
 
         }
 
@@ -144,16 +138,17 @@ def create_payment_intent(request):
         # PAYMENT METHOD
         # ----------------------------------------------------
 
+        intent_data = {
+           "amount": int(float(amount) * 100),
+            "currency": currency
+        }
+
         if payment_method_id:
+          intent_data["payment_method"] = payment_method_id
 
-            intent_data["payment_method"] = (
-                payment_method_id
-            )
-
-            intent_data[
-                "confirmation_method"
-            ] = "automatic"
-
+        intent = stripe.PaymentIntent.create(
+           **intent_data
+        )
 
         # ====================================================
         # CREATE STRIPE PAYMENT INTENT
