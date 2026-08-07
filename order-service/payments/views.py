@@ -139,16 +139,33 @@ def create_payment_intent(request):
         # ----------------------------------------------------
 
         intent_data = {
-           "amount": int(float(amount) * 100),
-            "currency": currency
-        }
+
+                "amount":
+                 int(float(amount) * 100),
+
+                "currency":
+                   currency
+}
+
 
         if payment_method_id:
-          intent_data["payment_method"] = payment_method_id
+
+            customer = PaymentCustomer.objects.get(
+            user_id=user["user_id"]
+    )
+
+            intent_data["customer"] = (
+              customer.stripe_customer_id
+    )
+
+            intent_data["payment_method"] = (
+             payment_method_id
+    )
+
 
         intent = stripe.PaymentIntent.create(
-           **intent_data
-        )
+          **intent_data
+)
 
         # ====================================================
         # CREATE STRIPE PAYMENT INTENT
