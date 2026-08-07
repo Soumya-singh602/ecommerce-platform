@@ -1,61 +1,114 @@
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
 from django.conf import settings
-from ecommerce_common.utils import get_user_info
-import stripe
-
-from .models import Payment, PaymentOrder , PaymentCustomer , SavedCard
-from orders.models import Order
-
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 
+from ecommerce_common.utils import get_user_info
 
+import stripe
+
+from .models import (
+    Payment,
+    PaymentOrder,
+    PaymentCustomer,
+    SavedCard
+)
+
+from orders.models import Order
+
+
+# ============================================================
+# PAYMENT HEALTH
+# ============================================================
 
 @api_view(["GET"])
 def payment_health(request):
 
     return Response({
+
         "success": True,
-        "message": "Payment Service Working"
+
+        "message":
+            "Payment Service Working"
+
     })
 
 
+# ============================================================
+# CREATE PAYMENT INTENT
+# ============================================================
 
 @api_view(["POST"])
 def create_payment_intent(request):
 
     user = get_user_info(request)
 
-    print("USER INFO FROM PAYMENT:", user)
+    print(
+        "USER INFO FROM PAYMENT:",
+        user
+    )
 
 
     amount = request.data.get("amount")
-    currency = request.data.get("currency", "usd")
 
-    order_id = request.data.get("order_id")
-    order_ids = request.data.get("order_ids")
+    currency = request.data.get(
+        "currency",
+        "usd"
+    )
 
+    order_id = request.data.get(
+        "order_id"
+    )
+
+    order_ids = request.data.get(
+        "order_ids"
+    )
+
+    payment_method_id = request.data.get(
+        "payment_method"
+    )
+
+
+    # --------------------------------------------------------
+    # VALIDATE AMOUNT
+    # --------------------------------------------------------
 
     if not amount:
 
         return Response(
+
             {
                 "success": False,
-                "message": "Amount is required"
+
+                "message":
+                    "Amount is required"
             },
+
             status=400
+
         )
 
+
+    # --------------------------------------------------------
+    # VALIDATE ORDER
+    # --------------------------------------------------------
 
     if not order_id and not order_ids:
 
         return Response(
+
             {
                 "success": False,
-                "message": "Order ID(s) are required"
+
+                "message":
+                    "Order ID(s) are required"
             },
+
             status=400
+
         )
 
 
@@ -64,31 +117,88 @@ def create_payment_intent(request):
 
     try:
 
+        # ====================================================
+        # PAYMENT INTENT DATA
+        # ====================================================
+
+        intent_data = {
+
+            "amount":
+                int(float(amount) * 100),
+
+            "currency":
+                currency,
+
+            "automatic_payment_methods": {
+
+                "enabled": True,
+
+                "allow_redirects": "never"
+
+            }
+
+        }
+
+
+        # ----------------------------------------------------
+        # PAYMENT METHOD
+        # ----------------------------------------------------
+
+        if payment_method_id:
+
+            intent_data["payment_method"] = (
+                payment_method_id
+            )
+
+            intent_data[
+                "confirmation_method"
+            ] = "automatic"
+
+
+        # ====================================================
+        # CREATE STRIPE PAYMENT INTENT
+        # ====================================================
+
         intent = stripe.PaymentIntent.create(
-
-            amount=int(float(amount) * 100),
-
-            currency=currency
-
+            **intent_data
         )
 
+
+        print(
+            "PAYMENT INTENT:",
+            intent.id
+        )
+
+
+        # ====================================================
+        # CREATE PAYMENT DB RECORD
+        # ====================================================
 
         payment = Payment.objects.create(
 
             user_id=user["user_id"],
 
-            order_id=order_id if order_id else order_ids[0],
+            order_id=(
+                order_id
+                if order_id
+                else order_ids[0]
+            ),
 
             amount=amount,
 
             currency=currency,
 
-            stripe_payment_intent_id=intent.id,
+            stripe_payment_intent_id=
+                intent.id,
 
             status="pending"
 
         )
 
+
+        # ====================================================
+        # SINGLE ORDER
+        # ====================================================
 
         if order_id:
 
@@ -100,6 +210,10 @@ def create_payment_intent(request):
 
             )
 
+
+        # ====================================================
+        # MULTIPLE ORDERS
+        # ====================================================
 
         if order_ids:
 
@@ -114,28 +228,63 @@ def create_payment_intent(request):
                 )
 
 
+        # ====================================================
+        # RESPONSE
+        # ====================================================
+
         return Response({
 
             "success": True,
 
-            "message": "Payment Intent Created Successfully",
+            "message":
+                "Payment Intent Created Successfully",
 
-            "payment_id": payment.id,
+            "payment_id":
+                payment.id,
 
-            "client_secret": intent.client_secret,
+            "client_secret":
+                intent.client_secret,
 
-            "payment_intent_id": intent.id
+            "payment_intent_id":
+                intent.id,
+
+            "status":
+                intent.status
 
         })
 
 
-    except Exception as e:
+    except stripe.error.StripeError as e:
 
+        print(
+            "STRIPE PAYMENT ERROR:",
+            e
+        )
 
         return Response(
 
             {
+                "success": False,
 
+                "error": str(e)
+
+            },
+
+            status=400
+
+        )
+
+
+    except Exception as e:
+
+        print(
+            "PAYMENT ERROR:",
+            e
+        )
+
+        return Response(
+
+            {
                 "success": False,
 
                 "error": str(e)
@@ -147,8 +296,9 @@ def create_payment_intent(request):
         )
 
 
-
-
+# ============================================================
+# PAYMENT LIST
+# ============================================================
 
 @api_view(["GET"])
 def payment_list(request):
@@ -160,7 +310,9 @@ def payment_list(request):
 
         user_id=user["user_id"]
 
-    ).order_by("-created_at")
+    ).order_by(
+        "-created_at"
+    )
 
 
     data = []
@@ -168,35 +320,39 @@ def payment_list(request):
 
     for payment in payments:
 
-
-        linked_orders = PaymentOrder.objects.filter(
-
-            payment=payment
-
-        ).values_list(
-
-            "order_id",
-
-            flat=True
-
+        linked_orders = (
+            PaymentOrder.objects.filter(
+                payment=payment
+            )
+            .values_list(
+                "order_id",
+                flat=True
+            )
         )
 
 
         data.append({
 
-            "id": payment.id,
+            "id":
+                payment.id,
 
-            "order_id": payment.order_id,
+            "order_id":
+                payment.order_id,
 
-            "order_ids": list(linked_orders),
+            "order_ids":
+                list(linked_orders),
 
-            "amount": str(payment.amount),
+            "amount":
+                str(payment.amount),
 
-            "currency": payment.currency,
+            "currency":
+                payment.currency,
 
-            "status": payment.status,
+            "status":
+                payment.status,
 
-            "created_at": payment.created_at
+            "created_at":
+                payment.created_at
 
         })
 
@@ -205,21 +361,25 @@ def payment_list(request):
 
         "success": True,
 
-        "message": "Payments fetched successfully",
+        "message":
+            "Payments fetched successfully",
 
-        "data": data
+        "data":
+            data
 
     })
 
 
-
-
+# ============================================================
+# ADMIN PAYMENT LIST
+# ============================================================
 
 @api_view(["GET"])
 def admin_payment_list(request):
 
-
-    payments = Payment.objects.all().order_by("-created_at")
+    payments = Payment.objects.all().order_by(
+        "-created_at"
+    )
 
 
     data = []
@@ -227,37 +387,42 @@ def admin_payment_list(request):
 
     for payment in payments:
 
-
-        linked_orders = PaymentOrder.objects.filter(
-
-            payment=payment
-
-        ).values_list(
-
-            "order_id",
-
-            flat=True
-
+        linked_orders = (
+            PaymentOrder.objects.filter(
+                payment=payment
+            )
+            .values_list(
+                "order_id",
+                flat=True
+            )
         )
 
 
         data.append({
 
-            "id": payment.id,
+            "id":
+                payment.id,
 
-            "user_id": payment.user_id,
+            "user_id":
+                payment.user_id,
 
-            "order_id": payment.order_id,
+            "order_id":
+                payment.order_id,
 
-            "order_ids": list(linked_orders),
+            "order_ids":
+                list(linked_orders),
 
-            "amount": str(payment.amount),
+            "amount":
+                str(payment.amount),
 
-            "currency": payment.currency,
+            "currency":
+                payment.currency,
 
-            "status": payment.status,
+            "status":
+                payment.status,
 
-            "created_at": payment.created_at
+            "created_at":
+                payment.created_at
 
         })
 
@@ -266,19 +431,21 @@ def admin_payment_list(request):
 
         "success": True,
 
-        "message": "All payments fetched successfully",
+        "message":
+            "All payments fetched successfully",
 
-        "data": data
+        "data":
+            data
 
     })
 
 
-
-
+# ============================================================
+# STRIPE WEBHOOK
+# ============================================================
 
 @csrf_exempt
 def stripe_webhook(request):
-
 
     if request.method != "POST":
 
@@ -313,17 +480,26 @@ def stripe_webhook(request):
 
     except ValueError as e:
 
-        print("INVALID PAYLOAD:", e)
+        print(
+            "INVALID PAYLOAD:",
+            e
+        )
 
-        return HttpResponse(status=400)
+        return HttpResponse(
+            status=400
+        )
 
 
     except stripe.error.SignatureVerificationError as e:
 
-        print("INVALID SIGNATURE:", e)
+        print(
+            "INVALID SIGNATURE:",
+            e
+        )
 
-        return HttpResponse(status=400)
-
+        return HttpResponse(
+            status=400
+        )
 
 
     print(
@@ -332,23 +508,27 @@ def stripe_webhook(request):
     )
 
 
-
-    # SUCCESS PAYMENT
+    # ========================================================
+    # PAYMENT SUCCESS
+    # ========================================================
 
     if event["type"] == "payment_intent.succeeded":
 
+        payment_intent = (
+            event["data"]["object"]
+        )
 
-        payment_intent = event["data"]["object"]
-
-        stripe_payment_intent_id = payment_intent["id"]
+        stripe_payment_intent_id = (
+            payment_intent["id"]
+        )
 
 
         try:
 
-
             payment = Payment.objects.get(
 
-                stripe_payment_intent_id=stripe_payment_intent_id
+                stripe_payment_intent_id=
+                    stripe_payment_intent_id
 
             )
 
@@ -358,21 +538,28 @@ def stripe_webhook(request):
             payment.save()
 
 
+            for item in PaymentOrder.objects.filter(
+                payment=payment
+            ):
 
-            for item in PaymentOrder.objects.filter(payment=payment):
+                try:
+
+                    order = Order.objects.get(
+                        id=item.order_id
+                    )
 
 
-                order = Order.objects.get(
+                    order.status = "Confirmed"
 
-                    id=item.order_id
-
-                )
+                    order.save()
 
 
-                order.status = "Confirmed"
+                except Order.DoesNotExist:
 
-                order.save()
-
+                    print(
+                        "ORDER NOT FOUND:",
+                        item.order_id
+                    )
 
 
             print(
@@ -383,30 +570,33 @@ def stripe_webhook(request):
 
         except Payment.DoesNotExist:
 
-
             print(
                 "PAYMENT NOT FOUND:",
                 stripe_payment_intent_id
             )
 
 
-
-    # FAILED PAYMENT
+    # ========================================================
+    # PAYMENT FAILED
+    # ========================================================
 
     elif event["type"] == "payment_intent.payment_failed":
 
+        payment_intent = (
+            event["data"]["object"]
+        )
 
-        payment_intent = event["data"]["object"]
-
-        stripe_payment_intent_id = payment_intent["id"]
+        stripe_payment_intent_id = (
+            payment_intent["id"]
+        )
 
 
         try:
 
-
             payment = Payment.objects.get(
 
-                stripe_payment_intent_id=stripe_payment_intent_id
+                stripe_payment_intent_id=
+                    stripe_payment_intent_id
 
             )
 
@@ -416,21 +606,28 @@ def stripe_webhook(request):
             payment.save()
 
 
+            for item in PaymentOrder.objects.filter(
+                payment=payment
+            ):
 
-            for item in PaymentOrder.objects.filter(payment=payment):
+                try:
+
+                    order = Order.objects.get(
+                        id=item.order_id
+                    )
 
 
-                order = Order.objects.get(
+                    order.status = "Failed"
 
-                    id=item.order_id
-
-                )
+                    order.save()
 
 
-                order.status = "Failed"
+                except Order.DoesNotExist:
 
-                order.save()
-
+                    print(
+                        "ORDER NOT FOUND:",
+                        item.order_id
+                    )
 
 
             print(
@@ -441,17 +638,20 @@ def stripe_webhook(request):
 
         except Payment.DoesNotExist:
 
-
             print(
                 "PAYMENT NOT FOUND:",
                 stripe_payment_intent_id
             )
 
 
-
     return HttpResponse(
         status=200
     )
+
+
+# ============================================================
+# CREATE STRIPE CUSTOMER
+# ============================================================
 
 @api_view(["POST"])
 def create_stripe_customer(request):
@@ -461,40 +661,73 @@ def create_stripe_customer(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-    existing_customer = PaymentCustomer.objects.filter(
-        user_id=user["user_id"]
-    ).first()
+    existing_customer = (
+        PaymentCustomer.objects.filter(
+            user_id=user["user_id"]
+        ).first()
+    )
 
 
     if existing_customer:
 
         return Response({
+
             "success": True,
-            "customer_id": existing_customer.stripe_customer_id
+
+            "customer_id":
+                existing_customer
+                .stripe_customer_id
+
         })
 
 
-    customer = stripe.Customer.create(
-        email=user["user_email"]
-    )
+    try:
+
+        customer = stripe.Customer.create(
+
+            email=user["user_email"]
+
+        )
 
 
-    PaymentCustomer.objects.create(
+        PaymentCustomer.objects.create(
 
-        user_id=user["user_id"],
+            user_id=user["user_id"],
 
-        stripe_customer_id=customer.id
+            stripe_customer_id=customer.id
 
-    )
+        )
 
 
-    return Response({
+        return Response({
 
-        "success": True,
+            "success": True,
 
-        "customer_id": customer.id
+            "customer_id":
+                customer.id
 
-    })
+        })
+
+
+    except stripe.error.StripeError as e:
+
+        return Response(
+
+            {
+                "success": False,
+
+                "error": str(e)
+
+            },
+
+            status=400
+
+        )
+
+
+# ============================================================
+# CREATE SETUP INTENT
+# ============================================================
 
 @api_view(["POST"])
 def create_setup_intent(request):
@@ -504,19 +737,26 @@ def create_setup_intent(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
-    customer = PaymentCustomer.objects.filter(
-        user_id=user["user_id"]
-    ).first()
+    customer = (
+        PaymentCustomer.objects.filter(
+            user_id=user["user_id"]
+        ).first()
+    )
 
 
     if not customer:
 
         return Response(
+
             {
                 "success": False,
-                "message": "Stripe customer not found"
+
+                "message":
+                    "Stripe customer not found"
             },
+
             status=400
+
         )
 
 
@@ -524,7 +764,8 @@ def create_setup_intent(request):
 
         setup_intent = stripe.SetupIntent.create(
 
-            customer=customer.stripe_customer_id,
+            customer=
+                customer.stripe_customer_id,
 
             payment_method_types=[
                 "card"
@@ -537,25 +778,53 @@ def create_setup_intent(request):
 
             "success": True,
 
-            "client_secret": setup_intent.client_secret
+            "client_secret":
+                setup_intent.client_secret
 
         })
 
 
+    except stripe.error.StripeError as e:
+
+        return Response(
+
+            {
+                "success": False,
+
+                "error": str(e)
+
+            },
+
+            status=400
+
+        )
+
+
     except Exception as e:
 
-        return Response({
+        return Response(
 
-            "success": False,
+            {
+                "success": False,
 
-            "error": str(e)
+                "error": str(e)
 
-        }, status=500)
+            },
+
+            status=500
+
+        )
+
+
+# ============================================================
+# SAVE CARD
+# ============================================================
 
 @api_view(["POST"])
 def save_card(request):
 
     user = get_user_info(request)
+
 
     payment_method_id = request.data.get(
         "payment_method_id"
@@ -565,11 +834,16 @@ def save_card(request):
     if not payment_method_id:
 
         return Response(
+
             {
-                "success":False,
-                "message":"Payment method required"
+                "success": False,
+
+                "message":
+                    "Payment method required"
             },
+
             status=400
+
         )
 
 
@@ -578,28 +852,99 @@ def save_card(request):
 
     try:
 
+        # ====================================================
+        # GET CUSTOMER
+        # ====================================================
+
         customer = PaymentCustomer.objects.get(
+
             user_id=user["user_id"]
+
         )
 
 
-        payment_method = stripe.PaymentMethod.retrieve(
-            payment_method_id
+        # ====================================================
+        # CHECK DUPLICATE
+        # ====================================================
+
+        existing_card = SavedCard.objects.filter(
+
+            user_id=user["user_id"],
+
+            stripe_payment_method_id=
+                payment_method_id
+
+        ).first()
+
+
+        if existing_card:
+
+            return Response({
+
+                "success": True,
+
+                "message":
+                    "Card already saved",
+
+                "card": {
+
+                    "id":
+                        existing_card.id,
+
+                    "brand":
+                        existing_card.brand,
+
+                    "last4":
+                        existing_card.last4,
+
+                    "exp_month":
+                        existing_card.exp_month,
+
+                    "exp_year":
+                        existing_card.exp_year,
+
+                    "payment_method_id":
+                        existing_card
+                        .stripe_payment_method_id
+
+                }
+
+            })
+
+
+        # ====================================================
+        # ATTACH PAYMENT METHOD TO CUSTOMER
+        # ====================================================
+
+        payment_method = (
+            stripe.PaymentMethod.attach(
+
+                payment_method_id,
+
+                customer=
+                    customer.stripe_customer_id
+
+            )
         )
 
+
+        # ====================================================
+        # CARD DETAILS
+        # ====================================================
 
         card = payment_method.card
 
+
+        # ====================================================
+        # SAVE IN DATABASE
+        # ====================================================
 
         saved_card = SavedCard.objects.create(
 
             user_id=user["user_id"],
 
-            stripe_customer_id=
-            customer.stripe_customer_id,
-
             stripe_payment_method_id=
-            payment_method.id,
+                payment_method.id,
 
             brand=card.brand,
 
@@ -612,40 +957,104 @@ def save_card(request):
         )
 
 
+        # ====================================================
+        # RESPONSE
+        # ====================================================
+
         return Response({
 
-            "success":True,
+            "success": True,
 
-            "message":"Card saved",
+            "message":
+                "Card saved successfully",
 
-            "card":{
+            "card": {
 
-                "id":saved_card.id,
+                "id":
+                    saved_card.id,
 
-                "brand":saved_card.brand,
+                "brand":
+                    saved_card.brand,
 
-                "last4":saved_card.last4,
+                "last4":
+                    saved_card.last4,
 
-                "exp_month":saved_card.exp_month,
+                "exp_month":
+                    saved_card.exp_month,
 
-                "exp_year":saved_card.exp_year
+                "exp_year":
+                    saved_card.exp_year,
+
+                "payment_method_id":
+                    saved_card
+                    .stripe_payment_method_id
 
             }
 
         })
 
 
+    except PaymentCustomer.DoesNotExist:
+
+        return Response(
+
+            {
+                "success": False,
+
+                "message":
+                    "Stripe customer not found"
+            },
+
+            status=400
+
+        )
+
+
+    except stripe.error.StripeError as e:
+
+        print(
+            "STRIPE SAVE CARD ERROR:",
+            e
+        )
+
+        return Response(
+
+            {
+                "success": False,
+
+                "error": str(e)
+
+            },
+
+            status=400
+
+        )
+
+
     except Exception as e:
 
-        print("SAVE CARD ERROR:",e)
+        print(
+            "SAVE CARD ERROR:",
+            e
+        )
 
-        return Response({
+        return Response(
 
-            "success":False,
+            {
+                "success": False,
 
-            "error":str(e)
+                "error": str(e)
 
-        },status=500)
+            },
+
+            status=500
+
+        )
+
+
+# ============================================================
+# SAVED CARDS
+# ============================================================
 
 @api_view(["GET"])
 def saved_cards(request):
@@ -654,8 +1063,12 @@ def saved_cards(request):
 
 
     cards = SavedCard.objects.filter(
+
         user_id=user["user_id"]
-    ).order_by("-created_at")
+
+    ).order_by(
+        "-created_at"
+    )
 
 
     data = []
@@ -665,15 +1078,23 @@ def saved_cards(request):
 
         data.append({
 
-            "id": card.id,
+            "id":
+                card.id,
 
-            "brand": card.brand,
+            "brand":
+                card.brand,
 
-            "last4": card.last4,
+            "last4":
+                card.last4,
 
-            "exp_month": card.exp_month,
+            "exp_month":
+                card.exp_month,
 
-            "exp_year": card.exp_year
+            "exp_year":
+                card.exp_year,
+
+            "payment_method_id":
+                card.stripe_payment_method_id
 
         })
 
@@ -682,6 +1103,8 @@ def saved_cards(request):
 
         "success": True,
 
-        "data": data
+        "data":
+            data
 
     })
+

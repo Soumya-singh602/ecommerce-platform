@@ -62,3 +62,17 @@ export const saveCard = async (data) => {
     return response.data;
 
 };
+
+
+
+
+export const getSavedCards = async()=>{
+
+    const response = await api.get(
+        "/payments/saved-cards/"
+    );
+
+
+    return response.data;
+
+};

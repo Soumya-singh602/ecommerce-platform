@@ -14,6 +14,7 @@ import OrderDetails from "../pages/OrderDetails";
 import Chat from "../pages/Chat";
 import Profile from "../pages/Profile";
 import AddCard from "../pages/AddCard";
+import SavedCards from "../pages/SavedCards";
 
 export default function AppRoutes() {
   return (
@@ -53,6 +54,17 @@ export default function AppRoutes() {
       <AddCard/>
    </ProtectedRoute>
  }
+/>  
+  <Route
+
+ path="/saved-cards"
+
+ element={
+   <ProtectedRoute>
+      <SavedCards/>
+   </ProtectedRoute>
+ }
+
 />
     </Routes>
      

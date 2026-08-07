@@ -1,17 +1,23 @@
+
 import {
   CardNumberElement,
   CardExpiryElement,
   CardCvcElement
 } from "@stripe/react-stripe-js";
 
-import { useState } from "react";
-
 
 export default function PaymentMethod({
-  paymentType,
-  setPaymentType
-}) {
 
+  paymentType,
+  setPaymentType,
+
+  savedCards,
+  selectedCard,
+  setSelectedCard,
+
+  loadingCards
+
+}) {
 
   return (
 
@@ -23,118 +29,303 @@ export default function PaymentMethod({
       </h2>
 
 
+      {/* =====================================
+          SAVED CARDS
+      ====================================== */}
 
-      <div className="space-y-4">
+      {loadingCards ? (
 
+        <div className="text-gray-500 mb-5">
+          Loading saved cards...
+        </div>
 
-        <label className="flex items-center gap-3 cursor-pointer">
+      ) : savedCards && savedCards.length > 0 ? (
 
-          <input
-            type="radio"
-            name="payment"
-            value="cod"
-            checked={paymentType==="cod"}
-            onChange={(e)=>setPaymentType(e.target.value)}
-          />
-
-          <span>
-            Cash on Delivery (COD)
-          </span>
-
-        </label>
+        <div className="space-y-3 mb-6">
 
 
+          <h3 className="text-lg font-semibold">
+            Saved Cards
+          </h3>
 
 
+          {savedCards.map((card) => (
 
-        <label className="flex items-center gap-3 cursor-pointer">
-
-
-          <input
-            type="radio"
-            name="payment"
-            value="card"
-            checked={paymentType==="card"}
-            onChange={(e)=>setPaymentType(e.target.value)}
-          />
-
-
-          <span>
-            Credit / Debit Card
-          </span>
+            <label
+              key={card.id}
+              className={`flex items-center justify-between border rounded-lg p-4 cursor-pointer transition ${
+                paymentType === "saved" &&
+                selectedCard?.id === card.id
+                  ? "border-green-600 bg-green-50"
+                  : "border-gray-200"
+              }`}
+            >
 
 
-        </label>
+              <div className="flex items-center gap-3">
 
 
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={
+                    paymentType === "saved" &&
+                    selectedCard?.id === card.id
+                  }
+                  onChange={() => {
+
+                    setSelectedCard(card);
+
+                    setPaymentType("saved");
+
+                  }}
+                />
 
 
+                <div>
 
-        {
-          paymentType==="card" && (
+                  <p className="font-medium capitalize">
 
-            <div className="space-y-4 mt-5">
+                    {card.brand}
+
+                    {" **** "}
+
+                    {card.last4}
+
+                  </p>
 
 
-              <div className="border p-3 rounded">
+                  <p className="text-sm text-gray-500">
 
-                <CardNumberElement />
+                    Expires{" "}
+
+                    {String(card.exp_month).padStart(
+                      2,
+                      "0"
+                    )}
+
+                    /
+
+                    {card.exp_year}
+
+                  </p>
+
+                </div>
+
 
               </div>
 
 
+              {card.is_default && (
 
-              <div className="border p-3 rounded">
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
 
-                <CardExpiryElement />
+                  Default
 
-              </div>
+                </span>
 
-
-
-              <div className="border p-3 rounded">
-
-                <CardCvcElement />
-
-              </div>
+              )}
 
 
+            </label>
+
+          ))}
+
+
+        </div>
+
+      ) : (
+
+        <div className="text-gray-500 mb-5">
+
+          No saved cards found.
+
+        </div>
+
+      )}
+
+
+      {/* =====================================
+          NEW CARD
+      ====================================== */}
+
+      <label
+        className={`flex items-center gap-3 border rounded-lg p-4 cursor-pointer mb-5 ${
+          paymentType === "new-card"
+            ? "border-green-600 bg-green-50"
+            : "border-gray-200"
+        }`}
+      >
+
+
+        <input
+          type="radio"
+          name="payment"
+          value="new-card"
+          checked={paymentType === "new-card"}
+          onChange={() => {
+
+            setSelectedCard(null);
+
+            setPaymentType("new-card");
+
+          }}
+        />
+
+
+        <span className="font-medium">
+          Use a new card
+        </span>
+
+
+      </label>
+
+
+      {/* =====================================
+          NEW CARD FIELDS
+      ====================================== */}
+
+      {paymentType === "new-card" && (
+
+        <div className="space-y-4 mb-6">
+
+
+          <div>
+
+            <label className="block text-sm font-medium mb-2">
+              Card Number
+            </label>
+
+
+            <div className="border p-3 rounded-lg">
+
+              <CardNumberElement />
 
             </div>
 
-          )
-        }
+          </div>
 
 
+          <div>
+
+            <label className="block text-sm font-medium mb-2">
+              Expiry
+            </label>
 
 
+            <div className="border p-3 rounded-lg">
+
+              <CardExpiryElement />
+
+            </div>
+
+          </div>
 
 
-        <label className="flex items-center gap-3 cursor-pointer">
+          <div>
+
+            <label className="block text-sm font-medium mb-2">
+              CVC
+            </label>
 
 
-          <input
-            type="radio"
-            name="payment"
-            value="upi"
-            checked={paymentType==="upi"}
-            onChange={(e)=>setPaymentType(e.target.value)}
-          />
+            <div className="border p-3 rounded-lg">
+
+              <CardCvcElement />
+
+            </div>
+
+          </div>
 
 
-          <span>
-            UPI Payment
-          </span>
+          <p className="text-sm text-gray-500">
+
+            This card will be securely saved to
+            your account for future payments.
+
+          </p>
 
 
-        </label>
+        </div>
+
+      )}
 
 
+      {/* =====================================
+          COD
+      ====================================== */}
 
-      </div>
+      <label
+        className={`flex items-center gap-3 border rounded-lg p-4 cursor-pointer ${
+          paymentType === "cod"
+            ? "border-green-600 bg-green-50"
+            : "border-gray-200"
+        }`}
+      >
+
+
+        <input
+          type="radio"
+          name="payment"
+          value="cod"
+          checked={paymentType === "cod"}
+          onChange={() => {
+
+            setSelectedCard(null);
+
+            setPaymentType("cod");
+
+          }}
+        />
+
+
+        <span>
+          Cash on Delivery (COD)
+        </span>
+
+
+      </label>
+
+
+      {/* =====================================
+          UPI
+      ====================================== */}
+
+      <label
+        className={`flex items-center gap-3 border rounded-lg p-4 cursor-pointer mt-3 ${
+          paymentType === "upi"
+            ? "border-green-600 bg-green-50"
+            : "border-gray-200"
+        }`}
+      >
+
+
+        <input
+          type="radio"
+          name="payment"
+          value="upi"
+          checked={paymentType === "upi"}
+          onChange={() => {
+
+            setSelectedCard(null);
+
+            setPaymentType("upi");
+
+          }}
+        />
+
+
+        <span>
+          UPI Payment
+        </span>
+
+
+      </label>
 
 
     </div>
 
   );
+
 }
+
