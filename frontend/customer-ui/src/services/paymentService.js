@@ -76,3 +76,16 @@ export const getSavedCards = async()=>{
     return response.data;
 
 };
+
+export const deleteSavedCard = async(cardId)=>{
+
+    const response = await api.delete(
+
+        `/payments/saved-card/delete/${cardId}/`
+
+    );
+
+
+    return response.data;
+
+};

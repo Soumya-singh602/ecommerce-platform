@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views 
 
 
 urlpatterns = [
@@ -53,6 +53,11 @@ urlpatterns = [
         "saved-cards/",
         views.saved_cards
     ),
+
+    path(
+    "saved-card/delete/<int:card_id>/",
+    views.delete_saved_card
+),
 
 
 ]

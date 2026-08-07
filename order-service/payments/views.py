@@ -1515,3 +1515,76 @@ def saved_cards(request):
             data
 
     })
+
+# ============================================================
+# DELETE SAVED CARD
+# ============================================================
+
+@api_view(["DELETE"])
+def delete_saved_card(request, card_id):
+
+    user = get_user_info(request)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+
+    try:
+
+        card = SavedCard.objects.get(
+
+            id=card_id,
+
+            user_id=user["user_id"]
+
+        )
+
+
+        # Remove card from Stripe customer
+
+        stripe.PaymentMethod.detach(
+
+            card.stripe_payment_method_id
+
+        )
+
+
+        # Remove from database
+
+        card.delete()
+
+
+        return Response({
+
+            "success": True,
+
+            "message":
+                "Card deleted successfully"
+
+        })
+
+
+    except SavedCard.DoesNotExist:
+
+
+        return Response({
+
+            "success": False,
+
+            "message":
+                "Card not found"
+
+        }, status=404)
+
+
+
+    except stripe.error.StripeError as e:
+
+
+        return Response({
+
+            "success": False,
+
+            "error":
+                str(e)
+
+        }, status=400)
