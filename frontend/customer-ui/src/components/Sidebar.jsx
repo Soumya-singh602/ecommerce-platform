@@ -1,294 +1,280 @@
+
 import {
-  Home,
-  ShoppingBag,
-  Package,
-  User,
-  CreditCard,
-  MessageCircle,
-  LogOut
+    Home,
+    ShoppingBag,
+    Package,
+    User,
+    CreditCard,
+    MessageCircle,
+    LogOut
 } from "lucide-react";
 
 import {
-  Link,
-  useNavigate
+    Link,
+    useNavigate
 } from "react-router-dom";
 
 import {
-  logout,
-  getUser
+    logout,
+    getUser
 } from "../utils/auth";
 
 
 export default function Sidebar() {
 
+    const navigate = useNavigate();
 
-  const navigate = useNavigate();
-
-  const user = getUser();
-
+    const user = getUser();
 
 
-  const handleLogout = () => {
+    const handleLogout = () => {
 
-    logout();
+        logout();
 
-    navigate("/login");
+        navigate("/login");
 
-  };
-
-
-
-  return (
-
-    <aside
-      className="
-        w-64
-        bg-white
-        shadow-md
-        min-h-full
-        flex
-        flex-col
-        border-r
-      "
-    >
+    };
 
 
-      {/* USER SECTION */}
+    return (
 
-      <div className="p-5 border-b">
-
-
-        <div className="flex items-center gap-3">
-
-
-          <div
+        <aside
             className="
-              w-10
-              h-10
-              rounded-full
-              bg-blue-600
-              text-white
-              flex
-              items-center
-              justify-center
-              font-bold
+                w-64
+                bg-white
+                shadow-md
+                min-h-full
+                flex
+                flex-col
+                border-r
             "
-          >
-
-            <User size={22}/>
-
-          </div>
-
-
-          <div>
-
-            <p className="font-semibold">
-
-              Account
-
-            </p>
-
-
-            <p className="text-xs text-gray-500">
-
-              {user?.email}
-
-            </p>
-
-
-          </div>
-
-
-        </div>
-
-
-      </div>
-
-
-
-
-
-      {/* MENU */}
-
-      <nav className="flex-1 p-4 space-y-2">
-
-
-
-        <Link
-          to="/"
-          className="
-            flex
-            items-center
-            gap-3
-            p-3
-            rounded-lg
-            hover:bg-blue-50
-            hover:text-blue-600
-          "
         >
 
-          <Home size={20}/>
 
-          Home
+            {/* =========================
+                USER / ACCOUNT SECTION
+            ========================== */}
 
-        </Link>
+            <Link
+                to="/profile"
+                className="
+                    p-5
+                    border-b
+                    block
+                    hover:bg-blue-50
+                    transition
+                    cursor-pointer
+                "
+            >
 
-
-
-
-        <Link
-          to="/shop"
-          className="
-            flex
-            items-center
-            gap-3
-            p-3
-            rounded-lg
-            hover:bg-blue-50
-            hover:text-blue-600
-          "
-        >
-
-          <ShoppingBag size={20}/>
-
-          Shop
-
-        </Link>
+                <div className="flex items-center gap-3">
 
 
+                    <div
+                        className="
+                            w-10
+                            h-10
+                            rounded-full
+                            bg-blue-600
+                            text-white
+                            flex
+                            items-center
+                            justify-center
+                            font-bold
+                        "
+                    >
+
+                        <User size={22} />
+
+                    </div>
 
 
-        <Link
-          to="/orders"
-          className="
-            flex
-            items-center
-            gap-3
-            p-3
-            rounded-lg
-            hover:bg-blue-50
-            hover:text-blue-600
-          "
-        >
+                    <div>
 
-          <Package size={20}/>
-
-          Orders
-
-        </Link>
+                        <p className="font-semibold text-gray-800">
+                            Account
+                        </p>
 
 
+                        <p className="text-xs text-gray-500">
+                            {user?.email}
+                        </p>
+
+                    </div>
 
 
-        <Link
-          to="/profile"
-          className="
-            flex
-            items-center
-            gap-3
-            p-3
-            rounded-lg
-            hover:bg-blue-50
-            hover:text-blue-600
-          "
-        >
+                </div>
 
-          <User size={20}/>
-
-          Profile
-
-        </Link>
+            </Link>
 
 
+            {/* =========================
+                MENU
+            ========================== */}
+
+            <nav className="flex-1 p-4 space-y-2">
 
 
-        <Link
-          to="/saved-cards"
-          className="
-            flex
-            items-center
-            gap-3
-            p-3
-            rounded-lg
-            hover:bg-blue-50
-            hover:text-blue-600
-          "
-        >
+                <Link
+                    to="/"
+                    className="
+                        flex
+                        items-center
+                        gap-3
+                        p-3
+                        rounded-lg
+                        hover:bg-blue-50
+                        hover:text-blue-600
+                    "
+                >
 
-          <CreditCard size={20}/>
+                    <Home size={20} />
 
-          Saved Cards
+                    Home
 
-        </Link>
-
-
+                </Link>
 
 
-        <Link
-          to="/chat"
-          className="
-            flex
-            items-center
-            gap-3
-            p-3
-            rounded-lg
-            hover:bg-blue-50
-            hover:text-blue-600
-          "
-        >
+                <Link
+                    to="/shop"
+                    className="
+                        flex
+                        items-center
+                        gap-3
+                        p-3
+                        rounded-lg
+                        hover:bg-blue-50
+                        hover:text-blue-600
+                    "
+                >
 
-          <MessageCircle size={20}/>
+                    <ShoppingBag size={20} />
 
-          Chat
+                    Shop
 
-        </Link>
-
-
-
-      </nav>
+                </Link>
 
 
+                <Link
+                    to="/orders"
+                    className="
+                        flex
+                        items-center
+                        gap-3
+                        p-3
+                        rounded-lg
+                        hover:bg-blue-50
+                        hover:text-blue-600
+                    "
+                >
+
+                    <Package size={20} />
+
+                    Orders
+
+                </Link>
 
 
+                <Link
+                    to="/profile"
+                    className="
+                        flex
+                        items-center
+                        gap-3
+                        p-3
+                        rounded-lg
+                        hover:bg-blue-50
+                        hover:text-blue-600
+                    "
+                >
 
-      {/* LOGOUT BOTTOM */}
+                    <User size={20} />
 
-      <div className="p-4 border-t">
+                    Profile
 
-
-        <button
-
-          onClick={handleLogout}
-
-          className="
-            w-full
-            flex
-            items-center
-            justify-center
-            gap-3
-            bg-red-500
-            text-white
-            py-3
-            rounded-lg
-            hover:bg-red-600
-          "
-
-        >
-
-          <LogOut size={20}/>
-
-          Logout
+                </Link>
 
 
-        </button>
+                <Link
+                    to="/saved-cards"
+                    className="
+                        flex
+                        items-center
+                        gap-3
+                        p-3
+                        rounded-lg
+                        hover:bg-blue-50
+                        hover:text-blue-600
+                    "
+                >
+
+                    <CreditCard size={20} />
+
+                    Saved Cards
+
+                </Link>
 
 
-      </div>
+                <Link
+                    to="/chat"
+                    className="
+                        flex
+                        items-center
+                        gap-3
+                        p-3
+                        rounded-lg
+                        hover:bg-blue-50
+                        hover:text-blue-600
+                    "
+                >
+
+                    <MessageCircle size={20} />
+
+                    Chat
+
+                </Link>
 
 
+            </nav>
 
-    </aside>
 
-  );
+            {/* =========================
+                LOGOUT
+            ========================== */}
+
+            <div className="p-4 border-t">
+
+
+                <button
+                    onClick={handleLogout}
+                    className="
+                        w-full
+                        flex
+                        items-center
+                        justify-center
+                        gap-3
+                        bg-red-500
+                        text-white
+                        py-3
+                        rounded-lg
+                        hover:bg-red-600
+                        transition
+                    "
+                >
+
+                    <LogOut size={20} />
+
+                    Logout
+
+                </button>
+
+
+            </div>
+
+
+        </aside>
+
+    );
 
 }
+
