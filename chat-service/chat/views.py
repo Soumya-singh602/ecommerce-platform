@@ -67,7 +67,8 @@ def conversation_list(request, user_id):
                 other_user,
                 token
             )
-
+            print("OTHER USER ID:", other_user)
+            print("USER DATA RECEIVED IN VIEW:", user_data)
 
             unread_count = Message.objects.filter(
                 sender_id=other_user,

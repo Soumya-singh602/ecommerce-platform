@@ -4,7 +4,7 @@ import requests
 
 USER_SERVICE_URL = os.getenv(
     "USER_SERVICE_URL",
-    "https://user-service-ngrs.onrender.com"
+    "http://127.0.0.1:8001"
 )
 
 
@@ -18,12 +18,13 @@ def get_user_details(user_id, token):
         timeout=10
     )
 
+    print("USER SERVICE STATUS:", response.status_code)
+    print("USER SERVICE RESPONSE:", response.text)
+
     if response.status_code == 200:
 
         data = response.json()
 
-        return data.get("data", {})
-
-    print(response.text)
+        return data.get("data", data)
 
     return {}
