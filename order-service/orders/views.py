@@ -779,3 +779,31 @@ def health_check(request):
         "status": "ok",
         "service": "order-service"
     })
+
+
+# DELETE ADMIN ORDER
+
+@api_view(["DELETE"])
+def delete_order(request, id):
+
+    try:
+        order = Order.objects.get(id=id)
+
+    except Order.DoesNotExist:
+        raise NotFoundException("Order not found")
+
+    # Delete payment-order mapping if it exists
+    PaymentOrder.objects.filter(
+        order_id=order.id
+    ).delete()
+
+    # Delete order
+    order.delete()
+
+    return success_response(
+        message="Order deleted successfully",
+        data={
+            "order_id": id
+        }
+    )
+

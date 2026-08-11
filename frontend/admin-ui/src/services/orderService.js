@@ -68,3 +68,13 @@ export const cancelOrder = async (id) => {
 
     return response.data;
 };
+
+export const deleteOrder = async (id) => {
+
+    const response = await api.delete(
+        `/orders/admin/${id}/delete/`
+    );
+
+    return response.data;
+};
+

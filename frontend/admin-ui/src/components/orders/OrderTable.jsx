@@ -1,8 +1,10 @@
+
 export default function OrderTable({
     orders,
     onView,
     onUpdate,
     onCancel,
+    onDelete,
 }) {
 
     return (
@@ -54,7 +56,6 @@ export default function OrderTable({
                 <tbody>
 
                     {
-
                         orders.length === 0 ? (
 
                             <tr>
@@ -63,9 +64,7 @@ export default function OrderTable({
                                     colSpan="8"
                                     className="text-center p-6 text-gray-500"
                                 >
-
                                     No Orders Found
-
                                 </td>
 
                             </tr>
@@ -95,7 +94,10 @@ export default function OrderTable({
                                         {order.quantity}
                                     </td>
 
-                                    {/* Order Status */}
+
+                                    {/* ==========================
+                                        ORDER STATUS
+                                    ========================== */}
 
                                     <td className="p-4">
 
@@ -119,7 +121,10 @@ export default function OrderTable({
 
                                     </td>
 
-                                    {/* Payment Status */}
+
+                                    {/* ==========================
+                                        PAYMENT STATUS
+                                    ========================== */}
 
                                     <td className="p-4">
 
@@ -141,40 +146,76 @@ export default function OrderTable({
 
                                     </td>
 
+
+                                    {/* ==========================
+                                        DATE
+                                    ========================== */}
+
                                     <td className="p-4">
 
-                                        {new Date(order.created_at).toLocaleDateString()}
+                                        {new Date(
+                                            order.created_at
+                                        ).toLocaleDateString()}
 
                                     </td>
 
-                                    <td className="p-4 space-x-2">
 
-                                        <button
-                                            onClick={() => onView(order.id)}
-                                            className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700"
-                                        >
+                                    {/* ==========================
+                                        ACTIONS
+                                    ========================== */}
 
-                                            View
+                                    <td className="p-4">
 
-                                        </button>
+                                        <div className="flex gap-2 flex-wrap">
 
-                                        <button
-                                            onClick={() => onUpdate(order)}
-                                            className="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700"
-                                        >
+                                            {/* VIEW */}
 
-                                            Update
+                                            <button
+                                                onClick={() =>
+                                                    onView(order.id)
+                                                }
+                                                className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700"
+                                            >
+                                                View
+                                            </button>
 
-                                        </button>
 
-                                        <button
-                                            onClick={() => onCancel(order.id)}
-                                            className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700"
-                                        >
+                                            {/* UPDATE */}
 
-                                            Cancel
+                                            <button
+                                                onClick={() =>
+                                                    onUpdate(order)
+                                                }
+                                                className="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700"
+                                            >
+                                                Update
+                                            </button>
 
-                                        </button>
+
+                                            {/* CANCEL */}
+
+                                            <button
+                                                onClick={() =>
+                                                    onCancel(order.id)
+                                                }
+                                                className="bg-red-600 text-white px-3 py-2 rounded-lg hover:bg-red-700"
+                                            >
+                                                Cancel
+                                            </button>
+
+
+                                            {/* DELETE */}
+
+                                            <button
+                                                onClick={() =>
+                                                    onDelete(order.id)
+                                                }
+                                                className="bg-gray-800 text-white px-3 py-2 rounded-lg hover:bg-gray-900"
+                                            >
+                                                Delete
+                                            </button>
+
+                                        </div>
 
                                     </td>
 
@@ -183,7 +224,6 @@ export default function OrderTable({
                             ))
 
                         )
-
                     }
 
                 </tbody>
@@ -193,5 +233,5 @@ export default function OrderTable({
         </div>
 
     );
-
 }
+

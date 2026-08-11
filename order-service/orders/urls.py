@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import place_order , order_list , order_detail, cancel_order,update_order_status , order_statistics , admin_order_list , admin_order_detail , admin_order_statistics , admin_cancel_order , health_check
+from .views import place_order , order_list , order_detail, cancel_order,update_order_status , order_statistics , admin_order_list , admin_order_detail , admin_order_statistics , admin_cancel_order , health_check , delete_order
 
 urlpatterns = [
 
@@ -13,6 +13,9 @@ urlpatterns = [
      path("admin/<int:id>/", admin_order_detail, name="admin-order-detail"),
      path("admin/stats/",admin_order_statistics,name="admin-order-statistics"),
      path("admin/<int:id>/cancel/",admin_cancel_order,name="admin-cancel-order",),
+     path("admin/<int:id>/delete/",delete_order,name="admin-order-delete",),
+
+
      path("health/", health_check),
 
 

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -9,13 +10,13 @@ import OrderUpdateModal from "../components/orders/OrderUpdateModal";
 import OrderStats from "../components/orders/OrderStats";
 import OrderCancelModal from "../components/orders/OrderCancelModal";
 
-
 import {
     getOrders,
     getOrderDetail,
     updateOrderStatus,
     getOrderStats,
     cancelOrder,
+    deleteOrder,
 } from "../services/orderService";
 
 export default function Orders() {
@@ -30,16 +31,19 @@ export default function Orders() {
 
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+
     const [selectedUpdateOrder, setSelectedUpdateOrder] = useState(null);
     const [selectedCancelOrder, setSelectedCancelOrder] = useState(null);
+
     const [stats, setStats] = useState({
-    total_orders: 0,
-    pending_orders: 0,
-    confirmed_orders: 0,
-    shipped_orders: 0,
-    delivered_orders: 0,
-    cancelled_orders: 0,
-});
+        total_orders: 0,
+        pending_orders: 0,
+        confirmed_orders: 0,
+        shipped_orders: 0,
+        delivered_orders: 0,
+        cancelled_orders: 0,
+    });
+
 
     // ==========================
     // FETCH ORDERS
@@ -58,7 +62,6 @@ export default function Orders() {
             );
 
             setOrders(data.orders);
-
             setTotalPages(data.total_pages);
 
         } catch (error) {
@@ -72,21 +75,27 @@ export default function Orders() {
         }
 
     };
+
+
+    // ==========================
+    // FETCH STATS
+    // ==========================
     const fetchStats = async () => {
 
-    try {
+        try {
 
-        const data = await getOrderStats();
+            const data = await getOrderStats();
 
-        setStats(data);
+            setStats(data);
 
-    } catch (error) {
+        } catch (error) {
 
-        console.log("STATS ERROR:", error);
+            console.log("STATS ERROR:", error);
 
-    }
+        }
 
-};
+    };
+
 
     // ==========================
     // VIEW ORDER
@@ -109,17 +118,30 @@ export default function Orders() {
 
     };
 
+
+    // ==========================
+    // UPDATE CLICK
+    // ==========================
     const handleUpdateClick = (order) => {
 
-          setSelectedUpdateOrder(order);
+        setSelectedUpdateOrder(order);
 
-        };
+    };
 
+
+    // ==========================
+    // CANCEL CLICK
+    // ==========================
     const handleCancelClick = (order) => {
 
-           setSelectedCancelOrder(order);
+        setSelectedCancelOrder(order);
 
-        };
+    };
+
+
+    // ==========================
+    // CANCEL ORDER
+    // ==========================
     const handleCancelOrder = async (id) => {
 
         try {
@@ -132,6 +154,8 @@ export default function Orders() {
 
             fetchOrders();
 
+            fetchStats();
+
         } catch (error) {
 
             console.log(error);
@@ -142,6 +166,50 @@ export default function Orders() {
 
     };
 
+
+    // ==========================
+    // DELETE ORDER
+    // ==========================
+    const handleDeleteOrder = async (id) => {
+
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this order?"
+        );
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+
+            await deleteOrder(id);
+
+            alert("Order deleted successfully");
+
+            // Remove deleted order immediately from UI
+            setOrders((prevOrders) =>
+                prevOrders.filter(
+                    (order) => order.id !== id
+                )
+            );
+
+            // Refresh statistics
+            fetchStats();
+
+        } catch (error) {
+
+            console.log(
+                "DELETE ORDER ERROR:",
+                error
+            );
+
+            alert("Unable to delete order");
+
+        }
+
+    };
+
+
     // ==========================
     // UPDATE STATUS
     // ==========================
@@ -149,11 +217,17 @@ export default function Orders() {
 
         try {
 
-            await updateOrderStatus(id, status);
+            await updateOrderStatus(
+                id,
+                status
+            );
 
-            alert("Order status updated successfully");
+            alert(
+                "Order status updated successfully"
+            );
 
             fetchOrders();
+            fetchStats();
 
         } catch (error) {
 
@@ -165,13 +239,26 @@ export default function Orders() {
 
     };
 
+
+    // ==========================
+    // FETCH DATA
+    // ==========================
     useEffect(() => {
 
         fetchOrders();
         fetchStats();
 
-    }, [search, status, sort, page]);
+    }, [
+        search,
+        status,
+        sort,
+        page
+    ]);
 
+
+    // ==========================
+    // LOADING
+    // ==========================
     if (loading) {
 
         return (
@@ -188,13 +275,16 @@ export default function Orders() {
 
     }
 
+
     return (
 
         <DashboardLayout>
 
             <OrderHeader />
 
-            <OrderStats stats={stats} />
+            <OrderStats
+                stats={stats}
+            />
 
             <OrderToolbar
                 search={search}
@@ -205,55 +295,68 @@ export default function Orders() {
                 setSort={setSort}
             />
 
+
+            {/* ==========================
+                ORDERS TABLE
+            ========================== */}
+
             <OrderTable
                 orders={orders}
                 onView={handleView}
                 onUpdateStatus={handleStatusUpdate}
                 onUpdate={handleUpdateClick}
                 onCancel={handleCancelOrder}
+                onDelete={handleDeleteOrder}
             />
 
-            {/* Pagination */}
+
+            {/* ==========================
+                PAGINATION
+            ========================== */}
 
             <div className="flex justify-center items-center gap-2 mt-6">
 
                 <button
-                    onClick={() => setPage(page - 1)}
+                    onClick={() =>
+                        setPage(page - 1)
+                    }
                     disabled={page === 1}
                     className="px-4 py-2 border rounded-lg disabled:opacity-50"
                 >
                     Previous
                 </button>
 
-                {
 
-                    [...Array(totalPages)].map((_, index) => (
+                {[...Array(totalPages)].map(
+                    (_, index) => (
 
                         <button
-
                             key={index}
-
-                            onClick={() => setPage(index + 1)}
-
+                            onClick={() =>
+                                setPage(index + 1)
+                            }
                             className={
                                 page === index + 1
                                     ? "px-4 py-2 bg-indigo-600 text-white rounded-lg"
                                     : "px-4 py-2 border rounded-lg hover:bg-gray-100"
                             }
-
                         >
 
                             {index + 1}
 
                         </button>
 
-                    ))
+                    )
+                )}
 
-                }
 
                 <button
-                    onClick={() => setPage(page + 1)}
-                    disabled={page === totalPages}
+                    onClick={() =>
+                        setPage(page + 1)
+                    }
+                    disabled={
+                        page === totalPages
+                    }
                     className="px-4 py-2 border rounded-lg disabled:opacity-50"
                 >
                     Next
@@ -261,22 +364,47 @@ export default function Orders() {
 
             </div>
 
+
+            {/* ==========================
+                VIEW MODAL
+            ========================== */}
+
             <OrderViewModal
                 order={selectedOrder}
-                onClose={() => setSelectedOrder(null)}
+                onClose={() =>
+                    setSelectedOrder(null)
+                }
             />
+
+
+            {/* ==========================
+                UPDATE MODAL
+            ========================== */}
+
             <OrderUpdateModal
                 order={selectedUpdateOrder}
-                onClose={() => setSelectedUpdateOrder(null)}
+                onClose={() =>
+                    setSelectedUpdateOrder(null)
+                }
                 onUpdate={handleStatusUpdate}
-                />
+            />
+
+
+            {/* ==========================
+                CANCEL MODAL
+            ========================== */}
+
             <OrderCancelModal
                 order={selectedCancelOrder}
-                onClose={() => setSelectedCancelOrder(null)}
+                onClose={() =>
+                    setSelectedCancelOrder(null)
+                }
                 onConfirm={handleCancelOrder}
-               />
+            />
+
         </DashboardLayout>
 
     );
 
 }
+
