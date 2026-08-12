@@ -1,6 +1,7 @@
 
 
 
+
 import {
   Home,
   ShoppingBag,
@@ -12,27 +13,33 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+
 import {
   Link,
   useLocation,
   useNavigate,
 } from "react-router-dom";
 
+
 import {
   logout,
   getUser,
 } from "../utils/auth";
 
+
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+
   const user = getUser();
+
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
 
   const menuItems = [
     {
@@ -67,10 +74,12 @@ export default function Sidebar() {
     },
   ];
 
+
   const isActive = (path) => {
     if (path === "/") {
       return location.pathname === "/";
     }
+
 
     return (
       location.pathname === path ||
@@ -78,10 +87,12 @@ export default function Sidebar() {
     );
   };
 
+
   const getUserName = () => {
     if (!user) {
       return "Account";
     }
+
 
     return (
       user?.name ||
@@ -90,6 +101,7 @@ export default function Sidebar() {
       "Account"
     );
   };
+
 
   return (
     <aside
@@ -105,9 +117,11 @@ export default function Sidebar() {
       "
     >
 
+
       {/* ======================================================
           USER / ACCOUNT
       ====================================================== */}
+
 
       <Link
         to="/profile"
@@ -127,7 +141,9 @@ export default function Sidebar() {
         "
       >
 
+
         <div className="flex items-center gap-3">
+
 
           <div
             className="
@@ -146,52 +162,68 @@ export default function Sidebar() {
             <User size={21} />
           </div>
 
+
           <div className="min-w-0 flex-1">
+
 
             <p className="text-xs font-medium text-slate-500">
               Welcome back
             </p>
 
+
             <p className="mt-0.5 truncate text-sm font-bold text-slate-900">
               {getUserName()}
             </p>
+
 
             <p className="mt-0.5 truncate text-xs text-slate-500">
               {user?.email || "Manage your account"}
             </p>
 
+
           </div>
+
 
           <ChevronRight
             size={17}
             className="flex-shrink-0 text-slate-400"
           />
 
+
         </div>
 
+
       </Link>
+
 
       {/* ======================================================
           NAVIGATION
       ====================================================== */}
 
+
       <div className="px-5 mb-2">
+
 
         <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
           Navigation
         </p>
 
+
       </div>
+
 
       {/* ======================================================
           MENU
       ====================================================== */}
 
+
       <nav className="flex-1 px-3 space-y-1">
+
 
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
+
 
           return (
             <Link
@@ -211,6 +243,7 @@ export default function Sidebar() {
                 transition
                 duration-200
 
+
                 ${
                   active
                     ? "bg-blue-50 text-blue-700"
@@ -218,6 +251,7 @@ export default function Sidebar() {
                 }
               `}
             >
+
 
               {active && (
                 <span
@@ -234,6 +268,7 @@ export default function Sidebar() {
                 />
               )}
 
+
               <span
                 className={`
                   flex
@@ -246,6 +281,7 @@ export default function Sidebar() {
                   transition
                   duration-200
 
+
                   ${
                     active
                       ? "bg-blue-600 text-white shadow-sm"
@@ -256,15 +292,18 @@ export default function Sidebar() {
                 <Icon size={18} />
               </span>
 
+
               <span className="flex-1">
                 {item.name}
               </span>
+
 
               <ChevronRight
                 size={15}
                 className={`
                   transition
                   duration-200
+
 
                   ${
                     active
@@ -274,15 +313,19 @@ export default function Sidebar() {
                 `}
               />
 
+
             </Link>
           );
         })}
 
+
       </nav>
+
 
       {/* ======================================================
           QUICK HELP
       ====================================================== */}
+
 
       <div
         className="
@@ -297,7 +340,9 @@ export default function Sidebar() {
         "
       >
 
+
         <div className="flex items-start gap-3">
+
 
           <div
             className="
@@ -314,19 +359,25 @@ export default function Sidebar() {
             <MessageCircle size={17} />
           </div>
 
+
           <div>
+
 
             <p className="text-sm font-semibold">
               Need help?
             </p>
 
+
             <p className="mt-1 text-xs leading-5 text-blue-100">
               Chat with our support team.
             </p>
 
+
           </div>
 
+
         </div>
+
 
         <Link
           to="/chat"
@@ -350,13 +401,17 @@ export default function Sidebar() {
           Open Chat
         </Link>
 
+
       </div>
+
 
       {/* ======================================================
           LOGOUT
       ====================================================== */}
 
+
       <div className="border-t border-slate-200 p-4">
+
 
         <button
           type="button"
@@ -379,6 +434,7 @@ export default function Sidebar() {
           "
         >
 
+
           <span
             className="
               flex
@@ -396,9 +452,11 @@ export default function Sidebar() {
             <LogOut size={18} />
           </span>
 
+
           <span className="flex-1 text-left">
             Logout
           </span>
+
 
           <ChevronRight
             size={15}
@@ -409,9 +467,12 @@ export default function Sidebar() {
             "
           />
 
+
         </button>
 
+
       </div>
+
 
     </aside>
   );
