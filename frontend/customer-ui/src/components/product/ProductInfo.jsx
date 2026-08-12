@@ -19,6 +19,8 @@ import {
   removeFromWishlist,
 } from "../../services/wishlistService";
 
+import { getProductReviews } from "../../services/reviewService";
+
 export default function ProductInfo({ product }) {
   const navigate = useNavigate();
 
@@ -27,7 +29,68 @@ export default function ProductInfo({ product }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+
   const { addToCart } = useCart();
+
+  // ============================================================
+  // FETCH REVIEWS / RATING
+  // ============================================================
+
+  useEffect(() => {
+    const fetchRating = async () => {
+      if (!product?.id) {
+        return;
+      }
+
+      try {
+        const response = await getProductReviews(product.id);
+
+        console.log("PRODUCT RATING RESPONSE:", response);
+
+        /*
+         * reviewService already returns response.data.
+         *
+         * Backend response:
+         *
+         * {
+         *   status: "success",
+         *   message: "...",
+         *   data: {
+         *     reviews: [],
+         *     average_rating: 5,
+         *     total_reviews: 1
+         *   }
+         * }
+         */
+
+        const data = response?.data || {};
+
+        console.log("PRODUCT RATING DATA:", data);
+
+        setAverageRating(
+          Number(data.average_rating ?? 0)
+        );
+
+        setTotalReviews(
+          Number(data.total_reviews ?? 0)
+        );
+      } catch (error) {
+        console.error("PRODUCT RATING ERROR:", error);
+
+        console.error(
+          "PRODUCT RATING ERROR RESPONSE:",
+          error?.response?.data
+        );
+
+        setAverageRating(0);
+        setTotalReviews(0);
+      }
+    };
+
+    fetchRating();
+  }, [product?.id]);
 
   // ============================================================
   // CHECK WISHLIST
@@ -51,8 +114,10 @@ export default function ProductInfo({ product }) {
 
         const exists = wishlistItems.some(
           (item) =>
-            Number(item.product_id || item.product?.id) ===
-            Number(product.id)
+            Number(
+              item.product_id ||
+                item.product?.id
+            ) === Number(product.id)
         );
 
         setIsWishlisted(exists);
@@ -131,7 +196,9 @@ export default function ProductInfo({ product }) {
     }
 
     if (quantity > product.stock) {
-      alert(`Only ${product.stock} items are available`);
+      alert(
+        `Only ${product.stock} items are available`
+      );
       return;
     }
 
@@ -155,7 +222,9 @@ export default function ProductInfo({ product }) {
     }
 
     if (quantity > product.stock) {
-      alert(`Only ${product.stock} items are available`);
+      alert(
+        `Only ${product.stock} items are available`
+      );
       return;
     }
 
@@ -174,6 +243,14 @@ export default function ProductInfo({ product }) {
   const unitPrice = Number(product?.price || 0);
 
   const totalPrice = unitPrice * quantity;
+
+  // ============================================================
+  // RATING
+  // ============================================================
+
+  const roundedRating = Math.round(
+    averageRating
+  );
 
   // ============================================================
   // RENDER
@@ -239,8 +316,16 @@ export default function ProductInfo({ product }) {
         >
           <Heart
             size={21}
-            fill={isWishlisted ? "currentColor" : "none"}
-            className="transition-transform duration-200 hover:scale-110"
+            fill={
+              isWishlisted
+                ? "currentColor"
+                : "none"
+            }
+            className="
+              transition-transform
+              duration-200
+              hover:scale-110
+            "
           />
         </button>
 
@@ -257,6 +342,7 @@ export default function ProductInfo({ product }) {
         >
           {product?.name}
         </h1>
+
       </div>
 
       {/* ======================================================
@@ -265,22 +351,25 @@ export default function ProductInfo({ product }) {
 
       <div className="mt-5 flex items-center gap-1">
 
-        {[1, 2, 3, 4].map((star) => (
+        {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
             size={18}
-            fill="currentColor"
-            className="text-amber-400"
+            fill={
+              star <= roundedRating
+                ? "currentColor"
+                : "none"
+            }
+            className={
+              star <= roundedRating
+                ? "text-amber-400"
+                : "text-slate-300"
+            }
           />
         ))}
 
-        <Star
-          size={18}
-          className="text-slate-300"
-        />
-
         <span className="ml-2 text-sm font-medium text-slate-600">
-          4.0
+          {averageRating.toFixed(1)}
         </span>
 
         <span className="text-sm text-slate-300">
@@ -288,8 +377,10 @@ export default function ProductInfo({ product }) {
         </span>
 
         <span className="text-sm text-slate-500">
-          0 Reviews
+          {totalReviews} review
+          {totalReviews !== 1 ? "s" : ""}
         </span>
+
       </div>
 
       {/* ======================================================
@@ -317,11 +408,13 @@ export default function ProductInfo({ product }) {
               {quantity}
             </span>
           )}
+
         </div>
 
         <p className="mt-2 text-sm text-slate-500">
           Inclusive of applicable taxes
         </p>
+
       </div>
 
       {/* ======================================================
@@ -375,6 +468,7 @@ export default function ProductInfo({ product }) {
               py-2.5
             "
           >
+
             <span
               className="
                 h-2.5
@@ -391,6 +485,7 @@ export default function ProductInfo({ product }) {
             <span className="text-sm text-blue-600">
               ({product.stock} available)
             </span>
+
           </div>
         ) : (
           <div
@@ -406,13 +501,16 @@ export default function ProductInfo({ product }) {
               py-2.5
             "
           >
+
             <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
 
             <span className="text-sm font-semibold text-red-700">
               Out of Stock
             </span>
+
           </div>
         )}
+
       </div>
 
       {/* ======================================================
@@ -431,11 +529,13 @@ export default function ProductInfo({ product }) {
             <span className="text-xs text-slate-500">
               Max {product.stock}
             </span>
+
           </div>
 
           <QuantitySelector
             onQuantityChange={setQuantity}
           />
+
         </div>
       )}
 
@@ -450,7 +550,10 @@ export default function ProductInfo({ product }) {
         <button
           type="button"
           onClick={handleAddToCart}
-          disabled={!product || product.stock <= 0}
+          disabled={
+            !product ||
+            product.stock <= 0
+          }
           className="
             group
             flex
@@ -478,6 +581,7 @@ export default function ProductInfo({ product }) {
             disabled:text-slate-400
           "
         >
+
           <ShoppingCart
             size={19}
             className="
@@ -488,6 +592,7 @@ export default function ProductInfo({ product }) {
           />
 
           Add to Cart
+
         </button>
 
         {/* BUY NOW */}
@@ -495,7 +600,10 @@ export default function ProductInfo({ product }) {
         <button
           type="button"
           onClick={handleBuyNow}
-          disabled={!product || product.stock <= 0}
+          disabled={
+            !product ||
+            product.stock <= 0
+          }
           className="
             group
             flex
@@ -522,6 +630,7 @@ export default function ProductInfo({ product }) {
             disabled:shadow-none
           "
         >
+
           <Zap
             size={19}
             fill="currentColor"
@@ -533,7 +642,9 @@ export default function ProductInfo({ product }) {
           />
 
           Buy Now
+
         </button>
+
       </div>
 
       {/* ======================================================
@@ -556,6 +667,7 @@ export default function ProductInfo({ product }) {
             p-4
           "
         >
+
           <div
             className="
               flex
@@ -574,6 +686,7 @@ export default function ProductInfo({ product }) {
           </div>
 
           <div>
+
             <p className="text-sm font-semibold text-slate-900">
               Secure Payment
             </p>
@@ -581,7 +694,9 @@ export default function ProductInfo({ product }) {
             <p className="mt-0.5 text-xs text-slate-500">
               Safe and protected checkout
             </p>
+
           </div>
+
         </div>
 
         {/* FAST DELIVERY */}
@@ -598,6 +713,7 @@ export default function ProductInfo({ product }) {
             p-4
           "
         >
+
           <div
             className="
               flex
@@ -616,6 +732,7 @@ export default function ProductInfo({ product }) {
           </div>
 
           <div>
+
             <p className="text-sm font-semibold text-slate-900">
               Fast Delivery
             </p>
@@ -623,10 +740,13 @@ export default function ProductInfo({ product }) {
             <p className="mt-0.5 text-xs text-slate-500">
               Quick and reliable shipping
             </p>
+
           </div>
+
         </div>
 
       </div>
+
     </div>
   );
 }
