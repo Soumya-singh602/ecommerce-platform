@@ -1,4 +1,3 @@
-
 import {
   ShoppingCart,
   Search,
@@ -7,6 +6,7 @@ import {
   X,
   User,
   ChevronDown,
+  Heart,
 } from "lucide-react";
 
 import {
@@ -22,8 +22,7 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] =
-    useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const { cartItems } = useCart();
 
@@ -39,9 +38,7 @@ export default function Navbar() {
       return;
     }
 
-    navigate(
-      `/shop?search=${encodeURIComponent(keyword)}`
-    );
+    navigate(`/shop?search=${encodeURIComponent(keyword)}`);
 
     setMobileMenuOpen(false);
   };
@@ -66,14 +63,13 @@ export default function Navbar() {
         backdrop-blur-md
       "
     >
-
       {/* ======================================================
           MAIN NAVBAR
       ====================================================== */}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-        <div className="h-[72px] flex items-center justify-between gap-4">
+        <div className="flex h-[72px] items-center justify-between gap-4">
 
           {/* ==================================================
               LOGO
@@ -81,9 +77,8 @@ export default function Navbar() {
 
           <Link
             to="/"
-            className="flex-shrink-0 group"
+            className="group flex-shrink-0"
           >
-
             <div className="flex items-center gap-2">
 
               <div
@@ -119,24 +114,23 @@ export default function Navbar() {
               </div>
 
             </div>
-
           </Link>
 
           {/* ==================================================
               DESKTOP SEARCH
           ================================================== */}
 
-          <div className="hidden md:flex flex-1 max-w-xl mx-4">
+          <div className="mx-4 hidden max-w-xl flex-1 md:flex">
 
             <div className="relative flex w-full items-center">
 
               <Search
                 size={19}
                 className="
+                  pointer-events-none
                   absolute
                   left-4
                   text-slate-400
-                  pointer-events-none
                 "
               />
 
@@ -144,17 +138,15 @@ export default function Navbar() {
                 type="text"
                 placeholder="Search products..."
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
+                onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     handleSearch();
                   }
                 }}
                 className="
-                  w-full
                   h-11
+                  w-full
                   rounded-xl
                   border
                   border-slate-200
@@ -163,8 +155,8 @@ export default function Navbar() {
                   pr-24
                   text-sm
                   text-slate-900
-                  placeholder:text-slate-400
                   outline-none
+                  placeholder:text-slate-400
                   transition
                   focus:border-blue-500
                   focus:bg-white
@@ -196,7 +188,6 @@ export default function Navbar() {
               </button>
 
             </div>
-
           </div>
 
           {/* ==================================================
@@ -205,7 +196,9 @@ export default function Navbar() {
 
           <div className="flex items-center gap-1 sm:gap-2">
 
-            {/* CHAT */}
+            {/* ==================================================
+                CHAT
+            ================================================== */}
 
             <Link
               to="/chat"
@@ -224,15 +217,47 @@ export default function Navbar() {
               "
               title="Chat"
             >
-
               <MessageCircle
                 size={21}
                 className="transition-transform group-hover:scale-110"
               />
-
             </Link>
 
-            {/* CART */}
+            {/* ==================================================
+                WISHLIST
+            ================================================== */}
+
+            <Link
+              to="/wishlist"
+              className="
+                group
+                flex
+                h-11
+                w-11
+                items-center
+                justify-center
+                rounded-xl
+                text-slate-600
+                transition
+                hover:bg-red-50
+                hover:text-red-500
+              "
+              title="Wishlist"
+              aria-label="Wishlist"
+            >
+              <Heart
+                size={21}
+                className="
+                  transition-transform
+                  duration-200
+                  group-hover:scale-110
+                "
+              />
+            </Link>
+
+            {/* ==================================================
+                CART
+            ================================================== */}
 
             <Link
               to="/cart"
@@ -252,7 +277,6 @@ export default function Navbar() {
               "
               title="Cart"
             >
-
               <ShoppingCart
                 size={22}
                 className="transition-transform group-hover:scale-110"
@@ -284,17 +308,17 @@ export default function Navbar() {
                     : cartItems.length}
                 </span>
               )}
-
             </Link>
 
-            {/* ACCOUNT */}
+            {/* ==================================================
+                ACCOUNT
+            ================================================== */}
 
             <button
               type="button"
               onClick={() => navigate("/login")}
               className="
                 hidden
-                sm:flex
                 items-center
                 gap-2
                 rounded-xl
@@ -304,9 +328,9 @@ export default function Navbar() {
                 transition
                 hover:bg-blue-50
                 hover:text-blue-700
+                sm:flex
               "
             >
-
               <span
                 className="
                   flex
@@ -321,29 +345,25 @@ export default function Navbar() {
                 <User size={17} />
               </span>
 
-              <span className="hidden lg:block text-sm font-semibold">
+              <span className="hidden text-sm font-semibold lg:block">
                 Account
               </span>
 
               <ChevronDown
                 size={15}
-                className="hidden lg:block text-slate-400"
+                className="hidden text-slate-400 lg:block"
               />
-
             </button>
 
-            {/* MOBILE MENU */}
+            {/* ==================================================
+                MOBILE MENU
+            ================================================== */}
 
             <button
               type="button"
-              onClick={() =>
-                setMobileMenuOpen(
-                  !mobileMenuOpen
-                )
-              }
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="
                 flex
-                md:hidden
                 h-11
                 w-11
                 items-center
@@ -353,54 +373,46 @@ export default function Navbar() {
                 transition
                 hover:bg-blue-50
                 hover:text-blue-600
+                md:hidden
               "
               aria-label="Toggle menu"
             >
-
               {mobileMenuOpen ? (
                 <X size={23} />
               ) : (
                 <Menu size={23} />
               )}
-
             </button>
 
           </div>
-
         </div>
 
         {/* ==================================================
             MOBILE SEARCH
         ================================================== */}
 
-        <div className="md:hidden pb-3">
+        <div className="pb-3 md:hidden">
 
           <div className="relative flex items-center">
 
             <Search
               size={18}
-              className="
-                absolute
-                left-3.5
-                text-slate-400
-              "
+              className="absolute left-3.5 text-slate-400"
             />
 
             <input
               type="text"
               placeholder="Search products..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleSearch();
                 }
               }}
               className="
-                w-full
                 h-11
+                w-full
                 rounded-xl
                 border
                 border-slate-200
@@ -438,7 +450,6 @@ export default function Navbar() {
             </button>
 
           </div>
-
         </div>
 
       </div>
@@ -448,16 +459,9 @@ export default function Navbar() {
       ====================================================== */}
 
       {mobileMenuOpen && (
-        <div
-          className="
-            md:hidden
-            border-t
-            border-slate-100
-            bg-white
-          "
-        >
+        <div className="border-t border-slate-100 bg-white md:hidden">
 
-          <div className="max-w-7xl mx-auto px-4 py-4 space-y-2">
+          <div className="mx-auto max-w-7xl space-y-2 px-4 py-4">
 
             <Link
               to="/"
@@ -499,6 +503,29 @@ export default function Navbar() {
               Shop
             </Link>
 
+            {/* MOBILE WISHLIST */}
+
+            <Link
+              to="/wishlist"
+              onClick={closeMobileMenu}
+              className="
+                flex
+                items-center
+                gap-3
+                rounded-xl
+                px-4
+                py-3
+                text-sm
+                font-medium
+                text-slate-700
+                hover:bg-red-50
+                hover:text-red-500
+              "
+            >
+              <Heart size={18} />
+              Wishlist
+            </Link>
+
             <Link
               to="/chat"
               onClick={closeMobileMenu}
@@ -537,7 +564,6 @@ export default function Navbar() {
                 hover:text-blue-700
               "
             >
-
               <span className="flex items-center gap-3">
                 <ShoppingCart size={18} />
                 Cart
@@ -558,7 +584,6 @@ export default function Navbar() {
                   {cartItems.length}
                 </span>
               )}
-
             </Link>
 
             <button
@@ -583,18 +608,13 @@ export default function Navbar() {
                 hover:text-blue-700
               "
             >
-
               <User size={18} />
-
               Account
-
             </button>
 
           </div>
-
         </div>
       )}
-
     </header>
   );
 }

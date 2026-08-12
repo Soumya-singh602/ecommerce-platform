@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import {
   Truck,
   ShieldCheck,
   RotateCcw,
-  Heart,
   Share2,
   ArrowLeft,
 } from "lucide-react";
@@ -20,10 +19,13 @@ import { getProductDetails } from "../services/productService";
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // ============================================================
+  // FETCH PRODUCT
+  // ============================================================
 
   useEffect(() => {
     fetchProduct();
@@ -47,11 +49,29 @@ export default function ProductDetails() {
   };
 
   // ============================================================
-  // OPEN WISHLIST
+  // SHARE PRODUCT
   // ============================================================
 
-  const handleWishlistClick = () => {
-    navigate("/wishlist");
+  const handleShare = async () => {
+    if (!product) return;
+
+    const shareUrl = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name || "Product",
+          text: "Check out this product",
+          url: shareUrl,
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(shareUrl);
+
+        alert("Product link copied!");
+      }
+    } catch (error) {
+      console.log("SHARE ERROR:", error);
+    }
   };
 
   // ============================================================
@@ -245,20 +265,18 @@ export default function ProductDetails() {
 
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* SHARE ONLY */}
 
-              {/* ==================================================
-                  WISHLIST BUTTON
-              ================================================== */}
+            <div className="flex items-center gap-2">
 
               <button
                 type="button"
-                onClick={handleWishlistClick}
+                onClick={handleShare}
                 className="
                   group
                   flex
-                  h-10
-                  w-10
+                  h-11
+                  w-11
                   items-center
                   justify-center
                   rounded-xl
@@ -270,47 +288,18 @@ export default function ProductDetails() {
                   transition
                   duration-200
                   hover:-translate-y-0.5
-                  hover:border-red-200
-                  hover:bg-red-50
-                  hover:text-red-500
-                  hover:shadow-md
-                "
-                title="My Wishlist"
-                aria-label="Open my wishlist"
-              >
-                <Heart
-                  size={19}
-                  className="transition-transform duration-200 group-hover:scale-110"
-                />
-              </button>
-
-              {/* ==================================================
-                  SHARE BUTTON
-              ================================================== */}
-
-              <button
-                type="button"
-                className="
-                  flex
-                  h-10
-                  w-10
-                  items-center
-                  justify-center
-                  rounded-xl
-                  border
-                  border-slate-200
-                  bg-white
-                  text-slate-500
-                  shadow-sm
-                  transition
                   hover:border-blue-200
                   hover:bg-blue-50
                   hover:text-blue-600
+                  hover:shadow-md
                 "
                 title="Share product"
                 aria-label="Share product"
               >
-                <Share2 size={18} />
+                <Share2
+                  size={19}
+                  className="transition-transform duration-200 group-hover:scale-110"
+                />
               </button>
 
             </div>
@@ -324,7 +313,7 @@ export default function ProductDetails() {
           <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
 
             {/* =================================================
-                IMAGE
+                PRODUCT IMAGE
             ================================================= */}
 
             <div className="lg:sticky lg:top-24">
