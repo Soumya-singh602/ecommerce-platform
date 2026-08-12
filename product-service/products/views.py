@@ -7,8 +7,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from django.core.paginator import Paginator , EmptyPage
 
-from .models import Product , Category , Banner
-from .serializers import ProductSerializer , CategorySerializer , BannerSerializer
+from .models import Product , Category , Banner , Review
+from .serializers import ProductSerializer , CategorySerializer , BannerSerializer , ReviewSerializer
 from django.db.models import Q
 from ecommerce_common.response import success_response
 from ecommerce_common.exceptions import NotFoundException
@@ -393,4 +393,195 @@ def delete_banner(request, id):
         data={
             "banner_id": id
         }
+    )
+
+# ============================================================
+# PRODUCT REVIEWS
+# ============================================================
+
+@api_view(["GET", "POST"])
+def product_reviews(request, product_id):
+
+    user = get_user_info(request)
+
+    print("User ID :", user["user_id"])
+    print("User Email :", user["user_email"])
+
+    try:
+        product = Product.objects.get(id=product_id)
+
+    except Product.DoesNotExist:
+        raise NotFoundException("Product not found")
+
+    # ========================================================
+    # GET REVIEWS
+    # ========================================================
+
+    if request.method == "GET":
+
+        reviews = Review.objects.filter(
+            product=product
+        ).select_related("product")
+
+        serializer = ReviewSerializer(
+            reviews,
+            many=True
+        )
+
+        total_reviews = reviews.count()
+
+        if total_reviews > 0:
+            average_rating = sum(
+                review.rating
+                for review in reviews
+            ) / total_reviews
+        else:
+            average_rating = 0
+
+        return success_response(
+            message="Reviews fetched successfully",
+            data={
+                "product_id": product.id,
+                "average_rating": round(
+                    average_rating,
+                    1
+                ),
+                "total_reviews": total_reviews,
+                "reviews": serializer.data,
+            }
+        )
+
+    # ========================================================
+    # CREATE REVIEW
+    # ========================================================
+
+    if request.method == "POST":
+
+        # Check if user already reviewed this product
+
+        existing_review = Review.objects.filter(
+            product=product,
+            user_id=user["user_id"]
+        ).first()
+
+        if existing_review:
+
+            return Response(
+                {
+                    "status": "failed",
+                    "message": "You have already reviewed this product.",
+                    "data": None,
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = ReviewSerializer(
+            data=request.data
+        )
+
+        if serializer.is_valid():
+
+            review = serializer.save(
+                product=product,
+                user_id=user["user_id"]
+            )
+
+            return success_response(
+                message="Review added successfully",
+                data=ReviewSerializer(review).data,
+                status_code=201
+            )
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "Validation failed",
+                "data": serializer.errors,
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+# ============================================================
+# UPDATE / DELETE REVIEW
+# ============================================================
+
+@api_view(["PUT", "PATCH", "DELETE"])
+def review_detail(request, review_id):
+
+    user = get_user_info(request)
+
+    user_id = int(user["user_id"])
+
+    print("User ID :", user_id)
+
+    try:
+        review = Review.objects.get(
+            id=review_id
+        )
+
+    except Review.DoesNotExist:
+        raise NotFoundException(
+            "Review not found"
+        )
+
+    # ========================================================
+    # CHECK REVIEW OWNER
+    # ========================================================
+
+    print("LOGIN USER ID:", user_id)
+    print("REVIEW USER ID:", review.user_id)
+
+    if review.user_id != user_id:
+
+        return Response(
+            {
+                "status": "failed",
+                "message": "You can only modify your own review.",
+                "data": None,
+            },
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    # ========================================================
+    # DELETE REVIEW
+    # ========================================================
+
+    if request.method == "DELETE":
+
+        review.delete()
+
+        return success_response(
+            message="Review deleted successfully",
+            data={
+                "review_id": review_id
+            }
+        )
+
+    # ========================================================
+    # UPDATE REVIEW
+    # ========================================================
+
+    serializer = ReviewSerializer(
+        review,
+        data=request.data,
+        partial=True
+    )
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return success_response(
+            message="Review updated successfully",
+            data=serializer.data
+        )
+
+    return Response(
+        {
+            "status": "failed",
+            "message": "Validation failed",
+            "data": serializer.errors,
+        },
+        status=status.HTTP_400_BAD_REQUEST
     )

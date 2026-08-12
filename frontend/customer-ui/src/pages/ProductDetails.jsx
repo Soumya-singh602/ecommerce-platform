@@ -14,6 +14,7 @@ import Breadcrumb from "../components/shop/Breadcrumb";
 import ProductImage from "../components/product/ProductImage";
 import ProductInfo from "../components/product/ProductInfo";
 import RelatedProducts from "../components/product/RelatedProducts";
+import ProductReviews from "../components/product/ProductReviews";
 
 import { getProductDetails } from "../services/productService";
 
@@ -111,7 +112,6 @@ export default function ProductDetails() {
         setShareCopied(false);
       }, 2000);
     } catch (error) {
-      // User closed the native share popup
       if (error?.name !== "AbortError") {
         console.error("SHARE ERROR:", error);
       }
@@ -126,6 +126,7 @@ export default function ProductDetails() {
     return (
       <MainLayout>
         <div className="min-h-screen bg-slate-50">
+
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
             <Breadcrumb />
@@ -141,9 +142,13 @@ export default function ProductDetails() {
                 <div className="aspect-square animate-pulse bg-slate-200" />
 
                 <div className="flex gap-3 border-t border-slate-100 p-4">
+
                   <div className="h-16 w-16 animate-pulse rounded-xl bg-slate-200" />
+
                   <div className="h-16 w-16 animate-pulse rounded-xl bg-slate-200" />
+
                   <div className="h-16 w-16 animate-pulse rounded-xl bg-slate-200" />
+
                 </div>
 
               </div>
@@ -159,9 +164,13 @@ export default function ProductDetails() {
                 <div className="mt-5 h-5 w-40 animate-pulse rounded bg-slate-200" />
 
                 <div className="mt-8 space-y-3">
+
                   <div className="h-4 w-full animate-pulse rounded bg-slate-200" />
+
                   <div className="h-4 w-11/12 animate-pulse rounded bg-slate-200" />
+
                   <div className="h-4 w-4/5 animate-pulse rounded bg-slate-200" />
+
                 </div>
 
                 <div className="mt-8 h-12 w-36 animate-pulse rounded-xl bg-slate-200" />
@@ -188,6 +197,7 @@ export default function ProductDetails() {
             </div>
 
           </div>
+
         </div>
       </MainLayout>
     );
@@ -223,7 +233,7 @@ export default function ProductDetails() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14A2 2 0 003.82 21h16.36a2 2 0 001.71-3.14l-8.18-14a2 2 0 00-3.42 0z"
+                      d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14A2 2 0 003.82 21h16.36a2 2 0 001.71-3.14l-8.18-14a2 2 0 003.42 0z"
                     />
                   </svg>
 
@@ -340,7 +350,6 @@ export default function ProductDetails() {
                 title="Share product"
                 aria-label="Share product"
               >
-
                 <Share2
                   size={19}
                   className="
@@ -349,7 +358,6 @@ export default function ProductDetails() {
                     group-hover:scale-110
                   "
                 />
-
               </button>
 
               {/* COPY SUCCESS */}
@@ -386,9 +394,7 @@ export default function ProductDetails() {
 
           <div className="mt-8 grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12">
 
-            {/* =================================================
-                PRODUCT IMAGE
-            ================================================= */}
+            {/* PRODUCT IMAGE */}
 
             <div className="lg:sticky lg:top-24">
 
@@ -432,9 +438,7 @@ export default function ProductDetails() {
 
             </div>
 
-            {/* =================================================
-                PRODUCT INFORMATION
-            ================================================= */}
+            {/* PRODUCT INFORMATION */}
 
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
@@ -472,7 +476,6 @@ export default function ProductDetails() {
                 hover:shadow-md
               "
             >
-
               <div className="flex items-center gap-4">
 
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
@@ -494,7 +497,6 @@ export default function ProductDetails() {
                 </div>
 
               </div>
-
             </div>
 
             {/* SECURE PAYMENT */}
@@ -515,7 +517,6 @@ export default function ProductDetails() {
                 hover:shadow-md
               "
             >
-
               <div className="flex items-center gap-4">
 
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
@@ -537,7 +538,6 @@ export default function ProductDetails() {
                 </div>
 
               </div>
-
             </div>
 
             {/* EASY RETURNS */}
@@ -558,7 +558,6 @@ export default function ProductDetails() {
                 hover:shadow-md
               "
             >
-
               <div className="flex items-center gap-4">
 
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
@@ -580,7 +579,6 @@ export default function ProductDetails() {
                 </div>
 
               </div>
-
             </div>
 
           </div>
@@ -611,6 +609,12 @@ export default function ProductDetails() {
             </div>
 
           </section>
+
+          {/* ==================================================
+              CUSTOMER REVIEWS
+          ================================================== */}
+
+          <ProductReviews productId={product.id} />
 
           {/* ==================================================
               RELATED PRODUCTS
