@@ -1,39 +1,97 @@
+
+import { useState } from "react";
+
 export default function Newsletter() {
-  return (
-    <section className="bg-blue-600 mt-20">
 
-      <div className="max-w-7xl mx-auto py-16 px-6 text-center">
+    const [email, setEmail] = useState("");
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
 
-        <h2 className="text-4xl font-bold text-white">
+    const handleSubscribe = (e) => {
 
-          Subscribe To Our Newsletter
+        e.preventDefault();
 
-        </h2>
+        setMessage("");
+        setError("");
 
-        <p className="text-blue-100 mt-4">
+        if (!email.trim()) {
+            setError("Please enter your email address.");
+            return;
+        }
 
-          Get latest offers, discounts and new arrivals directly in your inbox.
+        const emailRegex =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        </p>
+        if (!emailRegex.test(email)) {
+            setError("Please enter a valid email address.");
+            return;
+        }
 
-        <div className="mt-8 flex flex-col md:flex-row justify-center gap-4">
+        setMessage(
+            "Thank you for subscribing to our newsletter!"
+        );
 
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="px-6 py-3 rounded-lg w-full md:w-96 outline-none"
-          />
+        setEmail("");
+    };
 
-          <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100">
+    return (
+        <section className="bg-blue-600 mt-20">
 
-            Subscribe
+            <div className="max-w-7xl mx-auto py-16 px-6 text-center">
 
-          </button>
+                <h2 className="text-4xl font-bold text-white">
+                    Subscribe To Our Newsletter
+                </h2>
 
-        </div>
+                <p className="text-blue-100 mt-4">
+                    Get latest offers, discounts and new arrivals directly in your inbox.
+                </p>
 
-      </div>
+                <form
+                    onSubmit={handleSubscribe}
+                    className="mt-8 flex flex-col md:flex-row justify-center items-center gap-4"
+                >
 
-    </section>
-  );
+                    <div className="bg-white rounded-xl shadow-md w-full md:w-96">
+
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setError("");
+                                setMessage("");
+                            }}
+                            placeholder="Enter your email"
+                            className="w-full px-6 py-4 rounded-xl outline-none text-gray-700 bg-white"
+                        />
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold shadow-md hover:bg-gray-100 transition"
+                    >
+                        Subscribe
+                    </button>
+
+                </form>
+
+                {error && (
+                    <p className="text-red-200 mt-4 font-medium">
+                        {error}
+                    </p>
+                )}
+
+                {message && (
+                    <p className="text-white mt-4 font-medium">
+                        {message}
+                    </p>
+                )}
+
+            </div>
+
+        </section>
+    );
 }
+
