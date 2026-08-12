@@ -11,13 +11,14 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import InvalidToken
-from .models import CustomUser
+from .models import CustomUser , Wishlist
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
     UserListSerializer,
     UpdateProfileSerializer,
-    ChangePasswordSerializer
+    ChangePasswordSerializer,
+    WishlistSerializer
 )
 from django.contrib.auth.hashers import check_password
 from django.http import JsonResponse
@@ -461,3 +462,151 @@ def health_check(request):
         "status": "ok",
         "service": "user-service"
     })
+
+
+# ============================================================
+# ADD TO WISHLIST
+# ============================================================
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_to_wishlist(request):
+
+    product_id = request.data.get("product_id")
+
+    if not product_id:
+        return Response(
+            {
+                "status": "failed",
+                "message": "product_id is required",
+                "data": None,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        product_id = int(product_id)
+
+    except (TypeError, ValueError):
+        return Response(
+            {
+                "status": "failed",
+                "message": "Invalid product_id",
+                "data": None,
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    wishlist, created = Wishlist.objects.get_or_create(
+        user_id=request.user.id,
+        product_id=product_id,
+    )
+
+    serializer = WishlistSerializer(wishlist)
+
+    if not created:
+        return Response(
+            {
+                "status": "success",
+                "message": "Product already in wishlist",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Product added to wishlist",
+            "data": serializer.data,
+        },
+        status=status.HTTP_201_CREATED,
+    )
+
+
+# ============================================================
+# REMOVE FROM WISHLIST
+# ============================================================
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def remove_from_wishlist(request, product_id):
+
+    wishlist = Wishlist.objects.filter(
+        user_id=request.user.id,
+        product_id=product_id,
+    ).first()
+
+    if not wishlist:
+        return Response(
+            {
+                "status": "failed",
+                "message": "Product not found in wishlist",
+                "data": None,
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    wishlist.delete()
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Product removed from wishlist",
+            "data": None,
+        },
+        status=status.HTTP_200_OK,
+    )
+
+
+# ============================================================
+# MY WISHLIST
+# ============================================================
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def my_wishlist(request):
+
+    wishlist = Wishlist.objects.filter(
+        user_id=request.user.id
+    ).order_by("-created_at")
+
+    serializer = WishlistSerializer(
+        wishlist,
+        many=True
+    )
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Wishlist fetched successfully",
+            "data": serializer.data,
+        },
+        status=status.HTTP_200_OK,
+    )
+
+
+# ============================================================
+# CHECK WISHLIST
+# ============================================================
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def check_wishlist(request, product_id):
+
+    exists = Wishlist.objects.filter(
+        user_id=request.user.id,
+        product_id=product_id,
+    ).exists()
+
+    return Response(
+        {
+            "status": "success",
+            "message": "Wishlist status fetched successfully",
+            "data": {
+                "product_id": product_id,
+                "is_wishlisted": exists,
+            },
+        },
+        status=status.HTTP_200_OK,
+    )

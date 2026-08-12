@@ -1,60 +1,83 @@
 import { Routes, Route } from "react-router-dom";
 
+
 import Home from "../pages/Home";
 import Shop from "../pages/Shop";
 import ProductDetails from "../pages/ProductDetails";
 import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 
+
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+
 
 import MyOrders from "../pages/MyOrders";
 import OrderDetails from "../pages/OrderDetails";
 
+
 import Chat from "../pages/Chat";
 import Profile from "../pages/Profile";
+
 
 import AddCard from "../pages/AddCard";
 import SavedCards from "../pages/SavedCards";
 
-import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 import Contact from "../pages/Contact";
 import ShippingPolicy from "../pages/ShippingPolicy";
 import ReturnPolicy from "../pages/ReturnPolicy";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 
+
+// Wishlist
+import Wishlist from "../pages/Wishlist";
+
+
+import ProtectedRoute from "../components/auth/ProtectedRoute";
+
+
 export default function AppRoutes() {
+
   return (
+
     <Routes>
 
-      {/* PUBLIC */}
+
+      {/* =====================================================
+          PUBLIC
+      ===================================================== */}
+
 
       <Route
         path="/"
         element={<Home />}
       />
 
+
       <Route
         path="/shop"
         element={<Shop />}
       />
+
 
       <Route
         path="/product/:id"
         element={<ProductDetails />}
       />
 
+
       <Route
         path="/login"
         element={<Login />}
       />
 
+
       <Route
         path="/register"
         element={<Register />}
       />
+
 
       <Route
         path="/cart"
@@ -62,22 +85,28 @@ export default function AppRoutes() {
       />
 
 
-      {/* FOOTER PAGES */}
+      {/* =====================================================
+          FOOTER PAGES
+      ===================================================== */}
+
 
       <Route
         path="/contact"
         element={<Contact />}
       />
 
+
       <Route
         path="/shipping-policy"
         element={<ShippingPolicy />}
       />
 
+
       <Route
         path="/return-policy"
         element={<ReturnPolicy />}
       />
+
 
       <Route
         path="/privacy-policy"
@@ -85,7 +114,20 @@ export default function AppRoutes() {
       />
 
 
-      {/* PROTECTED */}
+      {/* =====================================================
+          PROTECTED
+      ===================================================== */}
+
+
+      <Route
+        path="/wishlist"
+        element={
+          <ProtectedRoute>
+            <Wishlist />
+          </ProtectedRoute>
+        }
+      />
+
 
       <Route
         path="/checkout"
@@ -96,6 +138,7 @@ export default function AppRoutes() {
         }
       />
 
+
       <Route
         path="/orders"
         element={
@@ -104,6 +147,7 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
 
       <Route
         path="/orders/:id"
@@ -114,6 +158,7 @@ export default function AppRoutes() {
         }
       />
 
+
       <Route
         path="/chat"
         element={
@@ -122,6 +167,7 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
 
       <Route
         path="/profile"
@@ -132,6 +178,7 @@ export default function AppRoutes() {
         }
       />
 
+
       <Route
         path="/add-card"
         element={
@@ -140,6 +187,7 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
 
       <Route
         path="/saved-cards"
@@ -150,6 +198,9 @@ export default function AppRoutes() {
         }
       />
 
+
     </Routes>
+
   );
+
 }

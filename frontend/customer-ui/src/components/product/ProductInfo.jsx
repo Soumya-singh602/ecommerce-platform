@@ -1,22 +1,120 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   Star,
   ShoppingCart,
   Zap,
   ShieldCheck,
   Truck,
+  Heart,
 } from "lucide-react";
 
 import QuantitySelector from "./QuantitySelector";
 import { useCart } from "../../context/CartContext";
+
+import {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
+} from "../../services/wishlistService";
 
 export default function ProductInfo({ product }) {
   const navigate = useNavigate();
 
   const [quantity, setQuantity] = useState(1);
 
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
   const { addToCart } = useCart();
+
+  // ============================================================
+  // CHECK WISHLIST
+  // ============================================================
+
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (!product?.id) {
+        return;
+      }
+
+      try {
+        const response = await getWishlist();
+
+        console.log("WISHLIST:", response);
+
+        const wishlistItems =
+          response?.data?.wishlist ||
+          response?.data ||
+          [];
+
+        const exists = wishlistItems.some(
+          (item) =>
+            Number(item.product_id || item.product?.id) ===
+            Number(product.id)
+        );
+
+        setIsWishlisted(exists);
+      } catch (error) {
+        console.log("WISHLIST FETCH ERROR:", error);
+
+        setIsWishlisted(false);
+      }
+    };
+
+    checkWishlist();
+  }, [product?.id]);
+
+  // ============================================================
+  // WISHLIST
+  // ============================================================
+
+  const handleWishlist = async () => {
+    if (!product?.id) {
+      return;
+    }
+
+    if (wishlistLoading) {
+      return;
+    }
+
+    try {
+      setWishlistLoading(true);
+
+      if (isWishlisted) {
+        await removeFromWishlist(product.id);
+
+        setIsWishlisted(false);
+
+        alert("Removed from wishlist");
+      } else {
+        await addToWishlist(product.id);
+
+        setIsWishlisted(true);
+
+        alert("Added to wishlist");
+      }
+    } catch (error) {
+      console.log("WISHLIST ERROR:", error);
+
+      const status = error?.response?.status;
+
+      if (status === 401) {
+        alert("Please login to use wishlist");
+
+        navigate("/login");
+        return;
+      }
+
+      alert(
+        error?.response?.data?.message ||
+          "Something went wrong"
+      );
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   // ============================================================
   // ADD TO CART
@@ -88,7 +186,8 @@ export default function ProductInfo({ product }) {
           PRODUCT HEADER
       ====================================================== */}
 
-      <div>
+      <div className="relative">
+
         <span
           className="
             inline-flex
@@ -107,9 +206,48 @@ export default function ProductInfo({ product }) {
           Premium Product
         </span>
 
+        <button
+          type="button"
+          onClick={handleWishlist}
+          disabled={wishlistLoading}
+          aria-label={
+            isWishlisted
+              ? "Remove from wishlist"
+              : "Add to wishlist"
+          }
+          className={`
+            absolute
+            right-0
+            top-0
+            flex
+            h-11
+            w-11
+            items-center
+            justify-center
+            rounded-full
+            border
+            transition-all
+            duration-200
+            ${
+              isWishlisted
+                ? "border-red-200 bg-red-50 text-red-500 shadow-sm"
+                : "border-slate-200 bg-white text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-500"
+            }
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+          `}
+        >
+          <Heart
+            size={21}
+            fill={isWishlisted ? "currentColor" : "none"}
+            className="transition-transform duration-200 hover:scale-110"
+          />
+        </button>
+
         <h1
           className="
             mt-4
+            pr-14
             text-3xl
             font-bold
             tracking-tight
@@ -120,7 +258,6 @@ export default function ProductInfo({ product }) {
           {product?.name}
         </h1>
       </div>
-
 
       {/* ======================================================
           RATING
@@ -153,9 +290,7 @@ export default function ProductInfo({ product }) {
         <span className="text-sm text-slate-500">
           0 Reviews
         </span>
-
       </div>
-
 
       {/* ======================================================
           PRICE
@@ -178,25 +313,22 @@ export default function ProductInfo({ product }) {
 
           {quantity > 1 && (
             <span className="pb-1 text-sm text-slate-500">
-              ₹{unitPrice.toLocaleString("en-IN")} × {quantity}
+              ₹{unitPrice.toLocaleString("en-IN")} ×{" "}
+              {quantity}
             </span>
           )}
-
         </div>
 
         <p className="mt-2 text-sm text-slate-500">
           Inclusive of applicable taxes
         </p>
-
       </div>
-
 
       {/* ======================================================
           DIVIDER
       ====================================================== */}
 
       <div className="my-7 border-t border-slate-200" />
-
 
       {/* ======================================================
           DESCRIPTION
@@ -223,7 +355,6 @@ export default function ProductInfo({ product }) {
 
       </div>
 
-
       {/* ======================================================
           STOCK
       ====================================================== */}
@@ -244,7 +375,6 @@ export default function ProductInfo({ product }) {
               py-2.5
             "
           >
-
             <span
               className="
                 h-2.5
@@ -261,7 +391,6 @@ export default function ProductInfo({ product }) {
             <span className="text-sm text-blue-600">
               ({product.stock} available)
             </span>
-
           </div>
         ) : (
           <div
@@ -277,18 +406,14 @@ export default function ProductInfo({ product }) {
               py-2.5
             "
           >
-
             <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
 
             <span className="text-sm font-semibold text-red-700">
               Out of Stock
             </span>
-
           </div>
         )}
-
       </div>
-
 
       {/* ======================================================
           QUANTITY
@@ -306,16 +431,13 @@ export default function ProductInfo({ product }) {
             <span className="text-xs text-slate-500">
               Max {product.stock}
             </span>
-
           </div>
 
           <QuantitySelector
             onQuantityChange={setQuantity}
           />
-
         </div>
       )}
-
 
       {/* ======================================================
           ACTION BUTTONS
@@ -368,7 +490,6 @@ export default function ProductInfo({ product }) {
           Add to Cart
         </button>
 
-
         {/* BUY NOW */}
 
         <button
@@ -413,9 +534,7 @@ export default function ProductInfo({ product }) {
 
           Buy Now
         </button>
-
       </div>
-
 
       {/* ======================================================
           BENEFITS
@@ -437,7 +556,6 @@ export default function ProductInfo({ product }) {
             p-4
           "
         >
-
           <div
             className="
               flex
@@ -456,7 +574,6 @@ export default function ProductInfo({ product }) {
           </div>
 
           <div>
-
             <p className="text-sm font-semibold text-slate-900">
               Secure Payment
             </p>
@@ -464,11 +581,8 @@ export default function ProductInfo({ product }) {
             <p className="mt-0.5 text-xs text-slate-500">
               Safe and protected checkout
             </p>
-
           </div>
-
         </div>
-
 
         {/* FAST DELIVERY */}
 
@@ -484,7 +598,6 @@ export default function ProductInfo({ product }) {
             p-4
           "
         >
-
           <div
             className="
               flex
@@ -503,7 +616,6 @@ export default function ProductInfo({ product }) {
           </div>
 
           <div>
-
             <p className="text-sm font-semibold text-slate-900">
               Fast Delivery
             </p>
@@ -511,13 +623,10 @@ export default function ProductInfo({ product }) {
             <p className="mt-0.5 text-xs text-slate-500">
               Quick and reliable shipping
             </p>
-
           </div>
-
         </div>
 
       </div>
-
     </div>
   );
 }

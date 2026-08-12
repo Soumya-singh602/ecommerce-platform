@@ -32,3 +32,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+class Wishlist(models.Model):
+    user_id = models.IntegerField()
+    product_id = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user_id", "product_id"],
+                name="unique_user_product_wishlist",
+            )
+        ]
+
+    def __str__(self):
+        return f"User {self.user_id} - Product {self.product_id}"

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
 import {
   Truck,
   ShieldCheck,
@@ -19,6 +20,7 @@ import { getProductDetails } from "../services/productService";
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,6 +47,14 @@ export default function ProductDetails() {
   };
 
   // ============================================================
+  // OPEN WISHLIST
+  // ============================================================
+
+  const handleWishlistClick = () => {
+    navigate("/wishlist");
+  };
+
+  // ============================================================
   // LOADING STATE
   // ============================================================
 
@@ -57,10 +67,13 @@ export default function ProductDetails() {
             <Breadcrumb />
 
             {/* PAGE SKELETON */}
+
             <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
 
               {/* IMAGE SKELETON */}
+
               <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+
                 <div className="aspect-square animate-pulse bg-slate-200" />
 
                 <div className="flex gap-3 border-t border-slate-100 p-4">
@@ -68,9 +81,11 @@ export default function ProductDetails() {
                   <div className="h-16 w-16 animate-pulse rounded-xl bg-slate-200" />
                   <div className="h-16 w-16 animate-pulse rounded-xl bg-slate-200" />
                 </div>
+
               </div>
 
               {/* INFO SKELETON */}
+
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
 
                 <div className="h-6 w-28 animate-pulse rounded-full bg-slate-200" />
@@ -92,16 +107,20 @@ export default function ProductDetails() {
                 <div className="mt-4 h-14 w-full animate-pulse rounded-xl bg-slate-200" />
 
               </div>
+
             </div>
 
             {/* BENEFITS SKELETON */}
+
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+
               {[1, 2, 3].map((item) => (
                 <div
                   key={item}
-                  className="h-24 animate-pulse rounded-2xl bg-white border border-slate-200"
+                  className="h-24 animate-pulse rounded-2xl border border-slate-200 bg-white"
                 />
               ))}
+
             </div>
 
           </div>
@@ -118,6 +137,7 @@ export default function ProductDetails() {
     return (
       <MainLayout>
         <div className="min-h-screen bg-slate-50">
+
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
             <Breadcrumb />
@@ -127,6 +147,7 @@ export default function ProductDetails() {
               <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
 
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-50 text-red-500">
+
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-10 w-10"
@@ -141,6 +162,7 @@ export default function ProductDetails() {
                       d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14A2 2 0 003.82 21h16.36a2 2 0 001.71-3.14l-8.18-14a2 2 0 00-3.42 0z"
                     />
                   </svg>
+
                 </div>
 
                 <h1 className="mt-6 text-2xl font-bold text-slate-900">
@@ -182,6 +204,7 @@ export default function ProductDetails() {
             </div>
 
           </div>
+
         </div>
       </MainLayout>
     );
@@ -193,6 +216,7 @@ export default function ProductDetails() {
 
   return (
     <MainLayout>
+
       <div className="min-h-screen bg-slate-50">
 
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -210,6 +234,7 @@ export default function ProductDetails() {
           <div className="mt-7 flex flex-col gap-3 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
 
             <div>
+
               <p className="text-sm font-semibold text-blue-600">
                 Product Details
               </p>
@@ -217,13 +242,20 @@ export default function ProductDetails() {
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 {product.name}
               </h1>
+
             </div>
 
             <div className="flex items-center gap-2">
 
+              {/* ==================================================
+                  WISHLIST BUTTON
+              ================================================== */}
+
               <button
                 type="button"
+                onClick={handleWishlistClick}
                 className="
+                  group
                   flex
                   h-10
                   w-10
@@ -236,14 +268,25 @@ export default function ProductDetails() {
                   text-slate-500
                   shadow-sm
                   transition
-                  hover:border-blue-200
-                  hover:bg-blue-50
-                  hover:text-blue-600
+                  duration-200
+                  hover:-translate-y-0.5
+                  hover:border-red-200
+                  hover:bg-red-50
+                  hover:text-red-500
+                  hover:shadow-md
                 "
-                title="Add to wishlist"
+                title="My Wishlist"
+                aria-label="Open my wishlist"
               >
-                <Heart size={19} />
+                <Heart
+                  size={19}
+                  className="transition-transform duration-200 group-hover:scale-110"
+                />
               </button>
+
+              {/* ==================================================
+                  SHARE BUTTON
+              ================================================== */}
 
               <button
                 type="button"
@@ -265,6 +308,7 @@ export default function ProductDetails() {
                   hover:text-blue-600
                 "
                 title="Share product"
+                aria-label="Share product"
               >
                 <Share2 size={18} />
               </button>
@@ -288,6 +332,7 @@ export default function ProductDetails() {
               <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
                 {/* IMAGE HEADER */}
+
                 <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
 
                   <div className="flex items-center gap-2">
@@ -309,10 +354,13 @@ export default function ProductDetails() {
                 </div>
 
                 {/* PRODUCT IMAGE */}
+
                 <div className="bg-slate-50 p-3 sm:p-5">
 
                   <div className="overflow-hidden rounded-2xl bg-white">
+
                     <ProductImage product={product} />
+
                   </div>
 
                 </div>
@@ -540,6 +588,7 @@ export default function ProductDetails() {
         </div>
 
       </div>
+
     </MainLayout>
   );
 }
