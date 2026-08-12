@@ -22,6 +22,7 @@ export default function ProductDetails() {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [shareCopied, setShareCopied] = useState(false);
 
   // ============================================================
   // FETCH PRODUCT
@@ -58,19 +59,62 @@ export default function ProductDetails() {
     const shareUrl = window.location.href;
 
     try {
+      // ========================================================
+      // NATIVE SHARE
+      // ========================================================
+
       if (navigator.share) {
         await navigator.share({
           title: product.name || "Product",
-          text: "Check out this product",
+          text: `Check out ${product.name || "this product"}`,
           url: shareUrl,
         });
-      } else if (navigator.clipboard) {
+
+        return;
+      }
+
+      // ========================================================
+      // CLIPBOARD
+      // ========================================================
+
+      if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareUrl);
 
-        alert("Product link copied!");
+        setShareCopied(true);
+
+        setTimeout(() => {
+          setShareCopied(false);
+        }, 2000);
+
+        return;
       }
+
+      // ========================================================
+      // FALLBACK COPY
+      // ========================================================
+
+      const textArea = document.createElement("textarea");
+
+      textArea.value = shareUrl;
+
+      document.body.appendChild(textArea);
+
+      textArea.select();
+
+      document.execCommand("copy");
+
+      document.body.removeChild(textArea);
+
+      setShareCopied(true);
+
+      setTimeout(() => {
+        setShareCopied(false);
+      }, 2000);
     } catch (error) {
-      console.log("SHARE ERROR:", error);
+      // User closed the native share popup
+      if (error?.name !== "AbortError") {
+        console.error("SHARE ERROR:", error);
+      }
     }
   };
 
@@ -265,9 +309,9 @@ export default function ProductDetails() {
 
             </div>
 
-            {/* SHARE ONLY */}
+            {/* SHARE */}
 
-            <div className="flex items-center gap-2">
+            <div className="relative flex items-center gap-2">
 
               <button
                 type="button"
@@ -296,11 +340,41 @@ export default function ProductDetails() {
                 title="Share product"
                 aria-label="Share product"
               >
+
                 <Share2
                   size={19}
-                  className="transition-transform duration-200 group-hover:scale-110"
+                  className="
+                    transition-transform
+                    duration-200
+                    group-hover:scale-110
+                  "
                 />
+
               </button>
+
+              {/* COPY SUCCESS */}
+
+              {shareCopied && (
+                <div
+                  className="
+                    absolute
+                    right-0
+                    top-14
+                    z-50
+                    whitespace-nowrap
+                    rounded-lg
+                    bg-slate-900
+                    px-3
+                    py-2
+                    text-xs
+                    font-semibold
+                    text-white
+                    shadow-lg
+                  "
+                >
+                  Link copied!
+                </div>
+              )}
 
             </div>
 
