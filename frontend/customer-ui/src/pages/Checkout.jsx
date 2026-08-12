@@ -25,6 +25,16 @@ import {
   saveCard,
 } from "../services/paymentService";
 
+import {
+  ArrowLeft,
+  ShieldCheck,
+  CreditCard,
+  Lock,
+  CheckCircle2,
+  ShoppingBag,
+  User,
+} from "lucide-react";
+
 
 function Checkout() {
 
@@ -45,15 +55,13 @@ function Checkout() {
   const [loadingCards, setLoadingCards] = useState(true);
 
   const [billingData, setBillingData] = useState({
-
-  name:"",
-  email:"",
-  phone:"",
-  address:"",
-  city:"",
-  pincode:""
-
-});
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    pincode: "",
+  });
 
 
   const {
@@ -63,10 +71,17 @@ function Checkout() {
   } = location.state || {};
 
 
-  console.log(
-    "CHECKOUT STATE:",
-    location.state
-  );
+  // ============================================================
+  // ITEM COUNT
+  // ============================================================
+
+  const itemCount = product
+    ? quantity || 1
+    : cartItems?.reduce(
+        (total, item) =>
+          total + (item.quantity || 1),
+        0
+      ) || 0;
 
 
   // ============================================================
@@ -94,7 +109,6 @@ function Checkout() {
 
           const cards =
             response.data || [];
-
 
           setSavedCards(cards);
 
@@ -151,7 +165,9 @@ function Checkout() {
   // PAYMENT TYPE CHANGE
   // ============================================================
 
-  const handlePaymentTypeChange = (type) => {
+  const handlePaymentTypeChange = (
+    type
+  ) => {
 
     setPaymentType(type);
 
@@ -193,14 +209,11 @@ function Checkout() {
 
     const result =
       await stripe.confirmCardPayment(
-
         clientSecret,
-
         {
           payment_method:
             paymentMethodId,
         }
-
       );
 
 
@@ -209,10 +222,6 @@ function Checkout() {
       result
     );
 
-
-    // ============================================================
-    // STRIPE PAYMENT ERROR
-    // ============================================================
 
     if (result.error) {
 
@@ -244,10 +253,6 @@ function Checkout() {
       result.paymentIntent.status
     );
 
-
-    // ============================================================
-    // PAYMENT MUST BE SUCCESSFUL
-    // ============================================================
 
     if (
       result.paymentIntent.status !==
@@ -397,18 +402,14 @@ function Checkout() {
           address:
             billingData.address,
 
-
           city:
             billingData.city,
-
 
           phone:
             billingData.phone,
 
-
           pincode:
-             billingData.pincode
-
+            billingData.pincode,
 
         };
 
@@ -434,20 +435,19 @@ function Checkout() {
 
               })
             ),
-              address:
-                billingData.address,
 
+          address:
+            billingData.address,
 
-              city:
-                billingData.city,
+          city:
+            billingData.city,
 
+          phone:
+            billingData.phone,
 
-              phone:
-                billingData.phone,
+          pincode:
+            billingData.pincode,
 
-
-              pincode:
-                billingData.pincode
         };
 
       }
@@ -521,6 +521,7 @@ function Checkout() {
         };
 
       }
+
 
       else {
 
@@ -610,11 +611,6 @@ function Checkout() {
         paymentType === "new-card"
       ) {
 
-
-        // ------------------------------------------------------
-        // CREATE PAYMENT METHOD
-        // ------------------------------------------------------
-
         const {
           error,
           paymentMethod,
@@ -649,18 +645,6 @@ function Checkout() {
         );
 
 
-        // ------------------------------------------------------
-        // CREATE PAYMENT INTENT
-        // ------------------------------------------------------
-
-        /*
-         IMPORTANT:
-
-         Card ko payment se pehle save nahi kar rahe.
-
-         Pehle PaymentIntent create hoga.
-        */
-
         const paymentResponse =
           await createPaymentIntent({
 
@@ -691,10 +675,6 @@ function Checkout() {
         }
 
 
-        // ------------------------------------------------------
-        // CONFIRM PAYMENT
-        // ------------------------------------------------------
-
         const paymentIntent =
           await confirmStripePayment(
 
@@ -711,9 +691,9 @@ function Checkout() {
         );
 
 
-        // ------------------------------------------------------
-        // SAVE CARD ONLY AFTER SUCCESS
-        // ------------------------------------------------------
+        // ======================================================
+        // SAVE CARD AFTER SUCCESS
+        // ======================================================
 
         try {
 
@@ -746,12 +726,6 @@ function Checkout() {
         }
 
         catch (saveError) {
-
-          /*
-           Payment successful hai.
-           Card save fail hone par payment ko
-           failed nahi karna hai.
-          */
 
           console.log(
             "CARD SAVE ERROR AFTER PAYMENT:",
@@ -796,7 +770,7 @@ function Checkout() {
 
 
       // ========================================================
-      // FINAL SUCCESS
+      // SUCCESS
       // ========================================================
 
       alert(
@@ -809,6 +783,7 @@ function Checkout() {
       );
 
     }
+
 
     catch (error) {
 
@@ -833,6 +808,7 @@ function Checkout() {
 
     }
 
+
     finally {
 
       setLoading(false);
@@ -850,105 +826,766 @@ function Checkout() {
 
     <MainLayout>
 
-      <div className="max-w-7xl mx-auto py-10 px-4">
+      <div className="min-h-screen bg-slate-50">
 
-        <Breadcrumb />
+        <div
+          className="
+            max-w-7xl
+            mx-auto
+            px-4
+            sm:px-6
+            lg:px-8
+            py-8
+          "
+        >
 
+          {/* ==================================================
+              BREADCRUMB
+          ================================================== */}
 
-        <h1 className="text-4xl font-bold mt-6 mb-10">
-
-          Checkout
-
-        </h1>
-
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-
-          <div className="lg:col-span-2">
-
-            <BillingForm 
-                 billingData={billingData}
-
-                 setBillingData={setBillingData}
-
-            />
+          <Breadcrumb />
 
 
-            <PaymentMethod
+          {/* ==================================================
+              HEADER
+          ================================================== */}
 
-              paymentType={
-                paymentType
-              }
-
-              setPaymentType={
-                handlePaymentTypeChange
-              }
-
-              savedCards={
-                savedCards
-              }
-
-              setSavedCards={
-               setSavedCards
-              }
-
-              selectedCard={
-                selectedCard
-              }
-
-              setSelectedCard={
-                setSelectedCard
-              }
-
-              loadingCards={
-                loadingCards
-              }
-
-            />
-
-          </div>
-
-
-          <div>
-
-            <CheckoutSummary
-
-              product={product}
-
-              quantity={quantity}
-
-              cartItems={cartItems}
-
-            />
-
+          <div className="mt-7 mb-8">
 
             <button
-
-              onClick={
-                handlePlaceOrder
+              type="button"
+              onClick={() =>
+                navigate(-1)
               }
-
-              disabled={
-                loading
-              }
-
-              className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
-
+              className="
+                mb-5
+                inline-flex
+                items-center
+                gap-2
+                text-sm
+                font-medium
+                text-slate-500
+                transition
+                hover:text-blue-600
+              "
             >
 
-              {
+              <ArrowLeft size={17} />
 
-                loading
-                  ? "Processing..."
-                  : "Confirm Order"
-
-              }
+              Back
 
             </button>
 
+
+            <div
+              className="
+                flex
+                flex-col
+                gap-4
+                md:flex-row
+                md:items-end
+                md:justify-between
+              "
+            >
+
+              <div>
+
+                <div
+                  className="
+                    mb-2
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-full
+                    bg-blue-50
+                    px-3
+                    py-1.5
+                    text-xs
+                    font-semibold
+                    text-blue-700
+                  "
+                >
+
+                  <ShieldCheck size={14} />
+
+                  Secure Checkout
+
+                </div>
+
+
+                <h1
+                  className="
+                    text-3xl
+                    sm:text-4xl
+                    font-bold
+                    tracking-tight
+                    text-slate-900
+                  "
+                >
+                  Complete your order
+                </h1>
+
+
+                <p
+                  className="
+                    mt-2
+                    max-w-2xl
+                    text-sm
+                    leading-6
+                    text-slate-500
+                  "
+                >
+                  Enter your delivery details and
+                  choose your preferred payment method.
+                </p>
+
+              </div>
+
+
+              {/* CHECKOUT STEPS */}
+
+              <div
+                className="
+                  hidden
+                  sm:flex
+                  items-center
+                  gap-3
+                  rounded-xl
+                  border
+                  border-slate-200
+                  bg-white
+                  px-4
+                  py-3
+                  shadow-sm
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    h-8
+                    w-8
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-blue-600
+                    text-xs
+                    font-bold
+                    text-white
+                  "
+                >
+                  1
+                </div>
+
+
+                <span
+                  className="
+                    text-sm
+                    font-semibold
+                    text-blue-700
+                  "
+                >
+                  Checkout
+                </span>
+
+
+                <div
+                  className="
+                    h-px
+                    w-8
+                    bg-slate-200
+                  "
+                />
+
+
+                <div
+                  className="
+                    flex
+                    h-8
+                    w-8
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-slate-100
+                    text-xs
+                    font-semibold
+                    text-slate-400
+                  "
+                >
+                  2
+                </div>
+
+
+                <span
+                  className="
+                    text-sm
+                    font-medium
+                    text-slate-400
+                  "
+                >
+                  Complete
+                </span>
+
+              </div>
+
+            </div>
+
           </div>
 
+
+          {/* ==================================================
+              MAIN GRID
+          ================================================== */}
+
+          <div
+            className="
+              grid
+              grid-cols-1
+              lg:grid-cols-3
+              gap-6
+              lg:gap-8
+              items-start
+            "
+          >
+
+            {/* =================================================
+                LEFT SIDE
+            ================================================= */}
+
+            <div
+              className="
+                lg:col-span-2
+                space-y-6
+              "
+            >
+
+              {/* =================================================
+                  BILLING
+              ================================================= */}
+
+              <section
+                className="
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-slate-200
+                  bg-white
+                  shadow-sm
+                "
+              >
+
+                <div
+                  className="
+                    border-b
+                    border-slate-100
+                    px-5
+                    py-5
+                    sm:px-6
+                  "
+                >
+
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-4
+                    "
+                  >
+
+                    <div
+                      className="
+                        flex
+                        h-11
+                        w-11
+                        flex-shrink-0
+                        items-center
+                        justify-center
+                        rounded-xl
+                        bg-blue-50
+                        text-blue-600
+                      "
+                    >
+
+                      <User size={20} />
+
+                    </div>
+
+
+                    <div>
+
+                      <h2
+                        className="
+                          text-lg
+                          font-bold
+                          text-slate-900
+                        "
+                      >
+                        Billing Information
+                      </h2>
+
+
+                      <p
+                        className="
+                          mt-0.5
+                          text-sm
+                          text-slate-500
+                        "
+                      >
+                        Enter your delivery details
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div className="p-5 sm:p-6">
+
+                  <BillingForm
+                    billingData={
+                      billingData
+                    }
+
+                    setBillingData={
+                      setBillingData
+                    }
+                  />
+
+                </div>
+
+              </section>
+
+
+              {/* =================================================
+                  PAYMENT
+              ================================================= */}
+
+              <section
+                className="
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-slate-200
+                  bg-white
+                  shadow-sm
+                "
+              >
+
+                <div
+                  className="
+                    border-b
+                    border-slate-100
+                    px-5
+                    py-5
+                    sm:px-6
+                  "
+                >
+
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      gap-4
+                    "
+                  >
+
+                    <div
+                      className="
+                        flex
+                        items-center
+                        gap-4
+                      "
+                    >
+
+                      <div
+                        className="
+                          flex
+                          h-11
+                          w-11
+                          flex-shrink-0
+                          items-center
+                          justify-center
+                          rounded-xl
+                          bg-blue-50
+                          text-blue-600
+                        "
+                      >
+
+                        <CreditCard size={20} />
+
+                      </div>
+
+
+                      <div>
+
+                        <h2
+                          className="
+                            text-lg
+                            font-bold
+                            text-slate-900
+                          "
+                        >
+                          Payment Method
+                        </h2>
+
+
+                        <p
+                          className="
+                            mt-0.5
+                            text-sm
+                            text-slate-500
+                          "
+                        >
+                          Choose how you want to pay
+                        </p>
+
+                      </div>
+
+                    </div>
+
+
+                    <div
+                      className="
+                        hidden
+                        sm:flex
+                        items-center
+                        gap-1.5
+                        text-xs
+                        font-medium
+                        text-slate-400
+                      "
+                    >
+
+                      <Lock size={14} />
+
+                      Secure Payment
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+
+                <div className="p-5 sm:p-6">
+
+                  <PaymentMethod
+                    paymentType={
+                      paymentType
+                    }
+
+                    setPaymentType={
+                      handlePaymentTypeChange
+                    }
+
+                    savedCards={
+                      savedCards
+                    }
+
+                    setSavedCards={
+                      setSavedCards
+                    }
+
+                    selectedCard={
+                      selectedCard
+                    }
+
+                    setSelectedCard={
+                      setSelectedCard
+                    }
+
+                    loadingCards={
+                      loadingCards
+                    }
+                  />
+
+                </div>
+
+              </section>
+
+
+              {/* =================================================
+                  SECURITY NOTICE
+              ================================================= */}
+
+              <div
+                className="
+                  flex
+                  items-start
+                  gap-3
+                  rounded-2xl
+                  border
+                  border-blue-100
+                  bg-blue-50
+                  p-4
+                "
+              >
+
+                <ShieldCheck
+                  size={20}
+                  className="
+                    mt-0.5
+                    flex-shrink-0
+                    text-blue-600
+                  "
+                />
+
+
+                <div>
+
+                  <p
+                    className="
+                      text-sm
+                      font-semibold
+                      text-blue-900
+                    "
+                  >
+                    Your payment is secure
+                  </p>
+
+
+                  <p
+                    className="
+                      mt-1
+                      text-xs
+                      leading-5
+                      text-blue-700
+                    "
+                  >
+                    Your payment information is
+                    securely processed. Card details
+                    are protected by Stripe.
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            {/* =================================================
+                RIGHT SIDE
+            ================================================= */}
+
+            <div
+              className="
+                lg:sticky
+                lg:top-24
+                space-y-4
+              "
+            >
+
+              {/* =================================================
+                  ORDER SUMMARY
+              ================================================= */}
+
+              <section
+                className="
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-slate-200
+                  bg-white
+                  shadow-sm
+                "
+              >
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    justify-between
+                    border-b
+                    border-slate-100
+                    px-5
+                    py-5
+                  "
+                >
+
+                  <div>
+
+                    <h2
+                      className="
+                        text-lg
+                        font-bold
+                        text-slate-900
+                      "
+                    >
+                      Order Summary
+                    </h2>
+
+
+                    <p
+                      className="
+                        mt-1
+                        text-sm
+                        text-slate-500
+                      "
+                    >
+                      {itemCount}{" "}
+                      {itemCount === 1
+                        ? "item"
+                        : "items"}
+                    </p>
+
+                  </div>
+
+
+                  <div
+                    className="
+                      flex
+                      h-10
+                      w-10
+                      items-center
+                      justify-center
+                      rounded-xl
+                      bg-blue-50
+                      text-blue-600
+                    "
+                  >
+
+                    <ShoppingBag size={19} />
+
+                  </div>
+
+                </div>
+
+
+                <div className="p-5">
+
+                  <CheckoutSummary
+                    product={product}
+                    quantity={quantity}
+                    cartItems={cartItems}
+                  />
+
+                </div>
+
+              </section>
+
+
+              {/* =================================================
+                  CONFIRM ORDER
+              ================================================= */}
+
+              <button
+                type="button"
+                onClick={
+                  handlePlaceOrder
+                }
+                disabled={loading}
+                className="
+                  group
+                  flex
+                  w-full
+                  items-center
+                  justify-center
+                  gap-2.5
+                  rounded-xl
+                  bg-blue-600
+                  px-6
+                  py-4
+                  text-sm
+                  font-bold
+                  text-white
+                  shadow-lg
+                  shadow-blue-600/20
+                  transition
+                  duration-200
+                  hover:bg-blue-700
+                  hover:shadow-blue-600/30
+                  active:scale-[0.99]
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
+                  disabled:hover:bg-blue-600
+                "
+              >
+
+                {loading ? (
+
+                  <>
+
+                    <span
+                      className="
+                        h-5
+                        w-5
+                        animate-spin
+                        rounded-full
+                        border-2
+                        border-white/40
+                        border-t-white
+                      "
+                    />
+
+                    Processing...
+
+                  </>
+
+                ) : (
+
+                  <>
+
+                    <CheckCircle2 size={18} />
+
+                    Confirm Order
+
+                  </>
+
+                )}
+
+              </button>
+
+
+              {/* =================================================
+                  SECURITY
+              ================================================= */}
+
+              <div
+                className="
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-xl
+                  border
+                  border-slate-200
+                  bg-white
+                  px-4
+                  py-3
+                  text-xs
+                  font-medium
+                  text-slate-500
+                "
+              >
+
+                <Lock size={13} />
+
+                Secure & encrypted payment
+
+              </div>
+
+
+              <p
+                className="
+                  px-3
+                  text-center
+                  text-[11px]
+                  leading-5
+                  text-slate-400
+                "
+              >
+                By placing your order, you agree
+                to our terms and conditions and
+                acknowledge our privacy policy.
+              </p>
+
+            </div>
+
+          </div>
 
         </div>
 
@@ -980,4 +1617,3 @@ export default function CheckoutWrapper() {
   );
 
 }
-

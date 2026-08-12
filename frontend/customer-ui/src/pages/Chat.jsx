@@ -1,4 +1,6 @@
+
 import { useEffect, useState } from "react";
+import { Send, MessageCircle, Headphones } from "lucide-react";
 import MainLayout from "../layouts/MainLayout";
 import { sendMessage } from "../services/chatSocket";
 import { getChatHistory } from "../api/chatApi";
@@ -50,8 +52,6 @@ export default function Chat() {
                     customerId
                 );
 
-                console.log("HISTORY:", data);
-
                 const uniqueMessages = data.filter(
                     (msg, index, self) =>
                         index ===
@@ -67,11 +67,7 @@ export default function Chat() {
         };
 
         loadHistory();
-    }, [
-        adminId,
-        customerId,
-        setMessages,
-    ]);
+    }, [adminId, customerId, setMessages]);
 
     // =========================
     // SEND MESSAGE
@@ -84,7 +80,7 @@ export default function Chat() {
 
         sendMessage(
             socketRef.current,
-            text
+            text.trim()
         );
 
         setText("");
@@ -104,20 +100,24 @@ export default function Chat() {
     return (
         <MainLayout>
 
-            <div className="min-h-[calc(100vh-80px)] bg-slate-50 px-4 py-6 md:px-8">
+            <div className="min-h-[calc(100vh-80px)] bg-gray-50 px-4 py-8">
 
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-5xl mx-auto">
 
-                    {/* ================= HEADER ================= */}
+                    {/* ================= PAGE HEADER ================= */}
 
                     <div className="mb-6">
 
-                        <h1 className="text-3xl font-bold text-slate-800">
-                            Chat
+                        <p className="text-sm font-medium text-indigo-600 mb-1">
+                            CUSTOMER SUPPORT
+                        </p>
+
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+                            Help & Support
                         </h1>
 
-                        <p className="text-gray-500 mt-1">
-                            Chat with our support team
+                        <p className="text-gray-500 mt-2">
+                            Have a question? Our support team is here to help.
                         </p>
 
                     </div>
@@ -125,44 +125,63 @@ export default function Chat() {
 
                     {/* ================= CHAT CARD ================= */}
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
 
                         {/* ================= CHAT HEADER ================= */}
 
-                        <div className="h-20 px-6 border-b flex items-center justify-between">
+                        <div className="px-5 md:px-7 py-5 border-b border-gray-100">
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center justify-between">
 
-                                {/* ADMIN AVATAR */}
+                                <div className="flex items-center gap-4">
 
-                                <div className="relative">
+                                    <div className="relative">
 
-                                    <div className="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">
-                                        A
+                                        <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+
+                                            <Headphones size={25} />
+
+                                        </div>
+
+                                        <span className="absolute -right-1 -bottom-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
+
                                     </div>
 
-                                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
+
+                                    <div>
+
+                                        <h2 className="font-bold text-gray-900 text-lg">
+                                            Admin Support
+                                        </h2>
+
+                                        <div className="flex items-center gap-2 mt-1">
+
+                                            <span className="w-2 h-2 bg-green-500 rounded-full" />
+
+                                            <span className="text-sm text-green-600 font-medium">
+                                                Online
+                                            </span>
+
+                                        </div>
+
+                                    </div>
 
                                 </div>
 
 
-                                <div>
+                                <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50">
 
-                                    <h2 className="font-semibold text-slate-800">
-                                        Admin Support
-                                    </h2>
+                                    <MessageCircle
+                                        size={17}
+                                        className="text-indigo-600"
+                                    />
 
-                                    <p className="text-sm text-green-600">
-                                        Online
-                                    </p>
+                                    <span className="text-sm text-gray-500">
+                                        Live Support
+                                    </span>
 
                                 </div>
 
-                            </div>
-
-
-                            <div className="text-sm text-gray-400">
-                                Support
                             </div>
 
                         </div>
@@ -170,24 +189,27 @@ export default function Chat() {
 
                         {/* ================= MESSAGES ================= */}
 
-                        <div className="h-[500px] md:h-[550px] overflow-y-auto p-5 md:p-6 bg-slate-50">
+                        <div className="h-[500px] md:h-[560px] overflow-y-auto px-4 md:px-7 py-6 bg-gray-50">
 
                             {messages.length === 0 ? (
 
                                 <div className="h-full flex items-center justify-center">
 
-                                    <div className="text-center">
+                                    <div className="text-center max-w-sm">
 
-                                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl">
-                                            💬
+                                        <div className="w-20 h-20 mx-auto rounded-3xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+
+                                            <MessageCircle size={34} />
+
                                         </div>
 
-                                        <h3 className="font-semibold text-slate-700">
+                                        <h3 className="text-xl font-bold text-gray-800 mt-5">
                                             Start a conversation
                                         </h3>
 
-                                        <p className="text-sm text-gray-500 mt-1">
-                                            Send a message to our admin team.
+                                        <p className="text-gray-500 text-sm mt-2 leading-relaxed">
+                                            Send us a message and our support
+                                            team will get back to you.
                                         </p>
 
                                     </div>
@@ -196,7 +218,7 @@ export default function Chat() {
 
                             ) : (
 
-                                <div className="space-y-4">
+                                <div className="space-y-5">
 
                                     {messages.map(
                                         (msg, index) => {
@@ -217,32 +239,30 @@ export default function Chat() {
                                                 >
 
                                                     <div
-                                                        className={`max-w-[75%] md:max-w-[60%] ${
+                                                        className={`flex flex-col ${
                                                             isCustomer
                                                                 ? "items-end"
                                                                 : "items-start"
-                                                        } flex flex-col`}
+                                                        } max-w-[85%] md:max-w-[65%]`}
                                                     >
 
-                                                        {/* SENDER */}
-
-                                                        <span className="text-xs text-gray-400 mb-1 px-1">
+                                                        <span className="text-xs text-gray-400 mb-1.5 px-2">
                                                             {isCustomer
                                                                 ? "You"
-                                                                : msg.sender || "Admin"}
+                                                                : msg.sender || "Admin Support"}
                                                         </span>
 
 
-                                                        {/* MESSAGE */}
-
                                                         <div
-                                                            className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                                                            className={`px-4 py-3.5 text-sm leading-relaxed shadow-sm ${
                                                                 isCustomer
-                                                                    ? "bg-indigo-600 text-white rounded-br-md"
-                                                                    : "bg-white text-slate-700 border border-gray-100 rounded-bl-md"
+                                                                    ? "bg-indigo-600 text-white rounded-2xl rounded-br-md"
+                                                                    : "bg-white text-gray-700 border border-gray-200 rounded-2xl rounded-bl-md"
                                                             }`}
                                                         >
+
                                                             {msg.message}
+
                                                         </div>
 
                                                     </div>
@@ -260,9 +280,9 @@ export default function Chat() {
                         </div>
 
 
-                        {/* ================= MESSAGE INPUT ================= */}
+                        {/* ================= INPUT ================= */}
 
-                        <div className="border-t bg-white p-4">
+                        <div className="border-t border-gray-100 bg-white p-4 md:p-5">
 
                             <div className="flex items-center gap-3">
 
@@ -274,21 +294,63 @@ export default function Chat() {
                                     }
                                     onKeyDown={handleKeyDown}
                                     placeholder="Type your message..."
-                                    className="flex-1 h-12 border border-gray-200 rounded-xl px-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                                    className="
+                                        flex-1
+                                        h-12
+                                        px-4
+                                        rounded-xl
+                                        border
+                                        border-gray-200
+                                        bg-gray-50
+                                        text-sm
+                                        text-gray-800
+                                        outline-none
+                                        transition
+                                        focus:bg-white
+                                        focus:border-indigo-500
+                                        focus:ring-2
+                                        focus:ring-indigo-100
+                                    "
                                 />
 
+
                                 <button
+                                    type="button"
                                     onClick={handleSend}
                                     disabled={!text.trim()}
-                                    className="h-12 px-6 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition"
+                                    className="
+                                        h-12
+                                        w-12
+                                        md:w-auto
+                                        md:px-6
+                                        rounded-xl
+                                        bg-indigo-600
+                                        hover:bg-indigo-700
+                                        disabled:bg-gray-200
+                                        disabled:text-gray-400
+                                        text-white
+                                        font-semibold
+                                        flex
+                                        items-center
+                                        justify-center
+                                        gap-2
+                                        transition
+                                    "
                                 >
-                                    Send
+
+                                    <Send size={18} />
+
+                                    <span className="hidden md:inline">
+                                        Send
+                                    </span>
+
                                 </button>
 
                             </div>
 
+
                             <p className="text-xs text-gray-400 mt-2 px-1">
-                                Press Enter to send
+                                Press Enter to send your message
                             </p>
 
                         </div>
