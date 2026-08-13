@@ -586,3 +586,93 @@ def review_detail(request, review_id):
         status=status.HTTP_400_BAD_REQUEST
     )
 
+
+@api_view(["PUT"])
+def update_product_stock(request, id):
+
+    try:
+        product = Product.objects.get(id=id)
+
+    except Product.DoesNotExist:
+        raise NotFoundException("Product not found")
+
+    quantity = request.data.get("quantity")
+    action = request.data.get("action")
+
+    if quantity is None:
+        return Response(
+            {
+                "status": "failed",
+                "message": "Quantity is required",
+                "data": None
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        quantity = int(quantity)
+
+    except (TypeError, ValueError):
+        return Response(
+            {
+                "status": "failed",
+                "message": "Quantity must be a valid number",
+                "data": None
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if quantity <= 0:
+        return Response(
+            {
+                "status": "failed",
+                "message": "Quantity must be greater than 0",
+                "data": None
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # DECREASE STOCK
+    if action == "decrease":
+
+        if product.stock < quantity:
+            return Response(
+                {
+                    "status": "failed",
+                    "message": "Insufficient stock",
+                    "data": {
+                        "available_stock": product.stock
+                    }
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        product.stock -= quantity
+
+    # INCREASE STOCK
+    elif action == "increase":
+
+        product.stock += quantity
+
+    else:
+        return Response(
+            {
+                "status": "failed",
+                "message": "Invalid action. Use decrease or increase.",
+                "data": None
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    product.save(
+        update_fields=["stock", "updated_at"]
+    )
+
+    return success_response(
+        message="Product stock updated successfully",
+        data={
+            "product_id": product.id,
+            "product_name": product.name,
+            "stock": product.stock
+        }
+    )

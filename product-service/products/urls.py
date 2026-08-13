@@ -15,6 +15,7 @@ from .views import (
     delete_banner,
     product_reviews,
     review_detail,
+    update_product_stock
     
 )
 
@@ -57,6 +58,12 @@ urlpatterns = [
         review_detail,
         name="review-detail",
     ),
+
+    path(
+    "<int:id>/stock/",
+    update_product_stock,
+    name="update-product-stock",
+),
 
 
 
