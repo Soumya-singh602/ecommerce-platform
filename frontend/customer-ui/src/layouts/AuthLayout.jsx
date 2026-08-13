@@ -5,7 +5,7 @@ export default function AuthLayout({ children }) {
       {/* Logo */}
       <div className="py-8 text-center">
         <h1 className="text-4xl font-bold text-blue-600">
-          Ecommerce
+          NEXORA
         </h1>
       </div>
 

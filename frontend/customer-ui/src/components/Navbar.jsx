@@ -1,5 +1,6 @@
 import {
   ShoppingCart,
+  ShoppingBag,
   Search,
   Menu,
   MessageCircle,
@@ -63,6 +64,7 @@ export default function Navbar() {
         backdrop-blur-md
       "
     >
+
       {/* ======================================================
           MAIN NAVBAR
       ====================================================== */}
@@ -72,49 +74,135 @@ export default function Navbar() {
         <div className="flex h-[72px] items-center justify-between gap-4">
 
           {/* ==================================================
-              LOGO
+              NEXORA LOGO
           ================================================== */}
 
           <Link
             to="/"
             className="group flex-shrink-0"
+            aria-label="NEXORA Home"
           >
-            <div className="flex items-center gap-2">
+
+            <div className="flex items-center gap-2.5">
+
+              {/* NEXORA ICON */}
 
               <div
                 className="
+                  relative
                   flex
-                  h-10
-                  w-10
+                  h-11
+                  w-11
                   items-center
                   justify-center
-                  rounded-xl
-                  bg-blue-600
+                  overflow-hidden
+                  rounded-[14px]
+                  bg-gradient-to-br
+                  from-blue-600
+                  via-blue-600
+                  to-sky-400
                   text-white
-                  shadow-md
+                  shadow-lg
                   shadow-blue-600/20
-                  transition
-                  duration-200
-                  group-hover:scale-105
+                  transition-all
+                  duration-300
+                  group-hover:-translate-y-0.5
+                  group-hover:shadow-blue-600/35
                 "
               >
-                <ShoppingCart size={21} />
+
+                <div
+                  className="
+                    absolute
+                    -right-3
+                    -top-3
+                    h-8
+                    w-8
+                    rounded-full
+                    bg-white/20
+                  "
+                />
+
+                <ShoppingBag
+                  size={22}
+                  strokeWidth={2.5}
+                  className="relative z-10"
+                />
+
               </div>
 
-              <div className="hidden sm:block">
 
-                <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                  Ecommerce
-                </h1>
+              {/* NEXORA WORDMARK */}
 
-                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-blue-600">
-                  Store
-                </p>
+              <div className="hidden sm:block leading-none">
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    tracking-[-0.06em]
+                  "
+                >
+
+                  <span
+                    className="
+                      text-[25px]
+                      font-black
+                      text-slate-950
+                    "
+                  >
+                    N
+                  </span>
+
+                  <span
+                    className="
+                      text-[25px]
+                      font-black
+                      bg-gradient-to-r
+                      from-blue-700
+                      via-blue-600
+                      to-sky-400
+                      bg-clip-text
+                      text-transparent
+                    "
+                  >
+                    EXORA
+                  </span>
+
+                </div>
+
+
+                <div className="mt-1 flex items-center gap-1.5">
+
+                  <span
+                    className="
+                      h-1
+                      w-1
+                      rounded-full
+                      bg-blue-600
+                    "
+                  />
+
+                  <p
+                    className="
+                      text-[8px]
+                      font-bold
+                      uppercase
+                      tracking-[0.24em]
+                      text-slate-400
+                    "
+                  >
+                    Shop Smart. Live Better.
+                  </p>
+
+                </div>
 
               </div>
 
             </div>
+
           </Link>
+
 
           {/* ==================================================
               DESKTOP SEARCH
@@ -188,7 +276,9 @@ export default function Navbar() {
               </button>
 
             </div>
+
           </div>
+
 
           {/* ==================================================
               RIGHT ACTIONS
@@ -196,9 +286,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-1 sm:gap-2">
 
-            {/* ==================================================
-                CHAT
-            ================================================== */}
+            {/* CHAT */}
 
             <Link
               to="/chat"
@@ -223,9 +311,8 @@ export default function Navbar() {
               />
             </Link>
 
-            {/* ==================================================
-                WISHLIST
-            ================================================== */}
+
+            {/* WISHLIST */}
 
             <Link
               to="/wishlist"
@@ -255,9 +342,8 @@ export default function Navbar() {
               />
             </Link>
 
-            {/* ==================================================
-                CART
-            ================================================== */}
+
+            {/* CART */}
 
             <Link
               to="/cart"
@@ -277,6 +363,7 @@ export default function Navbar() {
               "
               title="Cart"
             >
+
               <ShoppingCart
                 size={22}
                 className="transition-transform group-hover:scale-110"
@@ -308,11 +395,11 @@ export default function Navbar() {
                     : cartItems.length}
                 </span>
               )}
+
             </Link>
 
-            {/* ==================================================
-                ACCOUNT
-            ================================================== */}
+
+            {/* ACCOUNT */}
 
             <button
               type="button"
@@ -331,6 +418,7 @@ export default function Navbar() {
                 sm:flex
               "
             >
+
               <span
                 className="
                   flex
@@ -353,11 +441,11 @@ export default function Navbar() {
                 size={15}
                 className="hidden text-slate-400 lg:block"
               />
+
             </button>
 
-            {/* ==================================================
-                MOBILE MENU
-            ================================================== */}
+
+            {/* MOBILE MENU BUTTON */}
 
             <button
               type="button"
@@ -377,15 +465,19 @@ export default function Navbar() {
               "
               aria-label="Toggle menu"
             >
+
               {mobileMenuOpen ? (
                 <X size={23} />
               ) : (
                 <Menu size={23} />
               )}
+
             </button>
 
           </div>
+
         </div>
+
 
         {/* ==================================================
             MOBILE SEARCH
@@ -450,18 +542,23 @@ export default function Navbar() {
             </button>
 
           </div>
+
         </div>
 
       </div>
+
 
       {/* ======================================================
           MOBILE MENU
       ====================================================== */}
 
       {mobileMenuOpen && (
+
         <div className="border-t border-slate-100 bg-white md:hidden">
 
           <div className="mx-auto max-w-7xl space-y-2 px-4 py-4">
+
+            {/* HOME */}
 
             <Link
               to="/"
@@ -483,6 +580,9 @@ export default function Navbar() {
               Home
             </Link>
 
+
+            {/* SHOP */}
+
             <Link
               to="/shop"
               onClick={closeMobileMenu}
@@ -502,6 +602,7 @@ export default function Navbar() {
             >
               Shop
             </Link>
+
 
             {/* MOBILE WISHLIST */}
 
@@ -526,6 +627,9 @@ export default function Navbar() {
               Wishlist
             </Link>
 
+
+            {/* MOBILE CHAT */}
+
             <Link
               to="/chat"
               onClick={closeMobileMenu}
@@ -547,6 +651,9 @@ export default function Navbar() {
               Chat
             </Link>
 
+
+            {/* MOBILE CART */}
+
             <Link
               to="/cart"
               onClick={closeMobileMenu}
@@ -564,6 +671,7 @@ export default function Navbar() {
                 hover:text-blue-700
               "
             >
+
               <span className="flex items-center gap-3">
                 <ShoppingCart size={18} />
                 Cart
@@ -584,7 +692,11 @@ export default function Navbar() {
                   {cartItems.length}
                 </span>
               )}
+
             </Link>
+
+
+            {/* MOBILE ACCOUNT */}
 
             <button
               type="button"
@@ -613,8 +725,11 @@ export default function Navbar() {
             </button>
 
           </div>
+
         </div>
+
       )}
+
     </header>
   );
 }

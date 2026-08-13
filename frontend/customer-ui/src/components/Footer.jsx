@@ -152,11 +152,11 @@ export default function Footer() {
               <div>
 
                 <h2 className="text-xl font-bold tracking-tight">
-                  Ecommerce
+                  NEXORA
                 </h2>
 
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-blue-400">
-                  Store
+                  Shop Smart. Live Better.
                 </p>
 
               </div>
