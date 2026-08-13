@@ -15,6 +15,7 @@ from .views import (
     delete_banner,
     product_reviews,
     review_detail,
+    
 )
 
 
@@ -56,6 +57,7 @@ urlpatterns = [
         review_detail,
         name="review-detail",
     ),
+
 
 
     # Health

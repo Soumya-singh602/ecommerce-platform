@@ -585,3 +585,4 @@ def review_detail(request, review_id):
         },
         status=status.HTTP_400_BAD_REQUEST
     )
+
