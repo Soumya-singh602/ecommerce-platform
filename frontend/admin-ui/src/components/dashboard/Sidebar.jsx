@@ -84,7 +84,7 @@ export default function Sidebar() {
             <div className="mb-10">
 
                 <h1 className="text-3xl font-bold">
-                    Ecommerce
+                    NEXORA
                 </h1>
 
                 <p className="text-xs text-slate-400 mt-1">

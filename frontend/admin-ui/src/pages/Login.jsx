@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
-import { Eye, EyeOff, Mail, Lock, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ShieldCheck , ShoppingBag } from "lucide-react";
 
 export default function Login() {
     const navigate = useNavigate();
@@ -95,7 +95,10 @@ export default function Login() {
                         <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-xl">
 
                             <span className="text-indigo-700 text-2xl font-extrabold">
-                                E
+                                <ShoppingBag
+                                     size={28}
+                                     className="text-indigo-700"
+                                       />
                             </span>
 
                         </div>
@@ -103,7 +106,7 @@ export default function Login() {
                         <div>
 
                             <h1 className="text-2xl font-bold">
-                                Ecommerce
+                                NEXORA
                             </h1>
 
                             <p className="text-indigo-200 text-sm">
