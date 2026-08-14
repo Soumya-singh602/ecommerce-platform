@@ -285,8 +285,6 @@ def place_order(request):
 
             quantity = item["quantity"]
 
-            product_data = item["product"]
-
             stock_updated, stock_response = update_stock(
                 product_id,
                 quantity,
@@ -316,21 +314,13 @@ def place_order(request):
 
                 "quantity": quantity,
 
-                "address": request.data.get(
-                    "address"
-                ),
+                "address": request.data.get("address"),
 
-                "city": request.data.get(
-                    "city"
-                ),
+                "city": request.data.get("city"),
 
-                "phone": request.data.get(
-                    "phone"
-                ),
+                "phone": request.data.get("phone"),
 
-                "pincode": request.data.get(
-                    "pincode"
-                )
+                "pincode": request.data.get("pincode")
             }
 
             serializer = OrderSerializer(
@@ -352,6 +342,7 @@ def place_order(request):
             else:
 
                 # Rollback stock if order creation fails
+
                 update_stock(
                     product_id,
                     quantity,
@@ -499,7 +490,7 @@ def place_order(request):
             message="Order placed successfully",
             data={
                 **serializer.data,
-                "total_price": product_data["price"]
+                "total_price": float(product_data["price"]) * quantity
             },
             status_code=201
         )
@@ -613,6 +604,10 @@ def order_list(request):
 
     for order in serializer.data:
 
+        # ====================================================
+        # PRODUCT DETAILS
+        # ====================================================
+
         product_data, error_response = get_product(
             order["product_id"],
             request.headers.get("Authorization")
@@ -624,9 +619,28 @@ def order_list(request):
 
         order["product"] = product_data
 
-        orders_data.append(
-            order
+        # ====================================================
+        # PAYMENT STATUS
+        # ====================================================
+
+        payment_status = "pending"
+
+        payment_order = (
+            PaymentOrder.objects
+            .select_related("payment")
+            .filter(
+                order_id=order["id"]
+            )
+            .first()
         )
+
+        if payment_order and payment_order.payment:
+
+            payment_status = payment_order.payment.status
+
+        order["payment_status"] = payment_status
+
+        orders_data.append(order)
 
     return success_response(
         message="Orders fetched successfully",
@@ -663,6 +677,10 @@ def order_detail(request, id):
             "Order not found"
         )
 
+    # ========================================================
+    # PRODUCT DETAILS
+    # ========================================================
+
     product_data, error_response = get_product(
         order.product_id,
         request.headers.get("Authorization")
@@ -678,6 +696,27 @@ def order_detail(request, id):
         **serializer.data,
         "product": product_data
     }
+
+    # ========================================================
+    # PAYMENT STATUS
+    # ========================================================
+
+    payment_status = "pending"
+
+    payment_order = (
+        PaymentOrder.objects
+        .select_related("payment")
+        .filter(
+            order_id=order.id
+        )
+        .first()
+    )
+
+    if payment_order and payment_order.payment:
+
+        payment_status = payment_order.payment.status
+
+    data["payment_status"] = payment_status
 
     return success_response(
         message="Order fetched successfully",
@@ -721,7 +760,7 @@ def cancel_order(request, id):
         )
 
     # --------------------------------------------------------
-    # INCREASE STOCK
+    # RESTORE STOCK
     # --------------------------------------------------------
 
     stock_updated, stock_response = update_stock(
@@ -800,7 +839,7 @@ def update_order_status(request, id):
         )
 
     # --------------------------------------------------------
-    # IF ADMIN CHANGES ORDER TO CANCELLED
+    # RESTORE STOCK ONLY ON FIRST CANCELLATION
     # --------------------------------------------------------
 
     if (
@@ -997,7 +1036,7 @@ def admin_order_list(request):
 
     orders_data = []
 
-    # PRODUCT DETAILS
+    # PRODUCT DETAILS + PAYMENT STATUS
 
     for order in serializer.data:
 
@@ -1014,8 +1053,6 @@ def admin_order_list(request):
 
         order["product"] = product_data
 
-        # PAYMENT STATUS
-
         payment_status = "pending"
 
         payment_order = (
@@ -1027,7 +1064,7 @@ def admin_order_list(request):
             .first()
         )
 
-        if payment_order:
+        if payment_order and payment_order.payment:
 
             payment_status = (
                 payment_order.payment.status
@@ -1035,9 +1072,7 @@ def admin_order_list(request):
 
         order["payment_status"] = payment_status
 
-        orders_data.append(
-            order
-        )
+        orders_data.append(order)
 
     return success_response(
         message="All orders fetched successfully",
@@ -1071,9 +1106,32 @@ def admin_order_detail(request, id):
 
     serializer = OrderSerializer(order)
 
+    data = serializer.data
+
+    # ========================================================
+    # PAYMENT STATUS
+    # ========================================================
+
+    payment_status = "pending"
+
+    payment_order = (
+        PaymentOrder.objects
+        .select_related("payment")
+        .filter(
+            order_id=order.id
+        )
+        .first()
+    )
+
+    if payment_order and payment_order.payment:
+
+        payment_status = payment_order.payment.status
+
+    data["payment_status"] = payment_status
+
     return success_response(
         message="Order fetched successfully",
-        data=serializer.data
+        data=data
     )
 
 
