@@ -1,7 +1,7 @@
 setup.py
 ecommerce_common/__init__.py
-ecommerce_common/authentication.py
 ecommerce_common/exceptions.py
+ecommerce_common/handlers.py
 ecommerce_common/jwt.py
 ecommerce_common/response.py
 ecommerce_common/utils.py
